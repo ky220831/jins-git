@@ -1,0 +1,19 @@
+{
+  "name": "our-life",
+  "version": "0.1.0",
+  "private": true,
+  "description": "“我们的生活”——双人私密生活系统 V1.0（微信小程序 + CloudBase）",
+  "scripts": {
+    "sync": "node scripts/sync-shared.mjs",
+    "typecheck": "tsc -p tsconfig.json",
+    "build": "node scripts/build-functions.mjs",
+    "test": "tsx --test tests/**/*.test.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.3",
+    "esbuild": "^0.28.2",
+    "tsx": "^4.23.12",
+    "typescript": "^5.9.3",
+    "wx-server-sdk": "^4.0.2"
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "说明": "在微信云开发控制台 → 数据库 → 每个集合 → 权限设置 → 自定义安全规则，粘贴对应集合的规则。第一阶段全部拒绝客户端直连，数据只允许云函数访问。",
+  "collections": {
+    "users": {
+      "read": false,
+      "write": false
+    },
+    "user_identities": {
+      "read": false,
+      "write": false
+    },
+    "spaces": {
+      "read": false,
+      "write": false
+    },
+    "space_members": {
+      "read": false,
+      "write": false
+    },
+    "audit_logs": {
+      "read": false,
+      "write": false
+    }
+  },
+  "indexes": {
+    "user_identities": [
+      ["provider", "providerUserId"]
+    ],
+    "spaces": [
+      ["ownerUserId"]
+    ],
+    "space_members": [
+      ["spaceId", "userId"]
+    ]
+  },
+  "index_unique": {
+    "user_identities": ["provider", "providerUserId"],
+    "spaces": ["ownerUserId"],
+    "space_members": ["spaceId", "userId"]
+  }
+}

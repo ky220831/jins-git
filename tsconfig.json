@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "noEmit": true,
+    "types": ["node"],
+    "lib": ["ES2021"]
+  },
+  "include": [
+    "packages/**/*.ts",
+    "cloudfunctions/_shared/**/*.ts",
+    "cloudfunctions/*/src/**/*.ts",
+    "tests/**/*.ts"
+  ]
+}

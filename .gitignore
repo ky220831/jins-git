@@ -1,0 +1,16 @@
+# Node
+node_modules/
+dist/
+*.log
+
+# 微信开发者工具
+miniprogram_npm/
+project.private.config.json
+
+# 工作与交付目录
+work/
+outputs/
+
+# 系统文件
+.DS_Store
+Thumbs.db
