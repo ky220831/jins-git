@@ -9,5 +9,7 @@
     微信一键登录
   </button>
 
+  <view class="error-text" wx:if="{{error}}">{{error}}</view>
+
   <view class="privacy">仅绑定后的两人可见 · 数据不上传第三方</view>
 </view>

@@ -28,6 +28,7 @@ export async function callFunction<T>(name: string, data: Record<string, unknown
     throw new ApiError('EMPTY_RESPONSE', '服务返回异常，请稍后重试');
   }
   if (!payload.ok) {
+    console.error(`[callFunction] ${name} 返回错误:`, payload);
     throw new ApiError(payload.code, payload.message);
   }
   return payload.data;

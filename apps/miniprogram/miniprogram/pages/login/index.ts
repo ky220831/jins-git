@@ -5,6 +5,7 @@ import { SpaceService } from '../../services/space';
 Page({
   data: {
     logging: false,
+    error: '',
   },
 
   onShow() {
@@ -20,7 +21,7 @@ Page({
 
   async onLogin() {
     if (this.data.logging) return;
-    this.setData({ logging: true });
+    this.setData({ logging: true, error: '' });
     try {
       const res = await AuthService.login();
       if (res.hasSpace) {
@@ -31,6 +32,7 @@ Page({
     } catch (err) {
       const message = err instanceof ApiError ? err.message : '登录失败，请重试';
       wx.showToast({ title: message, icon: 'none' });
+      this.setData({ error: message });
     } finally {
       this.setData({ logging: false });
     }
