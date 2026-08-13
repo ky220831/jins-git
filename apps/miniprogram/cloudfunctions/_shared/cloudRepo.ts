@@ -2,9 +2,11 @@ import cloud from 'wx-server-sdk';
 import { COLLECTIONS } from './constants';
 import type {
   AuditLogRecord,
+  CalendarEventRecord,
   Repo,
   SpaceMemberRecord,
   SpaceRecord,
+  TodoRecord,
   UserIdentityRecord,
   UserRecord,
 } from './repo';
@@ -13,6 +15,7 @@ import type {
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV || process.env.CLOUDBASE_ENV_ID });
 
 const db = cloud.database();
+const _ = db.command;
 
 function mapDoc<T>(doc: Record<string, unknown>): T {
   const { _id, ...rest } = doc;
@@ -85,5 +88,77 @@ export class CloudRepo implements Repo {
 
   async writeAudit(log: AuditLogRecord): Promise<void> {
     await this.col(COLLECTIONS.auditLogs).add({ data: log });
+  }
+
+  async findTodoById(spaceId: string, todoId: string): Promise<TodoRecord | null> {
+    const res = await this.col(COLLECTIONS.todos)
+      .where({ _id: todoId, spaceId })
+      .limit(1)
+      .get();
+    return res.data.length > 0 ? mapDoc<TodoRecord>(res.data[0]) : null;
+  }
+
+  async createTodo(todo: TodoRecord): Promise<void> {
+    await this.col(COLLECTIONS.todos).doc(todo.id).set({ data: todo });
+  }
+
+  async updateTodo(spaceId: string, todoId: string, patch: Partial<TodoRecord>): Promise<void> {
+    await this.col(COLLECTIONS.todos).where({ _id: todoId, spaceId }).update({ data: patch });
+  }
+
+  async listTodosByDateRange(
+    spaceId: string,
+    startDate: string,
+    endDate: string,
+  ): Promise<TodoRecord[]> {
+    const res = await this.col(COLLECTIONS.todos)
+      .where({ spaceId, date: _.gte(startDate).and(_.lte(endDate)) })
+      .limit(100)
+      .get();
+    return res.data.map((d) => mapDoc<TodoRecord>(d));
+  }
+
+  async findCalendarEventBySource(
+    spaceId: string,
+    sourceType: string,
+    sourceId: string,
+  ): Promise<CalendarEventRecord | null> {
+    const res = await this.col(COLLECTIONS.calendarEvents)
+      .where({ spaceId, sourceType, sourceId })
+      .limit(1)
+      .get();
+    return res.data.length > 0 ? mapDoc<CalendarEventRecord>(res.data[0]) : null;
+  }
+
+  async listCalendarEventsByRange(
+    spaceId: string,
+    start: Date,
+    end: Date,
+  ): Promise<CalendarEventRecord[]> {
+    const res = await this.col(COLLECTIONS.calendarEvents)
+      .where({ spaceId, startTime: _.gte(start).and(_.lte(end)) })
+      .limit(100)
+      .get();
+    return res.data.map((d) => mapDoc<CalendarEventRecord>(d));
+  }
+
+  async createCalendarEvent(event: CalendarEventRecord): Promise<void> {
+    await this.col(COLLECTIONS.calendarEvents).doc(event.id).set({ data: event });
+  }
+
+  async updateCalendarEvent(
+    spaceId: string,
+    eventId: string,
+    patch: Partial<CalendarEventRecord>,
+  ): Promise<void> {
+    await this.col(COLLECTIONS.calendarEvents)
+      .where({ _id: eventId, spaceId })
+      .update({ data: patch });
+  }
+
+  async deleteCalendarEvent(spaceId: string, eventId: string): Promise<void> {
+    await this.col(COLLECTIONS.calendarEvents)
+      .where({ _id: eventId, spaceId })
+      .remove();
   }
 }

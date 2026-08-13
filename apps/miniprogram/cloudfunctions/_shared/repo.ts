@@ -1,7 +1,10 @@
 import type {
+  CalendarSourceType,
   MemberStatus,
   SpaceRole,
   SpaceStatus,
+  TodoPriority,
+  TodoStatus,
   UserStatus,
 } from '../../../../packages/types/src';
 
@@ -58,6 +61,38 @@ export interface AuditLogRecord {
   createdAt: Date;
 }
 
+export interface TodoRecord {
+  id: string;
+  spaceId: string;
+  title: string;
+  date: string;
+  time: string | null;
+  note: string | null;
+  priority: TodoPriority;
+  status: TodoStatus;
+  businessType: string | null;
+  businessId: string | null;
+  createdBy: string;
+  createdAt: Date;
+  updatedAt: Date;
+  version: number;
+}
+
+export interface CalendarEventRecord {
+  id: string;
+  spaceId: string;
+  sourceType: CalendarSourceType;
+  sourceId: string;
+  title: string;
+  startTime: Date;
+  endTime: Date | null;
+  colorToken: string | null;
+  createdBy: string;
+  createdAt: Date;
+  updatedAt: Date;
+  version: number;
+}
+
 /**
  * 数据访问层接口：云函数用 CloudRepo（真实数据库），测试用 MemoryRepo。
  * 业务逻辑（SpaceService）只依赖该接口，不直接操作数据库。
@@ -74,4 +109,19 @@ export interface Repo {
   updateSpace(spaceId: string, patch: Partial<SpaceRecord>): Promise<void>;
   listActiveMembers(spaceId: string): Promise<SpaceMemberRecord[]>;
   writeAudit(log: AuditLogRecord): Promise<void>;
+
+  // ---- 第二阶段：To Do 与日历 ----
+  findTodoById(spaceId: string, todoId: string): Promise<TodoRecord | null>;
+  createTodo(todo: TodoRecord): Promise<void>;
+  updateTodo(spaceId: string, todoId: string, patch: Partial<TodoRecord>): Promise<void>;
+  listTodosByDateRange(spaceId: string, startDate: string, endDate: string): Promise<TodoRecord[]>;
+  findCalendarEventBySource(
+    spaceId: string,
+    sourceType: string,
+    sourceId: string,
+  ): Promise<CalendarEventRecord | null>;
+  listCalendarEventsByRange(spaceId: string, start: Date, end: Date): Promise<CalendarEventRecord[]>;
+  createCalendarEvent(event: CalendarEventRecord): Promise<void>;
+  updateCalendarEvent(spaceId: string, eventId: string, patch: Partial<CalendarEventRecord>): Promise<void>;
+  deleteCalendarEvent(spaceId: string, eventId: string): Promise<void>;
 }

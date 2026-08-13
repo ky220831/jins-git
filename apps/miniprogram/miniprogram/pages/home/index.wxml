@@ -36,5 +36,7 @@
       <view class="card-title">绑定状态</view>
       <view class="bound">双人已绑定 ✅</view>
     </view>
+
+    <button class="btn-primary calendar-btn" bindtap="onOpenCalendar">打开日历</button>
   </block>
 </view>

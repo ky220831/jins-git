@@ -1,0 +1,194 @@
+.calendar-page {
+  padding-bottom: 64rpx;
+}
+
+.cal-header {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.cal-nav {
+  width: 64rpx;
+  height: 64rpx;
+  line-height: 60rpx;
+  text-align: center;
+  font-size: 44rpx;
+  color: var(--color-text-secondary);
+  background: var(--color-surface);
+  border-radius: var(--radius-sm);
+}
+
+.cal-title {
+  flex: 1;
+  font-size: 34rpx;
+  font-weight: 600;
+  text-align: center;
+}
+
+.cal-today {
+  padding: 10rpx 20rpx;
+  font-size: 24rpx;
+  color: var(--color-primary);
+  background: var(--color-surface);
+  border-radius: 999rpx;
+}
+
+.week-row {
+  display: flex;
+  margin-top: 24rpx;
+}
+
+.week-cell {
+  flex: 1;
+  text-align: center;
+  font-size: 24rpx;
+  color: var(--color-text-secondary);
+}
+
+.grid {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 8rpx;
+}
+
+.day-cell {
+  width: 14.28%;
+  height: 88rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+}
+
+.day-cell.today .day-num {
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+.day-cell.selected {
+  background: var(--color-primary);
+}
+
+.day-cell.selected .day-num {
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.day-cell.dim .day-num {
+  color: transparent;
+}
+
+.day-num {
+  font-size: 28rpx;
+  color: var(--color-text);
+}
+
+.dots {
+  display: flex;
+  gap: 6rpx;
+  height: 12rpx;
+  margin-top: 4rpx;
+}
+
+.dot {
+  width: 10rpx;
+  height: 10rpx;
+  border-radius: 50%;
+}
+
+.dot-todo {
+  background: var(--color-text-secondary);
+}
+
+.dot-event {
+  background: var(--color-accent);
+}
+
+.error-text {
+  margin-top: 24rpx;
+  text-align: center;
+  font-size: 26rpx;
+  color: var(--color-danger);
+}
+
+.day-panel {
+  margin-top: 32rpx;
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  padding: 32rpx;
+}
+
+.day-title {
+  font-size: 30rpx;
+  font-weight: 600;
+}
+
+.day-empty {
+  margin-top: 16rpx;
+  font-size: 26rpx;
+  color: var(--color-text-secondary);
+}
+
+.todo-item,
+.event-item {
+  margin-top: 20rpx;
+  padding: 20rpx;
+  background: var(--color-bg);
+  border-radius: var(--radius-sm);
+}
+
+.todo-item.done .todo-title {
+  color: var(--color-text-secondary);
+  text-decoration: line-through;
+}
+
+.todo-title,
+.event-title {
+  font-size: 28rpx;
+  color: var(--color-text);
+}
+
+.todo-meta,
+.event-meta {
+  margin-top: 6rpx;
+  font-size: 22rpx;
+  color: var(--color-text-secondary);
+}
+
+.add-btn {
+  margin-top: 28rpx;
+}
+
+.form {
+  margin-top: 24rpx;
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  padding: 32rpx;
+}
+
+.form-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  margin-bottom: 20rpx;
+}
+
+.input {
+  background: var(--color-bg);
+  border-radius: var(--radius-sm);
+  padding: 20rpx 24rpx;
+  font-size: 28rpx;
+  margin-bottom: 16rpx;
+}
+
+.form-actions {
+  display: flex;
+  gap: 16rpx;
+  margin-top: 8rpx;
+}
+
+.form-btn {
+  flex: 1;
+  font-size: 28rpx;
+}

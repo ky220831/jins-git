@@ -67,4 +67,8 @@ Page({
       },
     });
   },
+
+  onOpenCalendar() {
+    wx.navigateTo({ url: '/pages/calendar/index' });
+  },
 });

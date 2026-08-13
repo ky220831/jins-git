@@ -88,3 +88,101 @@ export interface JoinSpaceResult {
 export interface GetMySpaceResult {
   space: SpaceView;
 }
+
+// ---- To Do ----
+export const TODO_STATUS_PENDING = 'pending';
+export const TODO_STATUS_COMPLETED = 'completed';
+export const TODO_STATUS_ARCHIVED = 'archived';
+export type TodoStatus =
+  | typeof TODO_STATUS_PENDING
+  | typeof TODO_STATUS_COMPLETED
+  | typeof TODO_STATUS_ARCHIVED;
+
+export const PRIORITY_LOW = 'low';
+export const PRIORITY_NORMAL = 'normal';
+export const PRIORITY_HIGH = 'high';
+export type TodoPriority = typeof PRIORITY_LOW | typeof PRIORITY_NORMAL | typeof PRIORITY_HIGH;
+
+export const CALENDAR_SOURCE_TODO = 'todo';
+export const CALENDAR_SOURCE_TYPES = [
+  CALENDAR_SOURCE_TODO,
+  'meal',
+  'restaurant',
+  'anniversary',
+  'trip',
+  'period',
+  'custom',
+] as const;
+export type CalendarSourceType = (typeof CALENDAR_SOURCE_TYPES)[number];
+
+export interface TodoView {
+  id: string;
+  title: string;
+  /** YYYY-MM-DD（Asia/Shanghai 日期键） */
+  date: string;
+  /** HH:mm（可选） */
+  time?: string;
+  note?: string;
+  priority: TodoPriority;
+  status: TodoStatus;
+  businessType?: string;
+  businessId?: string;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+  version: number;
+}
+
+export interface CalendarEventView {
+  id: string;
+  sourceType: CalendarSourceType;
+  sourceId: string;
+  title: string;
+  startTime: string;
+  endTime?: string;
+  colorToken?: string;
+}
+
+export interface CreateTodoInput {
+  title: string;
+  date: string;
+  time?: string;
+  note?: string;
+  priority?: TodoPriority;
+}
+
+export interface UpdateTodoInput {
+  todoId: string;
+  title?: string;
+  date?: string;
+  time?: string | null;
+  note?: string | null;
+  priority?: TodoPriority;
+  status?: TodoStatus;
+}
+
+export interface CalendarMonthInput {
+  year: number;
+  month: number;
+}
+
+export interface CalendarMonthResult {
+  year: number;
+  month: number;
+  todos: TodoView[];
+  events: CalendarEventView[];
+}
+
+export interface RegisterBusinessEventInput {
+  sourceType: CalendarSourceType;
+  sourceId: string;
+  title: string;
+  startTime: string;
+  endTime?: string;
+  colorToken?: string;
+}
+
+export interface RemoveBusinessEventInput {
+  sourceType: CalendarSourceType;
+  sourceId: string;
+}

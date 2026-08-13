@@ -1,0 +1,10 @@
+{
+  "name": "todo-update",
+  "version": "1.0.0",
+  "private": true,
+  "description": "更新 To Do（标题/日期/时间/备注/优先级/状态，自动同步日历事件）",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "^4.0.2"
+  }
+}

@@ -1,9 +1,11 @@
 import { MEMBER_STATUS_ACTIVE, SPACE_STATUS_ACTIVE } from '../packages/types/src';
 import type {
   AuditLogRecord,
+  CalendarEventRecord,
   Repo,
   SpaceMemberRecord,
   SpaceRecord,
+  TodoRecord,
   UserIdentityRecord,
   UserRecord,
 } from '../apps/miniprogram/cloudfunctions/_shared/repo';
@@ -18,6 +20,8 @@ export class MemoryRepo implements Repo {
   spaces = new Map<string, SpaceRecord>();
   spaceMembers = new Map<string, SpaceMemberRecord>();
   audits: AuditLogRecord[] = [];
+  todos = new Map<string, TodoRecord>();
+  calendarEvents = new Map<string, CalendarEventRecord>();
 
   async findUserIdentity(provider: string, providerUserId: string): Promise<UserIdentityRecord | null> {
     for (const item of this.userIdentities.values()) {
@@ -83,5 +87,74 @@ export class MemoryRepo implements Repo {
 
   async writeAudit(log: AuditLogRecord): Promise<void> {
     this.audits.push({ ...log });
+  }
+
+  async findTodoById(spaceId: string, todoId: string): Promise<TodoRecord | null> {
+    const todo = this.todos.get(todoId);
+    return todo && todo.spaceId === spaceId ? { ...todo } : null;
+  }
+
+  async createTodo(todo: TodoRecord): Promise<void> {
+    this.todos.set(todo.id, { ...todo });
+  }
+
+  async updateTodo(spaceId: string, todoId: string, patch: Partial<TodoRecord>): Promise<void> {
+    const current = this.todos.get(todoId);
+    if (!current || current.spaceId !== spaceId) return;
+    this.todos.set(todoId, { ...current, ...patch });
+  }
+
+  async listTodosByDateRange(
+    spaceId: string,
+    startDate: string,
+    endDate: string,
+  ): Promise<TodoRecord[]> {
+    return [...this.todos.values()]
+      .filter((todo) => todo.spaceId === spaceId && todo.date >= startDate && todo.date <= endDate)
+      .map((todo) => ({ ...todo }));
+  }
+
+  async findCalendarEventBySource(
+    spaceId: string,
+    sourceType: string,
+    sourceId: string,
+  ): Promise<CalendarEventRecord | null> {
+    for (const event of this.calendarEvents.values()) {
+      if (event.spaceId === spaceId && event.sourceType === sourceType && event.sourceId === sourceId) {
+        return { ...event };
+      }
+    }
+    return null;
+  }
+
+  async listCalendarEventsByRange(
+    spaceId: string,
+    start: Date,
+    end: Date,
+  ): Promise<CalendarEventRecord[]> {
+    return [...this.calendarEvents.values()]
+      .filter((event) => event.spaceId === spaceId && event.startTime >= start && event.startTime <= end)
+      .map((event) => ({ ...event }));
+  }
+
+  async createCalendarEvent(event: CalendarEventRecord): Promise<void> {
+    this.calendarEvents.set(event.id, { ...event });
+  }
+
+  async updateCalendarEvent(
+    spaceId: string,
+    eventId: string,
+    patch: Partial<CalendarEventRecord>,
+  ): Promise<void> {
+    const current = this.calendarEvents.get(eventId);
+    if (!current || current.spaceId !== spaceId) return;
+    this.calendarEvents.set(eventId, { ...current, ...patch });
+  }
+
+  async deleteCalendarEvent(spaceId: string, eventId: string): Promise<void> {
+    const current = this.calendarEvents.get(eventId);
+    if (current && current.spaceId === spaceId) {
+      this.calendarEvents.delete(eventId);
+    }
   }
 }

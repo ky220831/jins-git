@@ -8,7 +8,15 @@
 const cloud = require('wx-server-sdk');
 
 const envId = process.env.CLOUDBASE_ENV_ID;
-const names = ['users', 'user_identities', 'spaces', 'space_members', 'audit_logs'];
+const names = [
+  'users',
+  'user_identities',
+  'spaces',
+  'space_members',
+  'audit_logs',
+  'todos',
+  'calendar_events',
+];
 
 if (!envId) {
   console.error('缺少 CLOUDBASE_ENV_ID');

@@ -23,7 +23,15 @@ const app = new CloudBase({
 const db = app.database;
 const permission = app.permission;
 
-const collections = ['users', 'user_identities', 'spaces', 'space_members', 'audit_logs'];
+const collections = [
+  'users',
+  'user_identities',
+  'spaces',
+  'space_members',
+  'audit_logs',
+  'todos',
+  'calendar_events',
+];
 
 const indexDefs = {
   user_identities: [
@@ -56,6 +64,30 @@ const indexDefs = {
           { Name: 'userId', Direction: '1' },
         ],
         MgoIsUnique: true,
+      },
+    },
+  ],
+  todos: [
+    {
+      IndexName: 'idx_spaceId_date',
+      MgoKeySchema: {
+        MgoIndexKeys: [
+          { Name: 'spaceId', Direction: '1' },
+          { Name: 'date', Direction: '1' },
+        ],
+        MgoIsUnique: false,
+      },
+    },
+  ],
+  calendar_events: [
+    {
+      IndexName: 'idx_spaceId_startTime',
+      MgoKeySchema: {
+        MgoIndexKeys: [
+          { Name: 'spaceId', Direction: '1' },
+          { Name: 'startTime', Direction: '1' },
+        ],
+        MgoIsUnique: false,
       },
     },
   ],

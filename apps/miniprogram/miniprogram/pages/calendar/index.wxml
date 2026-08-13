@@ -1,0 +1,65 @@
+<view class="container calendar-page">
+  <view class="cal-header">
+    <view class="cal-nav" bindtap="onPrev">‹</view>
+    <view class="cal-title">{{year}}年{{month}}月</view>
+    <view class="cal-nav" bindtap="onNext">›</view>
+    <view class="cal-today" bindtap="onToday">今天</view>
+  </view>
+
+  <view class="week-row">
+    <view class="week-cell" wx:for="{{weekdays}}" wx:key="*this">{{item}}</view>
+  </view>
+
+  <view class="grid">
+    <view
+      class="day-cell {{item.inMonth ? '' : 'dim'}} {{item.isToday ? 'today' : ''}} {{item.key === selectedDate ? 'selected' : ''}}"
+      wx:for="{{days}}"
+      wx:key="uid"
+      data-key="{{item.key}}"
+      bindtap="onTapDay"
+    >
+      <view class="day-num">{{item.day ? item.day : ''}}</view>
+      <view class="dots">
+        <view class="dot dot-todo" wx:if="{{item.hasTodo}}"></view>
+        <view class="dot dot-event" wx:if="{{item.hasEvent}}"></view>
+      </view>
+    </view>
+  </view>
+
+  <view class="error-text" wx:if="{{error}}">{{error}}</view>
+
+  <view class="day-panel" wx:if="{{selectedDate}}">
+    <view class="day-title">{{selectedDate}}</view>
+    <view class="day-empty" wx:if="{{!dayTodos.length && !dayEvents.length}}">这一天还没有安排</view>
+
+    <view
+      class="todo-item {{item.status === 'completed' ? 'done' : ''}}"
+      wx:for="{{dayTodos}}"
+      wx:key="id"
+      data-id="{{item.id}}"
+      data-status="{{item.status}}"
+      bindtap="onToggleTodo"
+    >
+      <view class="todo-title">{{item.title}}</view>
+      <view class="todo-meta">{{item.timeLabel}} · {{item.priorityLabel}}</view>
+    </view>
+
+    <view class="event-item" wx:for="{{dayEvents}}" wx:key="id">
+      <view class="event-title">{{item.title}}</view>
+      <view class="event-meta">{{item.timeLabel}}</view>
+    </view>
+
+    <button class="btn-secondary add-btn" bindtap="onShowForm">＋ 添加事项</button>
+  </view>
+
+  <view class="form" wx:if="{{showForm}}">
+    <view class="form-title">添加事项（{{selectedDate}}）</view>
+    <input class="input" placeholder="事项标题" value="{{formTitle}}" bindinput="onTitleInput" maxlength="100" />
+    <input class="input" placeholder="时间（可选，如 18:30）" value="{{formTime}}" bindinput="onTimeInput" maxlength="5" />
+    <input class="input" placeholder="备注（可选）" value="{{formNote}}" bindinput="onNoteInput" maxlength="200" />
+    <view class="form-actions">
+      <button class="btn-secondary form-btn" bindtap="onHideForm">取消</button>
+      <button class="btn-primary form-btn" bindtap="onAddTodo" loading="{{saving}}" disabled="{{saving}}">保存</button>
+    </view>
+  </view>
+</view>

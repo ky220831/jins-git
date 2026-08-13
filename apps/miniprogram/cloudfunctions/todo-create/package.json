@@ -1,0 +1,10 @@
+{
+  "name": "todo-create",
+  "version": "1.0.0",
+  "private": true,
+  "description": "创建 To Do（自动同步日历事件）",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "^4.0.2"
+  }
+}

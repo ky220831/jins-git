@@ -1,0 +1,10 @@
+{
+  "name": "calendar-month",
+  "version": "1.0.0",
+  "private": true,
+  "description": "月视图：聚合 To Do 与业务日历事件",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "^4.0.2"
+  }
+}
