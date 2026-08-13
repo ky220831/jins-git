@@ -3,9 +3,12 @@ import { COLLECTIONS } from './constants';
 import type {
   AuditLogRecord,
   CalendarEventRecord,
+  HolidayRecord,
+  PeriodRecordRecord,
   Repo,
   SpaceMemberRecord,
   SpaceRecord,
+  SpaceSettingRecord,
   TodoRecord,
   UserIdentityRecord,
   UserRecord,
@@ -160,5 +163,45 @@ export class CloudRepo implements Repo {
     await this.col(COLLECTIONS.calendarEvents)
       .where({ _id: eventId, spaceId })
       .remove();
+  }
+
+  async listPeriodRecords(spaceId: string): Promise<PeriodRecordRecord[]> {
+    const res = await this.col(COLLECTIONS.periodRecords)
+      .where({ spaceId })
+      .limit(100)
+      .get();
+    return res.data.map((d) => mapDoc<PeriodRecordRecord>(d));
+  }
+
+  async createPeriodRecord(record: PeriodRecordRecord): Promise<void> {
+    await this.col(COLLECTIONS.periodRecords).doc(record.id).set({ data: record });
+  }
+
+  async deletePeriodRecord(spaceId: string, recordId: string): Promise<void> {
+    await this.col(COLLECTIONS.periodRecords).where({ _id: recordId, spaceId }).remove();
+  }
+
+  async listHolidaysByRange(startDate: string, endDate: string): Promise<HolidayRecord[]> {
+    const res = await this.col(COLLECTIONS.holidays)
+      .where({ date: _.gte(startDate).and(_.lte(endDate)) })
+      .limit(500)
+      .get();
+    return res.data.map((d) => mapDoc<HolidayRecord>(d));
+  }
+
+  async upsertHoliday(record: HolidayRecord): Promise<void> {
+    await this.col(COLLECTIONS.holidays).doc(record.id).set({ data: record });
+  }
+
+  async findSpaceSetting(spaceId: string, key: string): Promise<SpaceSettingRecord | null> {
+    const res = await this.col(COLLECTIONS.spaceSettings)
+      .where({ spaceId, key })
+      .limit(1)
+      .get();
+    return res.data.length > 0 ? mapDoc<SpaceSettingRecord>(res.data[0]) : null;
+  }
+
+  async upsertSpaceSetting(setting: SpaceSettingRecord): Promise<void> {
+    await this.col(COLLECTIONS.spaceSettings).doc(setting.id).set({ data: setting });
   }
 }

@@ -6,19 +6,27 @@
     <view class="cal-today" bindtap="onToday">今天</view>
   </view>
 
+  <view class="cal-options">
+    <view class="period-toggle">
+      <text class="toggle-label">日历显示生理期</text>
+      <switch checked="{{periodVisible}}" bindchange="onTogglePeriodVisible" color="#C96F6F" />
+    </view>
+  </view>
+
   <view class="week-row">
     <view class="week-cell" wx:for="{{weekdays}}" wx:key="*this">{{item}}</view>
   </view>
 
   <view class="grid">
     <view
-      class="day-cell {{item.inMonth ? '' : 'dim'}} {{item.isToday ? 'today' : ''}} {{item.key === selectedDate ? 'selected' : ''}}"
+      class="day-cell {{item.inMonth ? '' : 'dim'}} {{item.isToday ? 'today' : ''}} {{item.key === selectedDate ? 'selected' : ''}} {{item.periodKind === 'period' ? 'period' : ''}} {{item.periodKind === 'rest' ? 'rest' : ''}}"
       wx:for="{{days}}"
       wx:key="uid"
       data-key="{{item.key}}"
       bindtap="onTapDay"
     >
       <view class="day-num">{{item.day ? item.day : ''}}</view>
+      <view class="holiday-label {{item.holidayType === 'makeup_workday' ? 'makeup' : ''}}" wx:if="{{item.holidayLabel}}">{{item.holidayLabel}}</view>
       <view class="dots">
         <view class="dot dot-todo" wx:if="{{item.hasTodo}}"></view>
         <view class="dot dot-event" wx:if="{{item.hasEvent}}"></view>
@@ -26,11 +34,25 @@
     </view>
   </view>
 
+  <view class="legend">
+    <view class="legend-item"><view class="legend-dot period"></view>生理期</view>
+    <view class="legend-item"><view class="legend-dot rest"></view>休息</view>
+    <view class="legend-item"><view class="legend-dot todo"></view>To Do</view>
+    <view class="legend-item"><view class="legend-dot event"></view>日程</view>
+  </view>
+
   <view class="error-text" wx:if="{{error}}">{{error}}</view>
 
   <view class="day-panel" wx:if="{{selectedDate}}">
     <view class="day-title">{{selectedDate}}</view>
-    <view class="day-empty" wx:if="{{!dayTodos.length && !dayEvents.length}}">这一天还没有安排</view>
+    <view class="status-line" wx:if="{{dayHoliday}}">
+      {{dayHoliday.type === 'makeup_workday' ? '🔄 调休上班' : '🇨🇳 ' + dayHoliday.name}}
+    </view>
+    <view class="status-line period" wx:if="{{dayPeriod && dayPeriod.kind === 'period'}}">
+      {{dayPeriod.isEstimated ? '🔴 生理期（预计）' : '🔴 生理期'}}
+    </view>
+    <view class="status-line rest" wx:if="{{dayPeriod && dayPeriod.kind === 'rest'}}">🔵 休息</view>
+    <view class="day-empty" wx:if="{{!dayTodos.length && !dayEvents.length && !dayPeriod && !dayHoliday}}">这一天还没有安排</view>
 
     <view
       class="todo-item {{item.status === 'completed' ? 'done' : ''}}"
@@ -50,6 +72,7 @@
     </view>
 
     <button class="btn-secondary add-btn" bindtap="onShowForm">＋ 添加事项</button>
+    <button class="btn-secondary add-btn" bindtap="onShowPeriodForm">＋ 记录生理期</button>
   </view>
 
   <view class="form" wx:if="{{showForm}}">
@@ -61,5 +84,31 @@
       <button class="btn-secondary form-btn" bindtap="onHideForm">取消</button>
       <button class="btn-primary form-btn" bindtap="onAddTodo" loading="{{saving}}" disabled="{{saving}}">保存</button>
     </view>
+  </view>
+
+  <view class="form" wx:if="{{showPeriodForm}}">
+    <view class="form-title">记录生理期（{{selectedDate}}）</view>
+    <input class="input" placeholder="开始日期 YYYY-MM-DD" value="{{periodStart}}" bindinput="onPeriodStartInput" maxlength="10" />
+    <input class="input" placeholder="结束日期 YYYY-MM-DD" value="{{periodEnd}}" bindinput="onPeriodEndInput" maxlength="10" />
+    <view class="form-tip">系统自动保留最近 2 次实际记录，并预测下次（+22 天）</view>
+    <view class="form-actions">
+      <button class="btn-secondary form-btn" bindtap="onHidePeriodForm">取消</button>
+      <button class="btn-primary form-btn" bindtap="onAddPeriod" loading="{{savingPeriod}}" disabled="{{savingPeriod}}">保存</button>
+    </view>
+  </view>
+
+  <view class="period-card" wx:if="{{periodRecords.length || isOwner}}">
+    <view class="period-card-title">生理期记录（最近 2 次实际 + 1 次预测）</view>
+    <view class="period-row" wx:for="{{periodRecords}}" wx:key="id">
+      <view class="period-info">
+        <view class="period-range">{{item.rangeLabel}}</view>
+        <view class="period-meta">
+          {{item.type === 'actual' ? (item.isEstimated ? '实际(估)' : '实际') : '预测'}}
+          · 周期 {{item.cycleLength}} 天
+        </view>
+      </view>
+      <view class="period-delete" wx:if="{{isOwner && item.type === 'actual'}}" data-id="{{item.id}}" bindtap="onDeletePeriod">删除</view>
+    </view>
+    <view class="period-empty" wx:if="{{!periodRecords.length}}">还没有记录，点击上面“记录生理期”开始</view>
   </view>
 </view>

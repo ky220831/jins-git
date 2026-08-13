@@ -31,6 +31,9 @@ const collections = [
   'audit_logs',
   'todos',
   'calendar_events',
+  'period_records',
+  'holiday_calendar',
+  'space_settings',
 ];
 
 const indexDefs = {
@@ -88,6 +91,39 @@ const indexDefs = {
           { Name: 'startTime', Direction: '1' },
         ],
         MgoIsUnique: false,
+      },
+    },
+  ],
+  period_records: [
+    {
+      IndexName: 'idx_spaceId_startDate',
+      MgoKeySchema: {
+        MgoIndexKeys: [
+          { Name: 'spaceId', Direction: '1' },
+          { Name: 'startDate', Direction: '1' },
+        ],
+        MgoIsUnique: false,
+      },
+    },
+  ],
+  holiday_calendar: [
+    {
+      IndexName: 'idx_date',
+      MgoKeySchema: {
+        MgoIndexKeys: [{ Name: 'date', Direction: '1' }],
+        MgoIsUnique: true,
+      },
+    },
+  ],
+  space_settings: [
+    {
+      IndexName: 'idx_spaceId_key',
+      MgoKeySchema: {
+        MgoIndexKeys: [
+          { Name: 'spaceId', Direction: '1' },
+          { Name: 'key', Direction: '1' },
+        ],
+        MgoIsUnique: true,
       },
     },
   ],

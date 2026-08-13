@@ -171,6 +171,8 @@ export interface CalendarMonthResult {
   month: number;
   todos: TodoView[];
   events: CalendarEventView[];
+  periodDays: PeriodDayView[];
+  holidays: HolidayDayView[];
 }
 
 export interface RegisterBusinessEventInput {
@@ -185,4 +187,67 @@ export interface RegisterBusinessEventInput {
 export interface RemoveBusinessEventInput {
   sourceType: CalendarSourceType;
   sourceId: string;
+}
+
+// ---- 生理期 ----
+export const PERIOD_TYPE_ACTUAL = 'actual';
+export const PERIOD_TYPE_PREDICTED = 'predicted';
+export type PeriodType = typeof PERIOD_TYPE_ACTUAL | typeof PERIOD_TYPE_PREDICTED;
+
+export interface PeriodRecordView {
+  id: string;
+  startDate: string;
+  endDate: string;
+  type: PeriodType;
+  isEstimated: boolean;
+  cycleLength: number;
+  createdAt: string;
+}
+
+export interface RecordPeriodInput {
+  startDate: string;
+  endDate: string;
+}
+
+export interface PeriodInfoResult {
+  records: PeriodRecordView[];
+  /** 今天是否处于生理期或休息日 */
+  today?: { date: string; kind: 'period' | 'rest' };
+  nextPredicted?: { startDate: string; endDate: string };
+  /** “日历显示生理期”开关（默认开） */
+  calendarVisible: boolean;
+}
+
+export interface PeriodDayView {
+  date: string;
+  kind: 'period' | 'rest';
+  isEstimated: boolean;
+}
+
+export interface SetPeriodVisibilityInput {
+  visible: boolean;
+}
+
+export interface DeletePeriodInput {
+  recordId: string;
+}
+
+// ---- 节假日 ----
+export const HOLIDAY_TYPE_HOLIDAY = 'holiday';
+export const HOLIDAY_TYPE_MAKEUP_WORKDAY = 'makeup_workday';
+export const HOLIDAY_TYPE_NORMAL_WORKDAY = 'normal_workday';
+export const HOLIDAY_TYPE_WEEKEND = 'weekend';
+export type HolidayType =
+  | typeof HOLIDAY_TYPE_HOLIDAY
+  | typeof HOLIDAY_TYPE_MAKEUP_WORKDAY
+  | typeof HOLIDAY_TYPE_NORMAL_WORKDAY
+  | typeof HOLIDAY_TYPE_WEEKEND;
+
+export interface HolidayDayView {
+  date: string;
+  name: string;
+  type: HolidayType;
+  isHoliday: boolean;
+  isWorkday: boolean;
+  isMakeupWorkday: boolean;
 }

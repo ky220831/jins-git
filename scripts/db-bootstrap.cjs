@@ -16,6 +16,9 @@ const names = [
   'audit_logs',
   'todos',
   'calendar_events',
+  'period_records',
+  'holiday_calendar',
+  'space_settings',
 ];
 
 if (!envId) {

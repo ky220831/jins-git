@@ -1,6 +1,8 @@
 import type {
   CalendarSourceType,
+  HolidayType,
   MemberStatus,
+  PeriodType,
   SpaceRole,
   SpaceStatus,
   TodoPriority,
@@ -93,6 +95,41 @@ export interface CalendarEventRecord {
   version: number;
 }
 
+export interface PeriodRecordRecord {
+  id: string;
+  spaceId: string;
+  startDate: string;
+  endDate: string;
+  type: PeriodType;
+  isEstimated: boolean;
+  cycleLength: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface HolidayRecord {
+  id: string;
+  year: number;
+  date: string;
+  name: string;
+  type: HolidayType;
+  isHoliday: boolean;
+  isWorkday: boolean;
+  isMakeupWorkday: boolean;
+  source: string;
+  version: number;
+  updatedAt: Date;
+}
+
+export interface SpaceSettingRecord {
+  id: string;
+  spaceId: string;
+  key: string;
+  value: unknown;
+  updatedBy: string;
+  updatedAt: Date;
+}
+
 /**
  * 数据访问层接口：云函数用 CloudRepo（真实数据库），测试用 MemoryRepo。
  * 业务逻辑（SpaceService）只依赖该接口，不直接操作数据库。
@@ -124,4 +161,13 @@ export interface Repo {
   createCalendarEvent(event: CalendarEventRecord): Promise<void>;
   updateCalendarEvent(spaceId: string, eventId: string, patch: Partial<CalendarEventRecord>): Promise<void>;
   deleteCalendarEvent(spaceId: string, eventId: string): Promise<void>;
+
+  // ---- 第三阶段：生理期与节假日 ----
+  listPeriodRecords(spaceId: string): Promise<PeriodRecordRecord[]>;
+  createPeriodRecord(record: PeriodRecordRecord): Promise<void>;
+  deletePeriodRecord(spaceId: string, recordId: string): Promise<void>;
+  listHolidaysByRange(startDate: string, endDate: string): Promise<HolidayRecord[]>;
+  upsertHoliday(record: HolidayRecord): Promise<void>;
+  findSpaceSetting(spaceId: string, key: string): Promise<SpaceSettingRecord | null>;
+  upsertSpaceSetting(setting: SpaceSettingRecord): Promise<void>;
 }

@@ -1,6 +1,15 @@
 import { ApiError } from '../../api/cloud';
-import type { CalendarEventView, TodoView } from '../../lib/shared/types/index';
+import {
+  ROLE_OWNER,
+  type CalendarEventView,
+  type HolidayDayView,
+  type PeriodDayView,
+  type PeriodRecordView,
+  type TodoView,
+} from '../../lib/shared/types/index';
 import { CalendarService } from '../../services/calendar';
+import { PeriodService } from '../../services/period';
+import { SpaceService } from '../../services/space';
 import { TodoService } from '../../services/todo';
 
 interface DayCell {
@@ -11,6 +20,9 @@ interface DayCell {
   isToday: boolean;
   hasTodo: boolean;
   hasEvent: boolean;
+  periodKind: '' | 'period' | 'rest';
+  holidayLabel: string;
+  holidayType: string;
 }
 
 interface TodoRow extends TodoView {
@@ -20,6 +32,10 @@ interface TodoRow extends TodoView {
 
 interface EventRow extends CalendarEventView {
   timeLabel: string;
+}
+
+interface PeriodRow extends PeriodRecordView {
+  rangeLabel: string;
 }
 
 function pad(n: number): string {
@@ -40,6 +56,13 @@ function toShanghaiParts(iso: string): { date: string; time: string } {
   };
 }
 
+/** 日历格子显示短标签：国庆节 → 国庆；调休上班 → 调休 */
+function holidayLabel(h: HolidayDayView): string {
+  if (h.type === 'makeup_workday') return '调休';
+  const name = h.name || '';
+  return name.length > 2 && name.endsWith('节') ? name.slice(0, -1) : name;
+}
+
 Page({
   data: {
     year: 0,
@@ -49,8 +72,15 @@ Page({
     selectedDate: '',
     monthTodos: [] as TodoView[],
     monthEvents: [] as CalendarEventView[],
+    periodDays: [] as PeriodDayView[],
+    holidays: [] as HolidayDayView[],
     dayTodos: [] as TodoRow[],
     dayEvents: [] as EventRow[],
+    dayPeriod: null as { kind: 'period' | 'rest'; isEstimated: boolean } | null,
+    dayHoliday: null as HolidayDayView | null,
+    periodVisible: true,
+    periodRecords: [] as PeriodRow[],
+    isOwner: false,
     loading: false,
     error: '',
     showForm: false,
@@ -58,11 +88,16 @@ Page({
     formTime: '',
     formNote: '',
     saving: false,
+    showPeriodForm: false,
+    periodStart: '',
+    periodEnd: '',
+    savingPeriod: false,
   },
 
   onLoad() {
     const now = new Date();
     this.setData({ year: now.getFullYear(), month: now.getMonth() + 1 });
+    this.loadRole();
   },
 
   onShow() {
@@ -71,12 +106,39 @@ Page({
     }
   },
 
+  async loadRole() {
+    try {
+      const res = await SpaceService.mySpace();
+      this.setData({ isOwner: res.space.myRole === ROLE_OWNER });
+    } catch {
+      // 角色仅影响删除按钮显示，失败不阻塞日历
+    }
+  },
+
   async refresh() {
     const { year, month } = this.data;
     this.setData({ loading: true, error: '' });
     try {
-      const res = await CalendarService.month({ year, month });
-      this.buildMonth(res.todos, res.events);
+      const [monthRes, periodInfo] = await Promise.all([
+        CalendarService.month({ year, month }),
+        PeriodService.info(),
+      ]);
+      this.buildMonth(
+        monthRes.todos,
+        monthRes.events,
+        monthRes.periodDays,
+        monthRes.holidays,
+        periodInfo.calendarVisible,
+      );
+      this.setData({
+        periodVisible: periodInfo.calendarVisible,
+        periodRecords: periodInfo.records
+          .map((r) => ({
+            ...r,
+            rangeLabel: `${r.startDate} ~ ${r.endDate}`,
+          }))
+          .sort((a, b) => (a.startDate < b.startDate ? -1 : 1)),
+      });
     } catch (err) {
       const message = err instanceof ApiError ? err.message : '日历加载失败，请重试';
       this.setData({ error: message });
@@ -85,35 +147,66 @@ Page({
     }
   },
 
-  buildMonth(todos: TodoView[], events: CalendarEventView[]) {
+  buildMonth(
+    todos: TodoView[],
+    events: CalendarEventView[],
+    periodDays: PeriodDayView[],
+    holidays: HolidayDayView[],
+    periodVisible: boolean,
+  ) {
     const { year, month, selectedDate } = this.data;
     const todoDates = new Set(todos.map((todo) => todo.date));
     const eventDates = new Set(events.map((event) => toShanghaiParts(event.startTime).date));
+    const periodByDate = new Map(periodDays.map((d) => [d.date, d]));
+    const holidayByDate = new Map(holidays.map((h) => [h.date, h]));
     const todayKey = dateKey(new Date().getFullYear(), new Date().getMonth() + 1, new Date().getDate());
 
     const firstWeekday = new Date(year, month - 1, 1).getDay();
     const daysInMonth = new Date(year, month, 0).getDate();
+    const emptyCell = (): DayCell => ({
+      uid: 0,
+      key: '',
+      day: 0,
+      inMonth: false,
+      isToday: false,
+      hasTodo: false,
+      hasEvent: false,
+      periodKind: '',
+      holidayLabel: '',
+      holidayType: '',
+    });
     const cells: DayCell[] = [];
     let uid = 0;
     for (let i = 0; i < firstWeekday; i += 1) {
-      cells.push({ uid: uid += 1, key: '', day: 0, inMonth: false, isToday: false, hasTodo: false, hasEvent: false });
+      cells.push({ ...emptyCell(), uid: (uid += 1) });
     }
     for (let day = 1; day <= daysInMonth; day += 1) {
       const key = dateKey(year, month, day);
+      const period = periodByDate.get(key);
+      const holiday = holidayByDate.get(key);
       cells.push({
-        uid: uid += 1,
+        uid: (uid += 1),
         key,
         day,
         inMonth: true,
         isToday: key === todayKey,
         hasTodo: todoDates.has(key),
         hasEvent: eventDates.has(key),
+        periodKind: periodVisible && period ? period.kind : '',
+        holidayLabel: holiday ? holidayLabel(holiday) : '',
+        holidayType: holiday ? holiday.type : '',
       });
     }
     while (cells.length % 7 !== 0) {
-      cells.push({ uid: uid += 1, key: '', day: 0, inMonth: false, isToday: false, hasTodo: false, hasEvent: false });
+      cells.push({ ...emptyCell(), uid: (uid += 1) });
     }
-    this.setData({ days: cells, monthTodos: todos, monthEvents: events });
+    this.setData({
+      days: cells,
+      monthTodos: todos,
+      monthEvents: events,
+      periodDays,
+      holidays,
+    });
     this.updateDayDetail(selectedDate || todayKey, todos, events);
   },
 
@@ -134,7 +227,17 @@ Page({
         ...event,
         timeLabel: parts.time,
       }));
-    this.setData({ selectedDate: date, dayTodos, dayEvents });
+    const period = this.data.periodVisible
+      ? this.data.periodDays.find((p) => p.date === date)
+      : undefined;
+    const holiday = this.data.holidays.find((h) => h.date === date);
+    this.setData({
+      selectedDate: date,
+      dayTodos,
+      dayEvents,
+      dayPeriod: period ? { kind: period.kind, isEstimated: period.isEstimated } : null,
+      dayHoliday: holiday || null,
+    });
   },
 
   onPrev() {
@@ -153,7 +256,11 @@ Page({
 
   onToday() {
     const now = new Date();
-    this.setData({ year: now.getFullYear(), month: now.getMonth() + 1, selectedDate: dateKey(now.getFullYear(), now.getMonth() + 1, now.getDate()) });
+    this.setData({
+      year: now.getFullYear(),
+      month: now.getMonth() + 1,
+      selectedDate: dateKey(now.getFullYear(), now.getMonth() + 1, now.getDate()),
+    });
     this.refresh();
   },
 
@@ -162,6 +269,19 @@ Page({
     if (!key) return;
     this.setData({ selectedDate: key });
     this.updateDayDetail(key);
+  },
+
+  async onTogglePeriodVisible(e: WechatMiniprogram.SwitchChange) {
+    const visible = !!e.detail.value;
+    this.setData({ periodVisible: visible });
+    try {
+      await PeriodService.setVisible(visible);
+      this.refresh();
+    } catch (err) {
+      const message = err instanceof ApiError ? err.message : '设置失败，请重试';
+      wx.showToast({ title: message, icon: 'none' });
+      this.refresh();
+    }
   },
 
   onShowForm() {
@@ -223,5 +343,66 @@ Page({
       const message = err instanceof ApiError ? err.message : '操作失败，请重试';
       wx.showToast({ title: message, icon: 'none' });
     }
+  },
+
+  onShowPeriodForm() {
+    const date = this.data.selectedDate;
+    this.setData({
+      showPeriodForm: true,
+      periodStart: date,
+      periodEnd: date,
+    });
+  },
+
+  onHidePeriodForm() {
+    this.setData({ showPeriodForm: false });
+  },
+
+  onPeriodStartInput(e: WechatMiniprogram.Input) {
+    this.setData({ periodStart: e.detail.value });
+  },
+
+  onPeriodEndInput(e: WechatMiniprogram.Input) {
+    this.setData({ periodEnd: e.detail.value });
+  },
+
+  async onAddPeriod() {
+    const start = this.data.periodStart.trim();
+    const end = this.data.periodEnd.trim();
+    if (!start || !end) {
+      wx.showToast({ title: '请填写开始和结束日期', icon: 'none' });
+      return;
+    }
+    if (this.data.savingPeriod) return;
+    this.setData({ savingPeriod: true });
+    try {
+      await PeriodService.record({ startDate: start, endDate: end });
+      this.setData({ showPeriodForm: false });
+      this.refresh();
+    } catch (err) {
+      const message = err instanceof ApiError ? err.message : '保存失败，请重试';
+      wx.showToast({ title: message, icon: 'none' });
+    } finally {
+      this.setData({ savingPeriod: false });
+    }
+  },
+
+  onDeletePeriod(e: WechatMiniprogram.TouchEvent) {
+    const id = e.currentTarget.dataset.id as string;
+    if (!id) return;
+    wx.showModal({
+      title: '删除生理期记录',
+      content: '删除后将重新计算预测，确定删除吗？',
+      success: async (res) => {
+        if (!res.confirm) return;
+        try {
+          await PeriodService.remove(id);
+          this.refresh();
+        } catch (err) {
+          const message = err instanceof ApiError ? err.message : '删除失败，请重试';
+          wx.showToast({ title: message, icon: 'none' });
+        }
+      },
+    });
   },
 });

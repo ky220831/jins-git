@@ -2,9 +2,12 @@ import { MEMBER_STATUS_ACTIVE, SPACE_STATUS_ACTIVE } from '../packages/types/src
 import type {
   AuditLogRecord,
   CalendarEventRecord,
+  HolidayRecord,
+  PeriodRecordRecord,
   Repo,
   SpaceMemberRecord,
   SpaceRecord,
+  SpaceSettingRecord,
   TodoRecord,
   UserIdentityRecord,
   UserRecord,
@@ -22,6 +25,9 @@ export class MemoryRepo implements Repo {
   audits: AuditLogRecord[] = [];
   todos = new Map<string, TodoRecord>();
   calendarEvents = new Map<string, CalendarEventRecord>();
+  periodRecords = new Map<string, PeriodRecordRecord>();
+  holidays = new Map<string, HolidayRecord>();
+  spaceSettings = new Map<string, SpaceSettingRecord>();
 
   async findUserIdentity(provider: string, providerUserId: string): Promise<UserIdentityRecord | null> {
     for (const item of this.userIdentities.values()) {
@@ -156,5 +162,45 @@ export class MemoryRepo implements Repo {
     if (current && current.spaceId === spaceId) {
       this.calendarEvents.delete(eventId);
     }
+  }
+
+  async listPeriodRecords(spaceId: string): Promise<PeriodRecordRecord[]> {
+    return [...this.periodRecords.values()]
+      .filter((record) => record.spaceId === spaceId)
+      .map((record) => ({ ...record }));
+  }
+
+  async createPeriodRecord(record: PeriodRecordRecord): Promise<void> {
+    this.periodRecords.set(record.id, { ...record });
+  }
+
+  async deletePeriodRecord(spaceId: string, recordId: string): Promise<void> {
+    const current = this.periodRecords.get(recordId);
+    if (current && current.spaceId === spaceId) {
+      this.periodRecords.delete(recordId);
+    }
+  }
+
+  async listHolidaysByRange(startDate: string, endDate: string): Promise<HolidayRecord[]> {
+    return [...this.holidays.values()]
+      .filter((record) => record.date >= startDate && record.date <= endDate)
+      .map((record) => ({ ...record }));
+  }
+
+  async upsertHoliday(record: HolidayRecord): Promise<void> {
+    this.holidays.set(record.id, { ...record });
+  }
+
+  async findSpaceSetting(spaceId: string, key: string): Promise<SpaceSettingRecord | null> {
+    for (const setting of this.spaceSettings.values()) {
+      if (setting.spaceId === spaceId && setting.key === key) {
+        return { ...setting };
+      }
+    }
+    return null;
+  }
+
+  async upsertSpaceSetting(setting: SpaceSettingRecord): Promise<void> {
+    this.spaceSettings.set(setting.id, { ...setting });
   }
 }

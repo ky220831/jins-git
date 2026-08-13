@@ -15,6 +15,16 @@
     <view class="space-name">{{space.spaceName}}</view>
     <view class="role-badge">{{isOwner ? '主账号 OWNER' : '副账号 MEMBER'}}</view>
 
+    <view class="card" wx:if="{{today}}">
+      <view class="card-title">今天 · {{today.date}} {{today.weekday}}</view>
+      <view class="today-row" wx:if="{{today.holidayLabel}}">{{today.holidayLabel}}</view>
+      <view class="today-row period-text" wx:if="{{today.periodLabel}}">{{today.periodLabel}}</view>
+      <view class="today-row">
+        To Do {{today.todoCount}} 项 · 日程 {{today.eventCount}} 条
+      </view>
+      <view class="today-row" wx:if="{{today.nextPredictedLabel}}">{{today.nextPredictedLabel}}</view>
+    </view>
+
     <view class="card">
       <view class="card-title">成员</view>
       <view class="member" wx:for="{{members}}" wx:key="userId">

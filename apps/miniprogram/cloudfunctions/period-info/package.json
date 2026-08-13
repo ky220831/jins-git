@@ -1,0 +1,10 @@
+{
+  "name": "period-info",
+  "version": "1.0.0",
+  "private": true,
+  "description": "生理期信息：今日状态 / 下次预测 / 日历显示开关",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "^4.0.2"
+  }
+}

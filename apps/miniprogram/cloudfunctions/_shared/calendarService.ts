@@ -10,7 +10,9 @@ import {
 import { requireSpaceMember } from './access';
 import { monthRange, toShanghaiDate, validateYearMonth } from './dateTime';
 import { AppError, ErrorCodes } from './errors';
+import { HolidayService } from './holidayService';
 import { newId } from './ids';
+import { PeriodService } from './periodService';
 import type { CalendarEventRecord, Repo } from './repo';
 import { toTodoView } from './todoService';
 
@@ -41,12 +43,16 @@ export class CalendarService {
       toShanghaiDate(start, '00:00'),
       toShanghaiDate(end, '23:59'),
     );
+    const periodDays = await new PeriodService(this.repo).monthDaysForSpace(spaceId, year, month);
+    const holidays = await new HolidayService(this.repo).month(year, month);
 
     return {
       year,
       month,
       todos: todos.filter((todo) => todo.status !== TODO_STATUS_ARCHIVED).map(toTodoView),
       events: events.map(toCalendarEventView),
+      periodDays,
+      holidays,
     };
   }
 

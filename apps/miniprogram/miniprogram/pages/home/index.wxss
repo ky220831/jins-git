@@ -72,6 +72,16 @@
   color: var(--color-text-secondary);
 }
 
+.today-row {
+  margin-top: 12rpx;
+  font-size: 28rpx;
+  color: var(--color-text);
+}
+
+.period-text {
+  color: var(--color-red);
+}
+
 .invite-code {
   margin-top: 8rpx;
   font-size: 48rpx;
