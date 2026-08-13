@@ -10,6 +10,7 @@
     "test": "tsx --test tests/**/*.test.ts"
   },
   "devDependencies": {
+    "@cloudbase/manager-node": "^5.7.0",
     "@types/node": "^24.13.3",
     "esbuild": "^0.28.2",
     "miniprogram-automator": "^0.12.1",
