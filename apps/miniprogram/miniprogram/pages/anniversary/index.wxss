@@ -138,3 +138,13 @@
   flex: 1;
   font-size: 28rpx;
 }
+
+/* 韩风可爱（第九阶段） */
+.anniversary-card {
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}
+
+.count-badge {
+  background: #FFE9EC;
+}

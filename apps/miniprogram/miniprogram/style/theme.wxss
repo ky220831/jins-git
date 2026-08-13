@@ -1,17 +1,22 @@
-/* 统一设计 Token：与 packages/design-tokens 保持一致（第一阶段基础色） */
+/* 统一设计 Token：与 packages/design-tokens 保持一致（第九阶段：韩风可爱风） */
 page {
-  --color-bg: #FAF7F2;
+  --color-bg: #FFF7F0;
   --color-surface: #FFFFFF;
-  --color-text: #3A3A3A;
-  --color-text-secondary: #8C8C8C;
-  --color-border: #EDE7DF;
-  --color-primary: #D98E8E;
-  --color-accent: #E0A06E;
-  --color-blue: #7FA3B8;
-  --color-red: #C96F6F;
-  --color-success: #7FA98C;
-  --color-danger: #C0564F;
-  --radius-sm: 8rpx;
-  --radius-md: 14rpx;
-  --radius-lg: 20rpx;
+  --color-text: #4E4547;
+  --color-text-secondary: #B9A8A0;
+  --color-border: #F6E8DC;
+  --color-primary: #FF96A1;
+  --color-primary-deep: #F4778A;
+  --color-accent: #FFC28E;
+  --color-blue: #9BC7DE;
+  --color-red: #F56A6A;
+  --color-success: #A8D8B9;
+  --color-danger: #F2556D;
+  --color-purple: #C3A6E1;
+  --color-mint: #A8E0D0;
+  --radius-sm: 16rpx;
+  --radius-md: 24rpx;
+  --radius-lg: 36rpx;
+  --shadow-card: 0 8rpx 24rpx rgba(244, 177, 177, 0.16);
+  --shadow-soft: 0 4rpx 16rpx rgba(244, 177, 177, 0.12);
 }

@@ -11,12 +11,13 @@
 .cal-nav {
   width: 64rpx;
   height: 64rpx;
-  line-height: 60rpx;
+  line-height: 62rpx;
   text-align: center;
   font-size: 44rpx;
   color: var(--color-text-secondary);
   background: var(--color-surface);
-  border-radius: var(--radius-sm);
+  border-radius: 50%;
+  box-shadow: var(--shadow-soft);
 }
 
 .cal-title {
@@ -29,9 +30,10 @@
 .cal-today {
   padding: 10rpx 20rpx;
   font-size: 24rpx;
-  color: var(--color-primary);
+  color: var(--color-primary-deep);
   background: var(--color-surface);
   border-radius: 999rpx;
+  box-shadow: var(--shadow-soft);
 }
 
 .cal-options {
@@ -71,34 +73,42 @@
 
 .day-cell {
   width: 14.28%;
-  height: 88rpx;
+  height: 96rpx;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  border-radius: var(--radius-sm);
+  border-radius: 20rpx;
 }
 
-.day-cell.today .day-num {
-  color: var(--color-primary);
-  font-weight: 700;
+.day-cell.today {
+  background: #FFE9EC;
 }
 
 .day-cell.period {
-  background: rgba(201, 111, 111, 0.16);
+  background: rgba(245, 106, 106, 0.14);
 }
 
 .day-cell.rest {
-  background: rgba(127, 163, 184, 0.16);
+  background: rgba(155, 199, 222, 0.22);
 }
 
 .day-cell.selected {
-  background: var(--color-primary);
+  background: linear-gradient(135deg, #FFB3BB, #FF96A1);
+  box-shadow: var(--shadow-soft);
 }
 
 .day-cell.selected .day-num {
   color: #ffffff;
   font-weight: 700;
+}
+
+.day-cell.selected .holiday-label {
+  color: #ffffff;
+}
+
+.day-cell.selected .dot {
+  background: rgba(255, 255, 255, 0.85);
 }
 
 .day-cell.dim .day-num {
@@ -132,17 +142,17 @@
 }
 
 .dot {
-  width: 10rpx;
-  height: 10rpx;
+  width: 11rpx;
+  height: 11rpx;
   border-radius: 50%;
 }
 
 .dot-todo {
-  background: var(--color-text-secondary);
+  background: #CBB8AE;
 }
 
 .dot-event {
-  background: var(--color-accent);
+  background: #FFC28E;
 }
 
 .legend {
@@ -151,7 +161,8 @@
   margin-top: 16rpx;
   padding: 12rpx 20rpx;
   background: var(--color-surface);
-  border-radius: var(--radius-sm);
+  border-radius: 999rpx;
+  box-shadow: var(--shadow-soft);
 }
 
 .legend-item {
@@ -194,8 +205,9 @@
 .day-panel {
   margin-top: 32rpx;
   background: var(--color-surface);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   padding: 32rpx;
+  box-shadow: var(--shadow-card);
 }
 
 .day-title {
@@ -223,8 +235,9 @@
 .event-item {
   margin-top: 20rpx;
   padding: 20rpx;
-  background: var(--color-bg);
-  border-radius: var(--radius-sm);
+  background: #FFF9F4;
+  border-radius: 20rpx;
+  border: 2rpx solid #FBE9DC;
 }
 
 .todo-item.done .todo-title {
@@ -252,8 +265,9 @@
 .form {
   margin-top: 24rpx;
   background: var(--color-surface);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   padding: 32rpx;
+  box-shadow: var(--shadow-card);
 }
 
 .form-title {
@@ -269,8 +283,9 @@
 }
 
 .input {
-  background: var(--color-bg);
-  border-radius: var(--radius-sm);
+  background: #FFF9F4;
+  border: 2rpx solid #FBE9DC;
+  border-radius: var(--radius-md);
   padding: 20rpx 24rpx;
   font-size: 28rpx;
   margin-bottom: 16rpx;
@@ -290,8 +305,9 @@
 .period-card {
   margin-top: 24rpx;
   background: var(--color-surface);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   padding: 32rpx;
+  box-shadow: var(--shadow-card);
 }
 
 .period-card-title {
@@ -304,7 +320,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 20rpx 0;
-  border-bottom: 1rpx solid var(--color-border);
+  border-bottom: 2rpx dashed var(--color-border);
 }
 
 .period-row:last-child {

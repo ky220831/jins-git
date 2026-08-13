@@ -218,6 +218,17 @@
   font-weight: 500;
 }
 
+/* 韩风可爱（第九阶段） */
+.restaurant-card {
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}
+
+.visit-row,
+.search-result {
+  border-bottom: 2rpx dashed var(--color-border);
+}
+
 .search-meta {
   margin-top: 6rpx;
   font-size: 22rpx;

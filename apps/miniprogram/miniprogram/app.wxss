@@ -3,47 +3,185 @@
 page {
   background: var(--color-bg);
   color: var(--color-text);
-  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  letter-spacing: 0.5rpx;
 }
 
 .container {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  padding: 48rpx 40rpx;
+  padding: 48rpx 40rpx 64rpx;
   box-sizing: border-box;
 }
 
-.btn-primary {
-  background: var(--color-primary);
-  color: #ffffff;
-  border-radius: var(--radius-lg);
-  font-size: 32rpx;
-  font-weight: 500;
+/* ---- 胶囊按钮 ---- */
+button {
+  border-radius: 999rpx;
+}
+
+button::after {
   border: none;
 }
 
-.btn-primary::after {
+.btn-primary {
+  background: linear-gradient(135deg, #FFB3BB 0%, #FF96A1 100%);
+  color: #ffffff;
+  border-radius: 999rpx;
+  font-size: 30rpx;
+  font-weight: 600;
   border: none;
+  box-shadow: var(--shadow-soft);
+}
+
+.btn-primary:active {
+  transform: scale(0.97);
 }
 
 .btn-secondary {
   background: var(--color-surface);
   color: var(--color-text);
-  border: 1rpx solid var(--color-border);
-  border-radius: var(--radius-lg);
-  font-size: 32rpx;
+  border: 2rpx solid var(--color-border);
+  border-radius: 999rpx;
+  font-size: 28rpx;
+  box-shadow: var(--shadow-soft);
 }
 
-.card {
-  background: var(--color-surface);
-  border-radius: var(--radius-md);
-  padding: 32rpx;
+.btn-secondary:active {
+  transform: scale(0.97);
+}
+
+.btn-row {
+  display: flex;
+  gap: 16rpx;
   margin-top: 24rpx;
 }
 
+.flex-btn {
+  flex: 1;
+  font-size: 28rpx;
+}
+
+/* ---- 贴纸卡片 ---- */
+.card {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  padding: 32rpx;
+  margin-top: 24rpx;
+  box-shadow: var(--shadow-card);
+}
+
 .card-title {
-  font-size: 26rpx;
+  font-size: 24rpx;
+  font-weight: 600;
   color: var(--color-text-secondary);
   margin-bottom: 16rpx;
+  letter-spacing: 1rpx;
+}
+
+/* ---- 输入框 ---- */
+.input {
+  background: #FFF9F4;
+  border: 2rpx solid #FBE9DC;
+  border-radius: var(--radius-md);
+  padding: 22rpx 26rpx;
+  font-size: 28rpx;
+  margin-bottom: 16rpx;
+  box-sizing: border-box;
+  color: var(--color-text);
+}
+
+.textarea {
+  width: 100%;
+  min-height: 120rpx;
+}
+
+.switch-row {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  margin-bottom: 16rpx;
+  font-size: 26rpx;
+  color: var(--color-text);
+}
+
+/* ---- 表单弹层 ---- */
+.form {
+  margin-top: 24rpx;
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  padding: 32rpx;
+  box-shadow: var(--shadow-card);
+}
+
+.form-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  margin-bottom: 20rpx;
+}
+
+.form-actions {
+  display: flex;
+  gap: 16rpx;
+  margin-top: 8rpx;
+}
+
+.form-btn {
+  flex: 1;
+  font-size: 28rpx;
+}
+
+/* ---- 标签/胶囊 chip ---- */
+.chip {
+  padding: 10rpx 22rpx;
+  font-size: 24rpx;
+  color: var(--color-primary-deep);
+  background: #FFF0EC;
+  border-radius: 999rpx;
+}
+
+.chip.danger,
+.link-btn.danger {
+  color: var(--color-danger);
+}
+
+.link-btn {
+  font-size: 26rpx;
+  color: var(--color-primary-deep);
+  padding: 8rpx 14rpx;
+}
+
+/* ---- 空状态 / 错误 ---- */
+.empty,
+.empty-list {
+  margin-top: 16rpx;
+  font-size: 26rpx;
+  color: var(--color-text-secondary);
+  text-align: center;
+  padding: 24rpx 0;
+}
+
+.error-text {
+  margin-top: 16rpx;
+  text-align: center;
+  font-size: 26rpx;
+  color: var(--color-danger);
+}
+
+/* ---- 页面标题 ---- */
+.page-head {
+  display: flex;
+  align-items: baseline;
+  gap: 16rpx;
+}
+
+.page-title {
+  font-size: 44rpx;
+  font-weight: 700;
+  letter-spacing: 2rpx;
+}
+
+.page-sub {
+  font-size: 24rpx;
+  color: var(--color-text-secondary);
 }

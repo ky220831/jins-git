@@ -1,12 +1,16 @@
+.home-page {
+  padding-bottom: 80rpx;
+}
+
 .loading {
-  padding-top: 120rpx;
+  padding-top: 160rpx;
   text-align: center;
   color: var(--color-text-secondary);
   font-size: 28rpx;
 }
 
 .error-box {
-  padding-top: 120rpx;
+  padding-top: 160rpx;
   text-align: center;
 }
 
@@ -28,54 +32,80 @@
   margin-top: 32rpx;
 }
 
-.space-name {
-  font-size: 44rpx;
+/* ---- 问候卡 ---- */
+.hero-card {
+  background: linear-gradient(135deg, #FFDDE2 0%, #FFE9D6 60%, #FFF3E0 100%);
+  border-radius: var(--radius-lg);
+  padding: 36rpx 32rpx;
+  box-shadow: var(--shadow-card);
+}
+
+.hero-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.greet-line {
+  font-size: 24rpx;
+  color: var(--color-primary-deep);
   font-weight: 600;
+  letter-spacing: 2rpx;
+}
+
+.space-name {
+  margin-top: 8rpx;
+  font-size: 44rpx;
+  font-weight: 700;
   color: var(--color-text);
 }
 
 .role-badge {
-  display: inline-block;
-  margin-top: 16rpx;
-  padding: 8rpx 20rpx;
+  padding: 10rpx 22rpx;
   border-radius: 999rpx;
-  background: var(--color-primary);
-  color: #ffffff;
+  background: #ffffff;
+  color: var(--color-primary-deep);
   font-size: 24rpx;
+  font-weight: 600;
+  box-shadow: var(--shadow-soft);
 }
 
-.member {
+.hero-date {
+  margin-top: 20rpx;
+  font-size: 26rpx;
+  color: var(--color-text-secondary);
+}
+
+.hero-actions {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20rpx 0;
-  border-bottom: 1rpx solid var(--color-border);
+  gap: 12rpx;
+  margin-top: 20rpx;
 }
 
-.member:last-child {
-  border-bottom: none;
-}
-
-.member-role {
-  font-size: 30rpx;
-  font-weight: 500;
-}
-
-.member-id {
-  margin-top: 6rpx;
-  font-size: 22rpx;
-  color: var(--color-text-secondary);
-}
-
-.member-time {
+.hero-chip {
+  padding: 12rpx 24rpx;
+  border-radius: 999rpx;
+  background: #ffffff;
   font-size: 24rpx;
-  color: var(--color-text-secondary);
+  color: var(--color-primary-deep);
+  font-weight: 600;
+  box-shadow: var(--shadow-soft);
+}
+
+.hero-chip.bound {
+  color: var(--color-success);
+}
+
+/* ---- 今天 ---- */
+.today-card {
+  background: #ffffff;
 }
 
 .today-row {
   margin-top: 12rpx;
-  font-size: 28rpx;
+  font-size: 27rpx;
   color: var(--color-text);
+  line-height: 1.6;
 }
 
 .period-text {
@@ -83,29 +113,132 @@
 }
 
 .anniversary-text {
-  color: var(--color-red);
+  color: var(--color-primary-deep);
+}
+
+/* ---- 模块宫格 ---- */
+.module-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  margin-top: 24rpx;
+  row-gap: 20rpx;
+}
+
+.module-card {
+  width: 31.5%;
+  border-radius: var(--radius-md);
+  padding: 28rpx 12rpx 24rpx;
+  text-align: center;
+  box-sizing: border-box;
+  box-shadow: var(--shadow-soft);
+}
+
+.module-card:active {
+  transform: scale(0.96);
+}
+
+.module-emoji {
+  font-size: 48rpx;
+}
+
+.module-label {
+  margin-top: 12rpx;
+  font-size: 26rpx;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.module-sub {
+  margin-top: 4rpx;
+  font-size: 20rpx;
+  color: var(--color-text-secondary);
+}
+
+.m-calendar {
+  background: #EAF5FB;
+}
+
+.m-meal {
+  background: #FFF1DE;
+}
+
+.m-restaurant {
+  background: #FFE9EC;
+}
+
+.m-anniversary {
+  background: #FFE4E4;
+}
+
+.m-travel {
+  background: #E6F5F0;
+}
+
+.m-manage {
+  background: #F1EAFB;
+}
+
+/* ---- 成员 ---- */
+.member {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx 0;
+  border-bottom: 2rpx dashed var(--color-border);
+}
+
+.member:last-child {
+  border-bottom: none;
+}
+
+.member-left {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+}
+
+.member-avatar {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 50%;
+  background: #FFF0EC;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36rpx;
+}
+
+.member-role {
+  font-size: 28rpx;
+  font-weight: 600;
+}
+
+.member-id {
+  margin-top: 4rpx;
+  font-size: 20rpx;
+  color: var(--color-text-secondary);
+}
+
+.member-time {
+  font-size: 22rpx;
+  color: var(--color-text-secondary);
+}
+
+/* ---- 邀请码 ---- */
+.invite-card {
+  text-align: center;
 }
 
 .invite-code {
-  margin-top: 8rpx;
-  font-size: 48rpx;
+  font-size: 52rpx;
   font-weight: 700;
-  letter-spacing: 6rpx;
-  color: var(--color-primary);
+  letter-spacing: 10rpx;
+  color: var(--color-primary-deep);
 }
 
 .invite-meta {
   margin-top: 12rpx;
-  font-size: 24rpx;
+  font-size: 22rpx;
   color: var(--color-text-secondary);
-}
-
-.bound {
-  font-size: 32rpx;
-  color: var(--color-success);
-  font-weight: 500;
-}
-
-.calendar-btn {
-  margin-top: 32rpx;
 }

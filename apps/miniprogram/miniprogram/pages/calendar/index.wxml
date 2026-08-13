@@ -35,8 +35,8 @@
   </view>
 
   <view class="legend">
-    <view class="legend-item"><view class="legend-dot period"></view>生理期</view>
-    <view class="legend-item"><view class="legend-dot rest"></view>休息</view>
+    <view class="legend-item"><view class="legend-dot period"></view>🔴 生理期</view>
+    <view class="legend-item"><view class="legend-dot rest"></view>🔵 休息</view>
     <view class="legend-item"><view class="legend-dot todo"></view>To Do</view>
     <view class="legend-item"><view class="legend-dot event"></view>日程</view>
   </view>
@@ -52,7 +52,7 @@
       {{dayPeriod.isEstimated ? '🔴 生理期（预计）' : '🔴 生理期'}}
     </view>
     <view class="status-line rest" wx:if="{{dayPeriod && dayPeriod.kind === 'rest'}}">🔵 休息</view>
-    <view class="day-empty" wx:if="{{!dayTodos.length && !dayEvents.length && !dayPeriod && !dayHoliday}}">这一天还没有安排</view>
+    <view class="day-empty" wx:if="{{!dayTodos.length && !dayEvents.length && !dayPeriod && !dayHoliday}}">🌷 这一天还没有安排</view>
 
     <view
       class="todo-item {{item.status === 'completed' ? 'done' : ''}}"
@@ -71,8 +71,8 @@
       <view class="event-meta">{{item.timeLabel}}</view>
     </view>
 
-    <button class="btn-secondary add-btn" bindtap="onShowForm">＋ 添加事项</button>
-    <button class="btn-secondary add-btn" bindtap="onShowPeriodForm">＋ 记录生理期</button>
+    <button class="btn-secondary add-btn" bindtap="onShowForm">🌷 添加事项</button>
+    <button class="btn-secondary add-btn" bindtap="onShowPeriodForm">🌸 记录生理期</button>
   </view>
 
   <view class="form" wx:if="{{showForm}}">

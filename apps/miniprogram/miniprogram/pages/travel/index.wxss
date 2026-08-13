@@ -220,3 +220,13 @@
   flex: 1;
   font-size: 28rpx;
 }
+
+/* 韩风可爱（第九阶段） */
+.trip-card {
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}
+
+.plan-row {
+  border-bottom: 2rpx dashed var(--color-border);
+}

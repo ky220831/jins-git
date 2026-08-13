@@ -13,10 +13,10 @@
     "pages/manage/index"
   ],
   "window": {
-    "navigationBarBackgroundColor": "#FAF7F2",
+    "navigationBarBackgroundColor": "#FFF7F0",
     "navigationBarTitleText": "我们的生活",
     "navigationBarTextStyle": "black",
-    "backgroundColor": "#FAF7F2",
+    "backgroundColor": "#FFF7F0",
     "backgroundTextStyle": "light"
   },
   "style": "v2",

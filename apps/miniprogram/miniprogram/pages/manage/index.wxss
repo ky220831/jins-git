@@ -230,3 +230,23 @@
   display: flex;
   gap: 8rpx;
 }
+
+/* 韩风可爱（第九阶段） */
+.count-item {
+  border-radius: var(--radius-md);
+}
+
+.count-num {
+  color: var(--color-primary-deep);
+}
+
+.trash-row,
+.member,
+.plan-row {
+  border-bottom: 2rpx dashed var(--color-border);
+}
+
+.manage-result {
+  background: #F0F8F2;
+  border-radius: 20rpx;
+}

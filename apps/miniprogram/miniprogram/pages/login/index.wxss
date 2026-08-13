@@ -46,3 +46,12 @@
   font-size: 24rpx;
   color: var(--color-text-secondary);
 }
+
+/* 韩风可爱（第九阶段） */
+.login-page {
+  background: linear-gradient(180deg, #FFE9EC 0%, #FFF7F0 45%);
+}
+
+.logo {
+  text-shadow: 0 8rpx 20rpx rgba(244, 177, 177, 0.35);
+}

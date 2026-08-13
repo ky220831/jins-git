@@ -33,3 +33,9 @@
   font-size: 24rpx;
   color: var(--color-text-secondary);
 }
+
+/* 韩风可爱（第九阶段） */
+.action-card {
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}

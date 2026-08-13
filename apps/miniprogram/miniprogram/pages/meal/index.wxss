@@ -133,3 +133,10 @@
   flex: 1;
   font-size: 28rpx;
 }
+
+/* 韩风可爱（第九阶段） */
+.plan-row,
+.template-row,
+.trash-row {
+  border-bottom: 2rpx dashed var(--color-border);
+}
