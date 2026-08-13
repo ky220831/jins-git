@@ -9,7 +9,8 @@ import type {
   UserRecord,
 } from './repo';
 
-cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV });
+// 云端部署时使用当前环境；本地脚本可通过 CLOUDBASE_ENV_ID 指定环境
+cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV || process.env.CLOUDBASE_ENV_ID });
 
 const db = cloud.database();
 
