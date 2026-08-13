@@ -223,3 +223,25 @@ test('安全矩阵：双人共享且 A/B 互相可见（非隔离）', async () 
   assert.ok(bMonth.events.some((e) => e.sourceType === 'restaurant'));
   assert.ok(bMonth.events.some((e) => e.sourceType === 'anniversary'));
 });
+
+test('昵称：双人各自自定义昵称（爱心连接显示），校验与未绑定用户被拒', async () => {
+  const repo = new MemoryRepo();
+  const spaceService = new SpaceService(repo);
+  const created = await spaceService.createSpace('openid-A', { name: '测试' });
+  await spaceService.joinSpace('openid-B', { inviteCode: created.inviteCode });
+
+  const afterA = await spaceService.setNickname('openid-A', { nickname: '小桃' });
+  assert.equal(afterA.space.members.find((m) => m.role === 'owner')?.nickname, '小桃');
+
+  const afterB = await spaceService.setNickname('openid-B', { nickname: '阿鱼' });
+  assert.equal(afterB.space.members.find((m) => m.role !== 'owner')?.nickname, '阿鱼');
+  // B 的视图里也能看到 A 的昵称（爱心连接双人可见）
+  assert.equal(afterB.space.members.find((m) => m.role === 'owner')?.nickname, '小桃');
+
+  await expectError(spaceService.setNickname('openid-A', { nickname: '' }), ErrorCodes.VALIDATION);
+  await expectError(
+    spaceService.setNickname('openid-A', { nickname: '超'.repeat(17) }),
+    ErrorCodes.VALIDATION,
+  );
+  await expectError(spaceService.setNickname('openid-X', { nickname: 'X' }), ErrorCodes.NOT_IN_SPACE);
+});

@@ -12,86 +12,86 @@
   </block>
 
   <block wx:elif="{{space}}">
-    <!-- 问候卡 -->
-    <view class="hero-card">
-      <view class="hero-top">
-        <view class="hero-left">
-          <view class="greet-line">우리들의 집 🏡</view>
-          <view class="space-name">{{space.spaceName}}</view>
+    <!-- 顶部：双人爱心连接 + 右上角小邀请码 -->
+    <view class="top-bar">
+      <view class="couple">
+        <view class="mini-avatar me" bindtap="onStartEditName">
+          <text class="mini-emoji">{{isOwner ? '👑' : '💗'}}</text>
+          <text class="mini-name">{{myDisplayName}}</text>
         </view>
-        <view class="role-badge">{{isOwner ? '👑 主账号' : '💗 副账号'}}</view>
-      </view>
-      <view class="hero-date" wx:if="{{today}}">{{today.date}} {{today.weekday}}</view>
-      <view class="hero-actions">
-        <view class="hero-chip" bindtap="onCopyInvite" wx:if="{{isOwner && space.inviteCode}}">邀请码 {{space.inviteCode}}</view>
-        <view class="hero-chip bound" wx:if="{{!space.inviteCode}}">双人已绑定 ✓</view>
-      </view>
-    </view>
-
-    <!-- 今天发生了什么 -->
-    <view class="card today-card" wx:if="{{today}}">
-      <view class="card-title">🌷 今天</view>
-      <view class="today-row" wx:if="{{today.holidayLabel}}">{{today.holidayLabel}}</view>
-      <view class="today-row period-text" wx:if="{{today.periodLabel}}">{{today.periodLabel}}</view>
-      <view class="today-row">📋 To Do {{today.todoCount}} 项 · 日程 {{today.eventCount}} 条</view>
-      <view class="today-row" wx:if="{{today.nextPredictedLabel}}">🌸 {{today.nextPredictedLabel}}</view>
-      <view class="today-row anniversary-text" wx:if="{{today.anniversaryLabel}}">{{today.anniversaryLabel}}</view>
-    </view>
-
-    <!-- 功能宫格 -->
-    <view class="module-grid">
-      <view class="module-card m-calendar" bindtap="onOpenCalendar">
-        <view class="module-emoji">📅</view>
-        <view class="module-label">日历</view>
-        <view class="module-sub">一起安排</view>
-      </view>
-      <view class="module-card m-meal" bindtap="onOpenMeal">
-        <view class="module-emoji">🍚</view>
-        <view class="module-label">今日菜单</view>
-        <view class="module-sub">今天吃什么</view>
-      </view>
-      <view class="module-card m-restaurant" bindtap="onOpenRestaurant">
-        <view class="module-emoji">🍴</view>
-        <view class="module-label">漂亮饭</view>
-        <view class="module-sub">收藏餐厅</view>
-      </view>
-      <view class="module-card m-anniversary" bindtap="onOpenAnniversary">
-        <view class="module-emoji">❤️</view>
-        <view class="module-label">纪念日</view>
-        <view class="module-sub">重要的日子</view>
-      </view>
-      <view class="module-card m-travel" bindtap="onOpenTravel">
-        <view class="module-emoji">✈️</view>
-        <view class="module-label">旅游计划</view>
-        <view class="module-sub">下一站</view>
-      </view>
-      <view class="module-card m-manage" bindtap="onOpenManage">
-        <view class="module-emoji">🛠️</view>
-        <view class="module-label">管理</view>
-        <view class="module-sub">{{isOwner ? '主管理' : '副管理'}}</view>
-      </view>
-    </view>
-
-    <!-- 成员 -->
-    <view class="card">
-      <view class="card-title">👫 我们</view>
-      <view class="member" wx:for="{{members}}" wx:key="userId">
-        <view class="member-left">
-          <view class="member-avatar">{{item.roleLabel === '主账号' ? '👑' : '💗'}}</view>
-          <view class="member-info">
-            <view class="member-role">{{item.roleLabel}}</view>
-            <view class="member-id">ID {{item.shortId}}</view>
-          </view>
+        <view class="heart">❤️</view>
+        <view class="mini-avatar">
+          <text class="mini-emoji">{{isOwner ? '💗' : '👑'}}</text>
+          <text class="mini-name">{{partnerDisplayName}}</text>
         </view>
-        <view class="member-time">{{item.joinedAtLabel}} 加入</view>
+      </view>
+      <view class="invite-badge" wx:if="{{isOwner && inviteCode}}" bindtap="onCopyInvite">🔑 {{inviteCode}}</view>
+      <view class="invite-badge bound" wx:if="{{!inviteCode}}">💗</view>
+    </view>
+
+    <!-- 日历（首页核心） -->
+    <month-calendar />
+
+    <!-- 功能列 -->
+    <view class="feature-list">
+      <view class="feature-row" bindtap="onOpenFullCalendar">
+        <text class="fe-emoji">📅</text>
+        <view class="fe-body">
+          <view class="fe-label">完整日历</view>
+          <view class="fe-sub">添加事项 · 记录生理期</view>
+        </view>
+        <text class="fe-arrow">›</text>
+      </view>
+      <view class="feature-row" bindtap="onOpenMeal">
+        <text class="fe-emoji">🍚</text>
+        <view class="fe-body">
+          <view class="fe-label">今日菜单</view>
+          <view class="fe-sub">今天吃什么 · 随机选</view>
+        </view>
+        <text class="fe-arrow">›</text>
+      </view>
+      <view class="feature-row" bindtap="onOpenRestaurant">
+        <text class="fe-emoji">🍴</text>
+        <view class="fe-body">
+          <view class="fe-label">漂亮饭</view>
+          <view class="fe-sub">两个人的餐厅收藏库</view>
+        </view>
+        <text class="fe-arrow">›</text>
+      </view>
+      <view class="feature-row" bindtap="onOpenAnniversary">
+        <text class="fe-emoji">❤️</text>
+        <view class="fe-body">
+          <view class="fe-label">纪念日</view>
+          <view class="fe-sub">重要的日子</view>
+        </view>
+        <text class="fe-arrow">›</text>
+      </view>
+      <view class="feature-row" bindtap="onOpenTravel">
+        <text class="fe-emoji">✈️</text>
+        <view class="fe-body">
+          <view class="fe-label">旅游计划</view>
+          <view class="fe-sub">我们的下一站</view>
+        </view>
+        <text class="fe-arrow">›</text>
+      </view>
+      <view class="feature-row" bindtap="onOpenManage">
+        <text class="fe-emoji">🛠️</text>
+        <view class="fe-body">
+          <view class="fe-label">管理</view>
+          <view class="fe-sub">{{isOwner ? '主管理 · 回收站 · 导出' : '副管理'}}</view>
+        </view>
+        <text class="fe-arrow">›</text>
       </view>
     </view>
 
-    <!-- 邀请码 -->
-    <view class="card invite-card" wx:if="{{isOwner && space.inviteCode}}">
-      <view class="card-title">🔑 邀请副账号绑定</view>
-      <view class="invite-code" bindtap="onCopyInvite">{{space.inviteCode}}</view>
-      <view class="invite-meta">有效期至 {{inviteExpiresAt}} · 点击复制</view>
+    <!-- 昵称编辑 -->
+    <view class="name-edit" wx:if="{{showNameEdit}}">
+      <view class="name-edit-title">改我的昵称</view>
+      <input class="input" placeholder="输入昵称（最多 16 字）" value="{{nameInput}}" bindinput="onNameInput" maxlength="16" />
+      <view class="name-edit-actions">
+        <button class="btn-secondary name-edit-btn" bindtap="onHideNameEdit">取消</button>
+        <button class="btn-primary name-edit-btn" bindtap="onSaveName" loading="{{savingName}}" disabled="{{savingName}}">保存</button>
+      </view>
     </view>
   </block>
 </view>

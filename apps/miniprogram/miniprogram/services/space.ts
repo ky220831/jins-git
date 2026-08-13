@@ -5,6 +5,7 @@ import type {
   GetMySpaceResult,
   JoinSpaceInput,
   JoinSpaceResult,
+  SetNicknameInput,
 } from '../lib/shared/types/index';
 
 export const SpaceService = {
@@ -22,5 +23,9 @@ export const SpaceService = {
 
   regenInvite(): Promise<CreateSpaceResult> {
     return callFunction<CreateSpaceResult>('space-info', { action: 'regen-invite' });
+  },
+
+  setNickname(input: SetNicknameInput): Promise<GetMySpaceResult> {
+    return callFunction<GetMySpaceResult>('space-info', { action: 'set-nickname', ...input });
   },
 };

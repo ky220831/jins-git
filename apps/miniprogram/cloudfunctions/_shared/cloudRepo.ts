@@ -86,6 +86,12 @@ export class CloudRepo implements Repo {
     await this.col(COLLECTIONS.spaceMembers).doc(member.id).set({ data: member });
   }
 
+  async updateMemberNickname(spaceId: string, userId: string, nickname: string): Promise<void> {
+    await this.col(COLLECTIONS.spaceMembers)
+      .where({ spaceId, userId, status: 'active' })
+      .update({ data: { nickname, updatedAt: new Date() } });
+  }
+
   async updateSpace(spaceId: string, patch: Partial<SpaceRecord>): Promise<void> {
     await this.col(COLLECTIONS.spaces).doc(spaceId).update({ data: patch });
   }

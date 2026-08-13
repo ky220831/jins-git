@@ -93,6 +93,14 @@ export class MemoryRepo implements Repo {
     this.spaceMembers.set(member.id, { ...member });
   }
 
+  async updateMemberNickname(spaceId: string, userId: string, nickname: string): Promise<void> {
+    for (const member of this.spaceMembers.values()) {
+      if (member.spaceId === spaceId && member.userId === userId) {
+        this.spaceMembers.set(member.id, { ...member, nickname, updatedAt: new Date() });
+      }
+    }
+  }
+
   async updateSpace(spaceId: string, patch: Partial<SpaceRecord>): Promise<void> {
     const current = this.spaces.get(spaceId);
     if (!current) {

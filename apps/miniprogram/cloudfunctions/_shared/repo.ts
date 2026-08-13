@@ -50,6 +50,7 @@ export interface SpaceMemberRecord {
   userId: string;
   role: SpaceRole;
   status: MemberStatus;
+  nickname: string | null;
   joinedAt: Date;
   createdAt: Date;
   updatedAt: Date;
@@ -299,6 +300,7 @@ export interface Repo {
   findSpaceByInviteCode(inviteCode: string): Promise<SpaceRecord | null>;
   createSpace(space: SpaceRecord): Promise<void>;
   createMember(member: SpaceMemberRecord): Promise<void>;
+  updateMemberNickname(spaceId: string, userId: string, nickname: string): Promise<void>;
   updateSpace(spaceId: string, patch: Partial<SpaceRecord>): Promise<void>;
   listActiveMembers(spaceId: string): Promise<SpaceMemberRecord[]>;
   writeAudit(log: AuditLogRecord): Promise<void>;

@@ -32,213 +32,140 @@
   margin-top: 32rpx;
 }
 
-/* ---- 问候卡 ---- */
-.hero-card {
-  background: linear-gradient(135deg, #FFDDE2 0%, #FFE9D6 60%, #FFF3E0 100%);
-  border-radius: var(--radius-lg);
-  padding: 36rpx 32rpx;
-  box-shadow: var(--shadow-card);
-}
-
-.hero-top {
+/* ---- 顶部：双人爱心 + 邀请码 ---- */
+.top-bar {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
 }
 
-.greet-line {
-  font-size: 24rpx;
-  color: var(--color-primary-deep);
-  font-weight: 600;
-  letter-spacing: 2rpx;
-}
-
-.space-name {
-  margin-top: 8rpx;
-  font-size: 44rpx;
-  font-weight: 700;
-  color: var(--color-text);
-}
-
-.role-badge {
-  padding: 10rpx 22rpx;
-  border-radius: 999rpx;
-  background: #ffffff;
-  color: var(--color-primary-deep);
-  font-size: 24rpx;
-  font-weight: 600;
-  box-shadow: var(--shadow-soft);
-}
-
-.hero-date {
-  margin-top: 20rpx;
-  font-size: 26rpx;
-  color: var(--color-text-secondary);
-}
-
-.hero-actions {
+.couple {
   display: flex;
-  gap: 12rpx;
-  margin-top: 20rpx;
+  align-items: center;
+  gap: 14rpx;
 }
 
-.hero-chip {
-  padding: 12rpx 24rpx;
-  border-radius: 999rpx;
-  background: #ffffff;
-  font-size: 24rpx;
-  color: var(--color-primary-deep);
-  font-weight: 600;
-  box-shadow: var(--shadow-soft);
-}
-
-.hero-chip.bound {
-  color: var(--color-success);
-}
-
-/* ---- 今天 ---- */
-.today-card {
-  background: #ffffff;
-}
-
-.today-row {
-  margin-top: 12rpx;
-  font-size: 27rpx;
-  color: var(--color-text);
-  line-height: 1.6;
-}
-
-.period-text {
-  color: var(--color-red);
-}
-
-.anniversary-text {
-  color: var(--color-primary-deep);
-}
-
-/* ---- 模块宫格 ---- */
-.module-grid {
+.mini-avatar {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  margin-top: 24rpx;
-  row-gap: 20rpx;
-}
-
-.module-card {
-  width: 31.5%;
+  flex-direction: column;
+  align-items: center;
+  padding: 14rpx 20rpx;
+  background: var(--color-surface);
   border-radius: var(--radius-md);
-  padding: 28rpx 12rpx 24rpx;
-  text-align: center;
-  box-sizing: border-box;
   box-shadow: var(--shadow-soft);
 }
 
-.module-card:active {
-  transform: scale(0.96);
-}
-
-.module-emoji {
-  font-size: 48rpx;
-}
-
-.module-label {
-  margin-top: 12rpx;
-  font-size: 26rpx;
-  font-weight: 600;
-  color: var(--color-text);
-}
-
-.module-sub {
-  margin-top: 4rpx;
-  font-size: 20rpx;
-  color: var(--color-text-secondary);
-}
-
-.m-calendar {
-  background: #EAF5FB;
-}
-
-.m-meal {
-  background: #FFF1DE;
-}
-
-.m-restaurant {
+.mini-avatar.me {
   background: #FFE9EC;
 }
 
-.m-anniversary {
-  background: #FFE4E4;
+.mini-emoji {
+  font-size: 34rpx;
 }
 
-.m-travel {
-  background: #E6F5F0;
+.mini-name {
+  margin-top: 6rpx;
+  font-size: 22rpx;
+  font-weight: 600;
+  color: var(--color-text);
+  max-width: 140rpx;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
-.m-manage {
-  background: #F1EAFB;
-}
-
-/* ---- 成员 ---- */
-.member {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20rpx 0;
-  border-bottom: 2rpx dashed var(--color-border);
-}
-
-.member:last-child {
-  border-bottom: none;
-}
-
-.member-left {
-  display: flex;
-  align-items: center;
-  gap: 20rpx;
-}
-
-.member-avatar {
-  width: 72rpx;
-  height: 72rpx;
-  border-radius: 50%;
-  background: #FFF0EC;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.heart {
   font-size: 36rpx;
 }
 
-.member-role {
-  font-size: 28rpx;
-  font-weight: 600;
-}
-
-.member-id {
-  margin-top: 4rpx;
-  font-size: 20rpx;
-  color: var(--color-text-secondary);
-}
-
-.member-time {
+.invite-badge {
+  padding: 10rpx 18rpx;
+  background: var(--color-surface);
+  border-radius: 999rpx;
   font-size: 22rpx;
-  color: var(--color-text-secondary);
+  color: var(--color-primary-deep);
+  font-weight: 600;
+  box-shadow: var(--shadow-soft);
 }
 
-/* ---- 邀请码 ---- */
-.invite-card {
+.invite-badge.bound {
+  font-size: 30rpx;
+}
+
+/* ---- 功能列 ---- */
+.feature-list {
+  margin-top: 24rpx;
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+.feature-row {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  padding: 26rpx 28rpx;
+  border-bottom: 2rpx dashed var(--color-border);
+}
+
+.feature-row:last-child {
+  border-bottom: none;
+}
+
+.feature-row:active {
+  background: #FFF9F4;
+}
+
+.fe-emoji {
+  font-size: 40rpx;
+  width: 64rpx;
   text-align: center;
 }
 
-.invite-code {
-  font-size: 52rpx;
-  font-weight: 700;
-  letter-spacing: 10rpx;
-  color: var(--color-primary-deep);
+.fe-body {
+  flex: 1;
 }
 
-.invite-meta {
-  margin-top: 12rpx;
+.fe-label {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.fe-sub {
+  margin-top: 4rpx;
   font-size: 22rpx;
   color: var(--color-text-secondary);
+}
+
+.fe-arrow {
+  font-size: 36rpx;
+  color: var(--color-text-secondary);
+}
+
+/* ---- 昵称编辑 ---- */
+.name-edit {
+  margin-top: 24rpx;
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  padding: 32rpx;
+  box-shadow: var(--shadow-card);
+}
+
+.name-edit-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  margin-bottom: 20rpx;
+}
+
+.name-edit-actions {
+  display: flex;
+  gap: 16rpx;
+  margin-top: 8rpx;
+}
+
+.name-edit-btn {
+  flex: 1;
+  font-size: 28rpx;
 }

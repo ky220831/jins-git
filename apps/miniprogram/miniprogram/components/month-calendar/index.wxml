@@ -1,0 +1,69 @@
+<view class="mc-card">
+  <view class="mc-header">
+    <view class="mc-nav" bindtap="onPrev">‹</view>
+    <view class="mc-title">{{year}}年{{month}}月</view>
+    <view class="mc-nav" bindtap="onNext">›</view>
+    <view class="mc-today" bindtap="onToday">今天</view>
+  </view>
+
+  <view class="mc-error" wx:if="{{error}}">{{error}}</view>
+
+  <view class="mc-week">
+    <view class="mc-week-cell" wx:for="{{weekdays}}" wx:key="*this">{{item}}</view>
+  </view>
+
+  <view class="mc-grid">
+    <view
+      class="mc-day {{item.inMonth ? '' : 'dim'}} {{item.isToday ? 'today' : ''}} {{item.key === selectedDate ? 'selected' : ''}} {{item.periodKind === 'period' ? 'period' : ''}} {{item.periodKind === 'rest' ? 'rest' : ''}}"
+      wx:for="{{days}}"
+      wx:key="uid"
+      data-key="{{item.key}}"
+      bindtap="onTapDay"
+    >
+      <view class="mc-day-num">{{item.day ? item.day : ''}}</view>
+      <view class="mc-holiday {{item.holidayType === 'makeup_workday' ? 'makeup' : ''}}" wx:if="{{item.holidayLabel}}">{{item.holidayLabel}}</view>
+      <view class="mc-dots">
+        <view class="mc-dot dot-todo" wx:if="{{item.hasTodo}}"></view>
+        <view class="mc-dot dot-event" wx:if="{{item.hasEvent}}"></view>
+      </view>
+    </view>
+  </view>
+
+  <view class="mc-legend">
+    <view class="mc-legend-item"><view class="mc-legend-dot period"></view>🔴 生理期</view>
+    <view class="mc-legend-item"><view class="mc-legend-dot rest"></view>🔵 休息</view>
+    <view class="mc-legend-item"><view class="mc-legend-dot todo"></view>To Do</view>
+    <view class="mc-legend-item"><view class="mc-legend-dot event"></view>日程</view>
+  </view>
+
+  <view class="mc-day-panel" wx:if="{{selectedDate}}">
+    <view class="mc-day-title">{{selectedDate}}</view>
+    <view class="mc-status" wx:if="{{dayHoliday}}">
+      {{dayHoliday.type === 'makeup_workday' ? '🔄 调休上班' : '🇨🇳 ' + dayHoliday.name}}
+    </view>
+    <view class="mc-status period" wx:if="{{dayPeriod && dayPeriod.kind === 'period'}}">
+      {{dayPeriod.isEstimated ? '🔴 生理期（预计）' : '🔴 生理期'}}
+    </view>
+    <view class="mc-status rest" wx:if="{{dayPeriod && dayPeriod.kind === 'rest'}}">🔵 休息</view>
+    <view class="mc-empty" wx:if="{{!dayTodos.length && !dayEvents.length && !dayPeriod && !dayHoliday}}">🌷 这一天还没有安排</view>
+
+    <view
+      class="mc-todo {{item.status === 'completed' ? 'done' : ''}}"
+      wx:for="{{dayTodos}}"
+      wx:key="id"
+      data-id="{{item.id}}"
+      data-status="{{item.status}}"
+      bindtap="onToggleTodo"
+    >
+      <view class="mc-todo-title">{{item.title}}</view>
+      <view class="mc-todo-meta">{{item.timeLabel}} · {{item.priorityLabel}}</view>
+    </view>
+
+    <view class="mc-event" wx:for="{{dayEvents}}" wx:key="id" data-type="{{item.sourceType}}" data-id="{{item.sourceId}}" bindtap="onTapEvent">
+      <view class="mc-event-title">{{item.title}}</view>
+      <view class="mc-event-meta">{{item.timeLabel}}</view>
+    </view>
+  </view>
+
+  <view class="mc-more" bindtap="onOpenFullCalendar">打开完整日历 ›</view>
+</view>

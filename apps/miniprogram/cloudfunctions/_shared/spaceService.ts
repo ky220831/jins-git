@@ -10,6 +10,7 @@ import {
   type JoinSpaceInput,
   type JoinSpaceResult,
   type LoginResult,
+  type SetNicknameInput,
   type SpaceMemberView,
   type SpaceView,
 } from '../../../../packages/types/src';
@@ -28,6 +29,7 @@ function toMemberView(member: SpaceMemberRecord): SpaceMemberView {
     userId: member.userId,
     role: member.role,
     joinedAt: member.joinedAt.toISOString(),
+    ...(member.nickname ? { nickname: member.nickname } : {}),
   };
 }
 
@@ -85,6 +87,7 @@ export class SpaceService {
       userId: identity.userId,
       role: ROLE_OWNER,
       status: MEMBER_STATUS_ACTIVE,
+      nickname: null,
       joinedAt: now,
       createdAt: now,
       updatedAt: now,
@@ -133,6 +136,7 @@ export class SpaceService {
       userId: identity.userId,
       role: ROLE_MEMBER,
       status: MEMBER_STATUS_ACTIVE,
+      nickname: null,
       joinedAt: now,
       createdAt: now,
       updatedAt: now,
@@ -159,6 +163,22 @@ export class SpaceService {
     }
     const space = await this.getSpaceView(identity.userId, membership.spaceId);
     return { space };
+  }
+
+  /** 自定义昵称：只能修改自己的昵称（PRD：双人平等，爱心连接显示） */
+  async setNickname(providerUserId: string, input: SetNicknameInput): Promise<GetMySpaceResult> {
+    const identity = await resolveIdentity(this.repo, providerUserId);
+    const membership = await this.repo.findActiveMembershipByUser(identity.userId);
+    if (!membership) {
+      throw new AppError(ErrorCodes.NOT_IN_SPACE, '你还没有加入任何空间');
+    }
+    const nickname = (input?.nickname ?? '').trim();
+    if (!nickname || nickname.length > 16) {
+      throw new AppError(ErrorCodes.VALIDATION, '昵称需为 1~16 个字符');
+    }
+    await this.repo.updateMemberNickname(membership.spaceId, identity.userId, nickname);
+    await this.writeAudit(identity.userId, membership.spaceId, 'member.nickname.update', 'space_member', membership.id);
+    return this.getMySpace(providerUserId);
   }
 
   /** 重新生成一次性邀请码：仅主账号，副账号未加入时可用（PRD §13 家庭管理） */

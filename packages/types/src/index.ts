@@ -48,6 +48,8 @@ export interface SpaceMemberView {
   userId: string;
   role: SpaceRole;
   joinedAt: string;
+  /** 成员自定义昵称（可选，默认显示角色名） */
+  nickname?: string;
 }
 
 export interface SpaceView {
@@ -87,6 +89,10 @@ export interface JoinSpaceResult {
 
 export interface GetMySpaceResult {
   space: SpaceView;
+}
+
+export interface SetNicknameInput {
+  nickname: string;
 }
 
 // ---- To Do ----

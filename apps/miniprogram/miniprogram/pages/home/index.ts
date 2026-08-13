@@ -1,40 +1,11 @@
 import { ApiError } from '../../api/cloud';
 import { ROLE_OWNER, type SpaceMemberView, type SpaceView } from '../../lib/shared/types/index';
-import { CalendarService } from '../../services/calendar';
-import { PeriodService } from '../../services/period';
 import { SpaceService } from '../../services/space';
-import { AnniversaryService } from '../../services/anniversary';
-import { formatDate, formatDateTime } from '../../utils/time';
+import { formatDateTime } from '../../utils/time';
 
 interface MemberRow extends SpaceMemberView {
-  shortId: string;
-  joinedAtLabel: string;
-  roleLabel: string;
-}
-
-interface TodaySummary {
-  date: string;
-  weekday: string;
-  holidayLabel: string;
-  periodLabel: string;
-  todoCount: number;
-  eventCount: number;
-  nextPredictedLabel: string;
-  anniversaryLabel: string;
-}
-
-function pad(n: number): string {
-  return String(n).padStart(2, '0');
-}
-
-function dateKey(year: number, month: number, day: number): string {
-  return `${year}-${pad(month)}-${pad(day)}`;
-}
-
-/** ISO 时间 → Asia/Shanghai 日期键 */
-function toShanghaiDateKey(iso: string): string {
-  const shifted = new Date(new Date(iso).getTime() + 8 * 3600000);
-  return `${shifted.getUTCFullYear()}-${pad(shifted.getUTCMonth() + 1)}-${pad(shifted.getUTCDate())}`;
+  displayName: string;
+  avatar: string;
 }
 
 Page({
@@ -43,9 +14,14 @@ Page({
     space: null as SpaceView | null,
     members: [] as MemberRow[],
     isOwner: false,
+    myDisplayName: '',
+    partnerDisplayName: '',
+    inviteCode: '',
     inviteExpiresAt: '',
-    today: null as TodaySummary | null,
     error: '',
+    showNameEdit: false,
+    nameInput: '',
+    savingName: false,
   },
 
   onShow() {
@@ -55,67 +31,30 @@ Page({
   async refresh() {
     this.setData({ loading: true, error: '' });
     try {
-      const now = new Date();
-      const [spaceRes, monthRes, periodInfo, anniversaries] = await Promise.all([
-        SpaceService.mySpace(),
-        CalendarService.month({ year: now.getFullYear(), month: now.getMonth() + 1 }),
-        PeriodService.info(),
-        AnniversaryService.list(),
-      ]);
+      const spaceRes = await SpaceService.mySpace();
       const space = spaceRes.space;
+      const isOwner = space.myRole === ROLE_OWNER;
       const members: MemberRow[] = space.members.map((m) => ({
         ...m,
-        shortId: m.userId.slice(-8),
-        joinedAtLabel: formatDate(m.joinedAt),
-        roleLabel: m.role === ROLE_OWNER ? '主账号' : '副账号',
+        displayName: m.nickname || (m.role === ROLE_OWNER ? '主账号' : '副账号'),
+        avatar: m.role === ROLE_OWNER ? '👑' : '💗',
       }));
-      const todayKey = dateKey(now.getFullYear(), now.getMonth() + 1, now.getDate());
-      const holiday = monthRes.holidays.find((h) => h.date === todayKey);
-      const todoCount = monthRes.todos.filter((t) => t.date === todayKey).length;
-      const eventCount = monthRes.events
-        .map((e) => toShanghaiDateKey(e.startTime))
-        .filter((d) => d === todayKey).length;
-      const periodToday = periodInfo.today;
-      const periodRecordToday = periodToday
-        ? periodInfo.records.find((r) => r.startDate <= todayKey && r.endDate >= todayKey)
-        : undefined;
-      const periodLabel = periodToday
-        ? periodToday.kind === 'period'
-          ? periodRecordToday?.isEstimated
-            ? '生理期（预计）'
-            : '生理期'
-          : '休息'
-        : '';
-      const upcoming = anniversaries
-        .filter((a) => a.daysToNext >= 0)
-        .sort((a, b) => a.daysToNext - b.daysToNext)[0];
-      const anniversaryLabel = upcoming
-        ? upcoming.daysToNext === 0
-          ? `❤️ ${upcoming.name}：就是今天`
-          : `❤️ ${upcoming.name}：还有 ${upcoming.daysToNext} 天`
-        : '';
-      const today: TodaySummary = {
-        date: todayKey,
-        weekday: `星期${['日', '一', '二', '三', '四', '五', '六'][now.getDay()]}`,
-        holidayLabel: holiday
-          ? holiday.type === 'makeup_workday'
-            ? '🔄 调休上班'
-            : `🇨🇳 ${holiday.name}`
-          : '',
-        periodLabel,
-        todoCount,
-        eventCount,
-        nextPredictedLabel: periodInfo.nextPredicted
-          ? `预计 ${periodInfo.nextPredicted.startDate} ~ ${periodInfo.nextPredicted.endDate}`
-          : '',
-        anniversaryLabel,
-      };
+      const me = members.find((m) =>
+        isOwner ? m.role === ROLE_OWNER : m.role !== ROLE_OWNER,
+      );
+      const partner = members.find((m) =>
+        isOwner ? m.role !== ROLE_OWNER : m.role === ROLE_OWNER,
+      );
       this.setData({
         space,
         members,
-        isOwner: space.myRole === ROLE_OWNER,
-        inviteExpiresAt: space.inviteCodeExpiresAt ? formatDateTime(space.inviteCodeExpiresAt) : '',
-        today,
+        isOwner,
+        myDisplayName: me?.displayName || '',
+        partnerDisplayName: partner?.displayName || '',
+        inviteCode: space.inviteCode || '',
+        inviteExpiresAt: space.inviteCodeExpiresAt
+          ? formatDateTime(space.inviteCodeExpiresAt)
+          : '',
         error: '',
       });
     } catch (err) {
@@ -135,7 +74,7 @@ Page({
   },
 
   onCopyInvite() {
-    const code = this.data.space?.inviteCode;
+    const code = this.data.inviteCode;
     if (!code) return;
     wx.setClipboardData({
       data: code,
@@ -145,7 +84,39 @@ Page({
     });
   },
 
-  onOpenCalendar() {
+  onStartEditName() {
+    this.setData({ showNameEdit: true, nameInput: this.data.myDisplayName });
+  },
+
+  onHideNameEdit() {
+    this.setData({ showNameEdit: false });
+  },
+
+  onNameInput(e: WechatMiniprogram.Input) {
+    this.setData({ nameInput: e.detail.value });
+  },
+
+  async onSaveName() {
+    const nickname = this.data.nameInput.trim();
+    if (!nickname) {
+      wx.showToast({ title: '昵称不能为空', icon: 'none' });
+      return;
+    }
+    if (this.data.savingName) return;
+    this.setData({ savingName: true });
+    try {
+      await SpaceService.setNickname({ nickname });
+      this.setData({ showNameEdit: false });
+      this.refresh();
+      wx.showToast({ title: '昵称已更新', icon: 'success' });
+    } catch (err) {
+      wx.showToast({ title: err instanceof ApiError ? err.message : '保存失败', icon: 'none' });
+    } finally {
+      this.setData({ savingName: false });
+    }
+  },
+
+  onOpenFullCalendar() {
     wx.navigateTo({ url: '/pages/calendar/index' });
   },
 
