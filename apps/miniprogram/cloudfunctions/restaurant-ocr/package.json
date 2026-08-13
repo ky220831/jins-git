@@ -1,0 +1,10 @@
+{
+  "name": "restaurant-ocr",
+  "version": "1.0.0",
+  "private": true,
+  "description": "漂亮饭：菜单/图片 OCR 识别草稿（用户确认后保存）",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "^4.0.2"
+  }
+}

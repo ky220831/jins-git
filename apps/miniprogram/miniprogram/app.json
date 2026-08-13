@@ -6,7 +6,8 @@
     "pages/space-join/index",
     "pages/home/index",
     "pages/calendar/index",
-    "pages/meal/index"
+    "pages/meal/index",
+    "pages/restaurant/index"
   ],
   "window": {
     "navigationBarBackgroundColor": "#FAF7F2",

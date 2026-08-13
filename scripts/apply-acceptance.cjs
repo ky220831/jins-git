@@ -37,6 +37,8 @@ const collections = [
   'meal_templates',
   'meal_plans',
   'trash_records',
+  'restaurants',
+  'restaurant_visits',
 ];
 
 const indexDefs = {
@@ -166,6 +168,34 @@ const indexDefs = {
       IndexName: 'idx_purgeAt',
       MgoKeySchema: {
         MgoIndexKeys: [{ Name: 'purgeAt', Direction: '1' }],
+        MgoIsUnique: false,
+      },
+    },
+  ],
+  restaurants: [
+    {
+      IndexName: 'idx_spaceId',
+      MgoKeySchema: {
+        MgoIndexKeys: [{ Name: 'spaceId', Direction: '1' }],
+        MgoIsUnique: false,
+      },
+    },
+  ],
+  restaurant_visits: [
+    {
+      IndexName: 'idx_spaceId_date',
+      MgoKeySchema: {
+        MgoIndexKeys: [
+          { Name: 'spaceId', Direction: '1' },
+          { Name: 'date', Direction: '1' },
+        ],
+        MgoIsUnique: false,
+      },
+    },
+    {
+      IndexName: 'idx_expireAt',
+      MgoKeySchema: {
+        MgoIndexKeys: [{ Name: 'expireAt', Direction: '1' }],
         MgoIsUnique: false,
       },
     },

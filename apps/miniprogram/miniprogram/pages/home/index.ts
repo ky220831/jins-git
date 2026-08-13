@@ -140,4 +140,8 @@ Page({
   onOpenMeal() {
     wx.navigateTo({ url: '/pages/meal/index' });
   },
+
+  onOpenRestaurant() {
+    wx.navigateTo({ url: '/pages/restaurant/index' });
+  },
 });

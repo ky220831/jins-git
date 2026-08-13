@@ -1,0 +1,10 @@
+{
+  "name": "restaurant-search",
+  "version": "1.0.0",
+  "private": true,
+  "description": "漂亮饭：腾讯位置服务地点搜索（POI）",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "^4.0.2"
+  }
+}

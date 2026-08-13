@@ -12,6 +12,8 @@ export const COLLECTIONS = {
   mealTemplates: 'meal_templates',
   mealPlans: 'meal_plans',
   trashRecords: 'trash_records',
+  restaurants: 'restaurants',
+  restaurantVisits: 'restaurant_visits',
 } as const;
 
 /** 邀请码有效期：7 天（可调整） */
@@ -22,8 +24,14 @@ export const INVITE_CODE_LENGTH = 8;
 export const TODO_TITLE_MAX_LENGTH = 100;
 export const MEAL_NAME_MAX_LENGTH = 50;
 export const MEAL_NOTE_MAX_LENGTH = 200;
+export const RESTAURANT_NAME_MAX_LENGTH = 60;
+export const RESTAURANT_NOTE_MAX_LENGTH = 500;
+export const RESTAURANT_TAGS_MAX = 10;
+export const RESTAURANT_DISHES_MAX = 20;
 /** 今日菜单临时记录：创建后 14 天进入回收站（PRD §38/§79） */
 export const MEAL_PLAN_TTL_DAYS = 14;
+/** 漂亮饭临时行程：创建后 14 天进入回收站（PRD §42/§79） */
+export const RESTAURANT_VISIT_TTL_DAYS = 14;
 /** 回收站保留 72 小时后永久删除（PRD §56） */
 export const TRASH_RETENTION_HOURS = 72;
 /** 定时任务等系统操作使用的虚拟身份 */

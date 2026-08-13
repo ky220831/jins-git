@@ -4,6 +4,7 @@ import type {
   MealPlanStatus,
   MemberStatus,
   PeriodType,
+  RestaurantSource,
   SpaceRole,
   SpaceStatus,
   TodoPriority,
@@ -182,6 +183,51 @@ export interface TrashRecord {
   updatedAt: Date;
 }
 
+export interface RestaurantRecord {
+  id: string;
+  spaceId: string;
+  name: string;
+  address: string | null;
+  city: string | null;
+  district: string | null;
+  lat: number | null;
+  lng: number | null;
+  category: string | null;
+  pricePerPerson: number | null;
+  tags: string[];
+  rating: number | null;
+  recommendedDishes: string[];
+  coverImage: string | null;
+  images: string[];
+  menuImages: string[];
+  note: string | null;
+  visited: boolean;
+  favorite: boolean;
+  enabled: boolean;
+  businessHours: string | null;
+  source: RestaurantSource;
+  createdBy: string;
+  createdAt: Date;
+  updatedAt: Date;
+  version: number;
+}
+
+export interface RestaurantVisitRecord {
+  id: string;
+  spaceId: string;
+  restaurantId: string;
+  name: string;
+  date: string;
+  time: string | null;
+  note: string | null;
+  status: 'planned' | 'offline';
+  createdBy: string;
+  createdAt: Date;
+  updatedAt: Date;
+  version: number;
+  expireAt: Date;
+}
+
 /**
  * 数据访问层接口：云函数用 CloudRepo（真实数据库），测试用 MemoryRepo。
  * 业务逻辑（SpaceService）只依赖该接口，不直接操作数据库。
@@ -242,4 +288,17 @@ export interface Repo {
   updateTrash(spaceId: string, trashId: string, patch: Partial<TrashRecord>): Promise<void>;
   deleteTrash(spaceId: string, trashId: string): Promise<void>;
   listTrashDueForPurge(now: Date): Promise<TrashRecord[]>;
+
+  // ---- 第五阶段：漂亮饭 ----
+  listRestaurants(spaceId: string): Promise<RestaurantRecord[]>;
+  findRestaurantById(spaceId: string, restaurantId: string): Promise<RestaurantRecord | null>;
+  createRestaurant(restaurant: RestaurantRecord): Promise<void>;
+  updateRestaurant(spaceId: string, restaurantId: string, patch: Partial<RestaurantRecord>): Promise<void>;
+  deleteRestaurant(spaceId: string, restaurantId: string): Promise<void>;
+  findRestaurantVisitById(spaceId: string, visitId: string): Promise<RestaurantVisitRecord | null>;
+  listRestaurantVisitsByDateRange(spaceId: string, startDate: string, endDate: string): Promise<RestaurantVisitRecord[]>;
+  listExpiredRestaurantVisits(now: Date): Promise<RestaurantVisitRecord[]>;
+  createRestaurantVisit(visit: RestaurantVisitRecord): Promise<void>;
+  updateRestaurantVisit(spaceId: string, visitId: string, patch: Partial<RestaurantVisitRecord>): Promise<void>;
+  deleteRestaurantVisit(spaceId: string, visitId: string): Promise<void>;
 }

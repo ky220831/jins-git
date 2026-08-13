@@ -7,6 +7,8 @@ import type {
   MealTemplateRecord,
   PeriodRecordRecord,
   Repo,
+  RestaurantRecord,
+  RestaurantVisitRecord,
   SpaceMemberRecord,
   SpaceRecord,
   SpaceSettingRecord,
@@ -34,6 +36,8 @@ export class MemoryRepo implements Repo {
   mealTemplates = new Map<string, MealTemplateRecord>();
   mealPlans = new Map<string, MealPlanRecord>();
   trash = new Map<string, TrashRecord>();
+  restaurants = new Map<string, RestaurantRecord>();
+  restaurantVisits = new Map<string, RestaurantVisitRecord>();
 
   async findUserIdentity(provider: string, providerUserId: string): Promise<UserIdentityRecord | null> {
     for (const item of this.userIdentities.values()) {
@@ -293,6 +297,10 @@ export class MemoryRepo implements Repo {
       this.mealTemplates.set(id, record as unknown as MealTemplateRecord);
     } else if (collection === 'meal_plans') {
       this.mealPlans.set(id, record as unknown as MealPlanRecord);
+    } else if (collection === 'restaurants') {
+      this.restaurants.set(id, record as unknown as RestaurantRecord);
+    } else if (collection === 'restaurant_visits') {
+      this.restaurantVisits.set(id, record as unknown as RestaurantVisitRecord);
     } else if (collection === 'todos') {
       this.todos.set(id, record as unknown as TodoRecord);
     } else {
@@ -333,5 +341,82 @@ export class MemoryRepo implements Repo {
     return [...this.trash.values()]
       .filter((t) => t.status === 'in_trash' && t.purgeAt.getTime() <= now.getTime())
       .map((t) => ({ ...t }));
+  }
+
+  async listRestaurants(spaceId: string): Promise<RestaurantRecord[]> {
+    return [...this.restaurants.values()]
+      .filter((r) => r.spaceId === spaceId)
+      .map((r) => ({ ...r }));
+  }
+
+  async findRestaurantById(spaceId: string, restaurantId: string): Promise<RestaurantRecord | null> {
+    const r = this.restaurants.get(restaurantId);
+    return r && r.spaceId === spaceId ? { ...r } : null;
+  }
+
+  async createRestaurant(restaurant: RestaurantRecord): Promise<void> {
+    this.restaurants.set(restaurant.id, { ...restaurant });
+  }
+
+  async updateRestaurant(
+    spaceId: string,
+    restaurantId: string,
+    patch: Partial<RestaurantRecord>,
+  ): Promise<void> {
+    const current = this.restaurants.get(restaurantId);
+    if (!current || current.spaceId !== spaceId) return;
+    this.restaurants.set(restaurantId, { ...current, ...patch });
+  }
+
+  async deleteRestaurant(spaceId: string, restaurantId: string): Promise<void> {
+    const current = this.restaurants.get(restaurantId);
+    if (current && current.spaceId === spaceId) {
+      this.restaurants.delete(restaurantId);
+    }
+  }
+
+  async findRestaurantVisitById(
+    spaceId: string,
+    visitId: string,
+  ): Promise<RestaurantVisitRecord | null> {
+    const v = this.restaurantVisits.get(visitId);
+    return v && v.spaceId === spaceId ? { ...v } : null;
+  }
+
+  async listRestaurantVisitsByDateRange(
+    spaceId: string,
+    startDate: string,
+    endDate: string,
+  ): Promise<RestaurantVisitRecord[]> {
+    return [...this.restaurantVisits.values()]
+      .filter((v) => v.spaceId === spaceId && v.date >= startDate && v.date <= endDate)
+      .map((v) => ({ ...v }));
+  }
+
+  async listExpiredRestaurantVisits(now: Date): Promise<RestaurantVisitRecord[]> {
+    return [...this.restaurantVisits.values()]
+      .filter((v) => v.expireAt.getTime() <= now.getTime())
+      .map((v) => ({ ...v }));
+  }
+
+  async createRestaurantVisit(visit: RestaurantVisitRecord): Promise<void> {
+    this.restaurantVisits.set(visit.id, { ...visit });
+  }
+
+  async updateRestaurantVisit(
+    spaceId: string,
+    visitId: string,
+    patch: Partial<RestaurantVisitRecord>,
+  ): Promise<void> {
+    const current = this.restaurantVisits.get(visitId);
+    if (!current || current.spaceId !== spaceId) return;
+    this.restaurantVisits.set(visitId, { ...current, ...patch });
+  }
+
+  async deleteRestaurantVisit(spaceId: string, visitId: string): Promise<void> {
+    const current = this.restaurantVisits.get(visitId);
+    if (current && current.spaceId === spaceId) {
+      this.restaurantVisits.delete(visitId);
+    }
   }
 }

@@ -8,6 +8,8 @@ import type {
   MealTemplateRecord,
   PeriodRecordRecord,
   Repo,
+  RestaurantRecord,
+  RestaurantVisitRecord,
   SpaceMemberRecord,
   SpaceRecord,
   SpaceSettingRecord,
@@ -336,5 +338,92 @@ export class CloudRepo implements Repo {
       .limit(1000)
       .get();
     return res.data.map((d) => mapDoc<TrashRecord>(d));
+  }
+
+  async listRestaurants(spaceId: string): Promise<RestaurantRecord[]> {
+    const res = await this.col(COLLECTIONS.restaurants)
+      .where({ spaceId })
+      .limit(500)
+      .get();
+    return res.data.map((d) => mapDoc<RestaurantRecord>(d));
+  }
+
+  async findRestaurantById(spaceId: string, restaurantId: string): Promise<RestaurantRecord | null> {
+    const res = await this.col(COLLECTIONS.restaurants)
+      .where({ _id: restaurantId, spaceId })
+      .limit(1)
+      .get();
+    return res.data.length > 0 ? mapDoc<RestaurantRecord>(res.data[0]) : null;
+  }
+
+  async createRestaurant(restaurant: RestaurantRecord): Promise<void> {
+    await this.col(COLLECTIONS.restaurants).doc(restaurant.id).set({ data: restaurant });
+  }
+
+  async updateRestaurant(
+    spaceId: string,
+    restaurantId: string,
+    patch: Partial<RestaurantRecord>,
+  ): Promise<void> {
+    await this.col(COLLECTIONS.restaurants)
+      .where({ _id: restaurantId, spaceId })
+      .update({ data: patch });
+  }
+
+  async deleteRestaurant(spaceId: string, restaurantId: string): Promise<void> {
+    await this.col(COLLECTIONS.restaurants)
+      .where({ _id: restaurantId, spaceId })
+      .remove();
+  }
+
+  async findRestaurantVisitById(
+    spaceId: string,
+    visitId: string,
+  ): Promise<RestaurantVisitRecord | null> {
+    const res = await this.col(COLLECTIONS.restaurantVisits)
+      .where({ _id: visitId, spaceId })
+      .limit(1)
+      .get();
+    return res.data.length > 0 ? mapDoc<RestaurantVisitRecord>(res.data[0]) : null;
+  }
+
+  async listRestaurantVisitsByDateRange(
+    spaceId: string,
+    startDate: string,
+    endDate: string,
+  ): Promise<RestaurantVisitRecord[]> {
+    const res = await this.col(COLLECTIONS.restaurantVisits)
+      .where({ spaceId, date: _.gte(startDate).and(_.lte(endDate)) })
+      .limit(100)
+      .get();
+    return res.data.map((d) => mapDoc<RestaurantVisitRecord>(d));
+  }
+
+  async listExpiredRestaurantVisits(now: Date): Promise<RestaurantVisitRecord[]> {
+    const res = await this.col(COLLECTIONS.restaurantVisits)
+      .where({ expireAt: _.lte(now) })
+      .limit(1000)
+      .get();
+    return res.data.map((d) => mapDoc<RestaurantVisitRecord>(d));
+  }
+
+  async createRestaurantVisit(visit: RestaurantVisitRecord): Promise<void> {
+    await this.col(COLLECTIONS.restaurantVisits).doc(visit.id).set({ data: visit });
+  }
+
+  async updateRestaurantVisit(
+    spaceId: string,
+    visitId: string,
+    patch: Partial<RestaurantVisitRecord>,
+  ): Promise<void> {
+    await this.col(COLLECTIONS.restaurantVisits)
+      .where({ _id: visitId, spaceId })
+      .update({ data: patch });
+  }
+
+  async deleteRestaurantVisit(spaceId: string, visitId: string): Promise<void> {
+    await this.col(COLLECTIONS.restaurantVisits)
+      .where({ _id: visitId, spaceId })
+      .remove();
   }
 }

@@ -1,0 +1,10 @@
+{
+  "name": "restaurant",
+  "version": "1.0.0",
+  "private": true,
+  "description": "漂亮饭：餐厅增删改查 / 收藏上架 / 临时行程 / 日历联动",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "^4.0.2"
+  }
+}

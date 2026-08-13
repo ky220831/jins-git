@@ -22,6 +22,8 @@ const names = [
   'meal_templates',
   'meal_plans',
   'trash_records',
+  'restaurants',
+  'restaurant_visits',
 ];
 
 if (!envId) {

@@ -352,6 +352,174 @@ export interface TrashActionInput {
   trashId: string;
 }
 
+// ---- 漂亮饭（餐厅）----
+export const RESTAURANT_SOURCE_MANUAL = 'manual';
+export const RESTAURANT_SOURCE_POI = 'poi';
+export const RESTAURANT_SOURCE_OCR = 'ocr';
+export type RestaurantSource =
+  | typeof RESTAURANT_SOURCE_MANUAL
+  | typeof RESTAURANT_SOURCE_POI
+  | typeof RESTAURANT_SOURCE_OCR;
+
+export interface RestaurantView {
+  id: string;
+  name: string;
+  address?: string;
+  city?: string;
+  district?: string;
+  lat?: number | null;
+  lng?: number | null;
+  category?: string;
+  pricePerPerson?: number | null;
+  tags: string[];
+  rating?: number | null;
+  recommendedDishes: string[];
+  coverImage?: string;
+  images: string[];
+  menuImages: string[];
+  note?: string;
+  visited: boolean;
+  favorite: boolean;
+  /** 上架/下架：双人可切换 */
+  enabled: boolean;
+  businessHours?: string;
+  source: RestaurantSource;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+  version: number;
+}
+
+export interface CreateRestaurantInput {
+  name: string;
+  address?: string | null;
+  city?: string | null;
+  district?: string | null;
+  lat?: number | null;
+  lng?: number | null;
+  category?: string | null;
+  pricePerPerson?: number | null;
+  tags?: string[] | null;
+  rating?: number | null;
+  recommendedDishes?: string[] | null;
+  coverImage?: string | null;
+  images?: string[] | null;
+  menuImages?: string[] | null;
+  note?: string | null;
+  favorite?: boolean;
+  visited?: boolean;
+  businessHours?: string | null;
+}
+
+export interface UpdateRestaurantInput {
+  restaurantId: string;
+  name?: string;
+  address?: string | null;
+  city?: string | null;
+  district?: string | null;
+  lat?: number | null;
+  lng?: number | null;
+  category?: string | null;
+  pricePerPerson?: number | null;
+  tags?: string[] | null;
+  rating?: number | null;
+  recommendedDishes?: string[] | null;
+  coverImage?: string | null;
+  images?: string[] | null;
+  menuImages?: string[] | null;
+  note?: string | null;
+  favorite?: boolean;
+  visited?: boolean;
+  enabled?: boolean;
+  businessHours?: string | null;
+}
+
+export interface DeleteRestaurantInput {
+  restaurantId: string;
+}
+
+export interface RestaurantVisitView {
+  id: string;
+  restaurantId: string;
+  name: string;
+  date: string;
+  time?: string;
+  note?: string;
+  status: 'planned' | 'offline';
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+  version: number;
+}
+
+export interface CreateRestaurantVisitInput {
+  restaurantId: string;
+  date: string;
+  time?: string;
+  note?: string;
+}
+
+export interface UpdateRestaurantVisitInput {
+  visitId: string;
+  date?: string;
+  time?: string | null;
+  note?: string | null;
+  status?: 'planned' | 'offline';
+}
+
+export interface OfflineRestaurantVisitInput {
+  visitId: string;
+}
+
+export interface DeleteRestaurantVisitInput {
+  visitId: string;
+}
+
+export interface RestaurantSearchInput {
+  keyword: string;
+  /** 城市名，如“上海”；不填默认全国 */
+  region?: string;
+}
+
+export interface RestaurantSearchItem {
+  id: string;
+  name: string;
+  address?: string;
+  city?: string;
+  district?: string;
+  lat?: number;
+  lng?: number;
+  category?: string;
+  tel?: string;
+}
+
+export interface RestaurantSearchResult {
+  items: RestaurantSearchItem[];
+  provider: string;
+}
+
+export interface RestaurantOcrInput {
+  fileID: string;
+}
+
+export interface RestaurantOcrDraft {
+  name?: string;
+  address?: string;
+  city?: string;
+  category?: string;
+  pricePerPerson?: number;
+  businessHours?: string;
+  rawText: string;
+}
+
+export interface RestaurantImagesInput {
+  fileIDs: string[];
+}
+
+export interface RestaurantImagesResult {
+  urls: { fileID: string; tempFileURL: string }[];
+}
+
 // ---- 节假日 ----
 export const HOLIDAY_TYPE_HOLIDAY = 'holiday';
 export const HOLIDAY_TYPE_MAKEUP_WORKDAY = 'makeup_workday';

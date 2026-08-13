@@ -1,12 +1,37 @@
-import { ROLE_OWNER, type TrashActionInput, type TrashItemView, type TrashListInput } from '../../../../packages/types/src';
+import {
+  ROLE_OWNER,
+  type CalendarSourceType,
+  type TrashActionInput,
+  type TrashItemView,
+  type TrashListInput,
+} from '../../../../packages/types/src';
 import { requireSpaceMember } from './access';
-import { COLLECTIONS, MEAL_PLAN_TTL_DAYS, SYSTEM_ACTOR } from './constants';
+import {
+  COLLECTIONS,
+  MEAL_PLAN_TTL_DAYS,
+  RESTAURANT_VISIT_TTL_DAYS,
+  SYSTEM_ACTOR,
+} from './constants';
 import { toShanghaiDate } from './dateTime';
 import { AppError, ErrorCodes } from './errors';
 import { newId } from './ids';
 import type { MealPlanRecord, Repo, TrashRecord } from './repo';
 
-const RESTORABLE_COLLECTIONS: string[] = [COLLECTIONS.mealTemplates, COLLECTIONS.mealPlans];
+const RESTORABLE_COLLECTIONS: string[] = [
+  COLLECTIONS.mealTemplates,
+  COLLECTIONS.mealPlans,
+  COLLECTIONS.restaurants,
+  COLLECTIONS.restaurantVisits,
+];
+
+/** 恢复后需要重建日历事件的临时记录集合（业务数据为唯一真实来源） */
+const CALENDAR_RESTORE_COLLECTIONS: Record<
+  string,
+  { ttlDays: number; sourceType: CalendarSourceType }
+> = {
+  [COLLECTIONS.mealPlans]: { ttlDays: MEAL_PLAN_TTL_DAYS, sourceType: 'meal' },
+  [COLLECTIONS.restaurantVisits]: { ttlDays: RESTAURANT_VISIT_TTL_DAYS, sourceType: 'restaurant' },
+};
 
 function toTrashItemView(t: TrashRecord): TrashItemView {
   const snapshot = (t.snapshot ?? {}) as { name?: string; title?: string };
@@ -58,9 +83,10 @@ export class TrashService {
 
     const now = new Date();
     const snapshot = { ...(item.snapshot as Record<string, unknown>) };
-    if (item.collection === COLLECTIONS.mealPlans) {
+    const calendarConfig = CALENDAR_RESTORE_COLLECTIONS[item.collection];
+    if (calendarConfig) {
       // 恢复后重新获得 14 天临时周期，避免立刻又被自动清理
-      snapshot.expireAt = new Date(now.getTime() + MEAL_PLAN_TTL_DAYS * 24 * 3600000);
+      snapshot.expireAt = new Date(now.getTime() + calendarConfig.ttlDays * 24 * 3600000);
     }
     await this.repo.restoreRecord(item.collection, snapshot);
     await this.repo.updateTrash(spaceId, trashId, {
@@ -70,20 +96,21 @@ export class TrashService {
       updatedAt: now,
     });
 
-    // 菜单带时间的记录恢复后，重新生成日历事件（业务数据为唯一真实来源）
-    if (item.collection === COLLECTIONS.mealPlans) {
-      const plan = snapshot as unknown as MealPlanRecord;
-      if (plan.time && plan.status === 'published') {
+    // 带时间的临时记录恢复后，重新生成日历事件
+    if (calendarConfig) {
+      const record = snapshot as unknown as MealPlanRecord;
+      const rawStatus = (record as { status?: string }).status;
+      if (record.time && (rawStatus === 'published' || rawStatus === 'planned')) {
         await this.repo.createCalendarEvent({
           id: newId('ce'),
           spaceId,
-          sourceType: 'meal',
-          sourceId: plan.id,
-          title: `🍴 ${plan.name}`,
-          startTime: toShanghaiDate(plan.date, plan.time),
+          sourceType: calendarConfig.sourceType,
+          sourceId: record.id,
+          title: `🍴 ${record.name}`,
+          startTime: toShanghaiDate(record.date, record.time),
           endTime: null,
           colorToken: 'accent',
-          createdBy: plan.createdBy,
+          createdBy: record.createdBy,
           createdAt: now,
           updatedAt: now,
           version: 1,

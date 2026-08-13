@@ -49,7 +49,7 @@
     <view class="trash-row" wx:for="{{trashItems}}" wx:key="id">
       <view class="trash-left">
         <view class="trash-title">{{item.title}}</view>
-        <view class="trash-meta">{{item.collection === 'meal_plans' ? '菜单' : '素材'}} · {{item.deleteReason === 'auto_expire' ? '自动过期' : '手动删除'}} · {{item.retentionType === 'temporary' ? '临时' : '永久'}}</view>
+        <view class="trash-meta">{{item.collection === 'meal_plans' ? '菜单' : item.collection === 'restaurants' ? '餐厅' : item.collection === 'restaurant_visits' ? '餐厅行程' : '素材'}} · {{item.deleteReason === 'auto_expire' ? '自动过期' : '手动删除'}} · {{item.retentionType === 'temporary' ? '临时' : '永久'}}</view>
       </view>
       <view class="trash-actions">
         <view class="link-btn" data-id="{{item.id}}" bindtap="onRestoreTrash">恢复</view>

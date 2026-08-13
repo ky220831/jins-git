@@ -1,0 +1,123 @@
+<view class="container restaurant-page">
+  <view class="page-head">
+    <view class="page-title">漂亮饭</view>
+    <view class="page-sub">两个人的餐厅收藏库</view>
+  </view>
+
+  <view class="error-text" wx:if="{{error}}">{{error}}</view>
+
+  <view class="card">
+    <view class="card-title">本月行程（14 天后自动进回收站）</view>
+    <view class="empty" wx:if="{{!visits.length}}">还没有安排，点餐厅上的“安排去”</view>
+    <view class="visit-row" wx:for="{{visits}}" wx:key="id">
+      <view class="visit-left">
+        <view class="visit-name">🍴 {{item.name}}</view>
+        <view class="visit-meta">{{item.date}} {{item.timeLabel}}{{item.note ? ' · ' + item.note : ''}}</view>
+      </view>
+      <view class="visit-actions">
+        <view class="link-btn" data-id="{{item.id}}" bindtap="onOfflineVisit">下架</view>
+        <view class="link-btn danger" wx:if="{{isOwner}}" data-id="{{item.id}}" bindtap="onDeleteVisit">删除</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="empty-list" wx:if="{{!restaurants.length && !loading}}">收藏的餐厅会显示在这里</view>
+  <view class="restaurant-card" wx:for="{{restaurants}}" wx:key="id">
+    <image class="cover" wx:if="{{item.coverUrl}}" src="{{item.coverUrl}}" mode="aspectFill" />
+    <view class="restaurant-body">
+      <view class="restaurant-head">
+        <view class="restaurant-name">{{item.name}}</view>
+        <view class="fav" data-id="{{item.id}}" data-field="favorite" bindtap="onToggleRestaurant">{{item.favorite ? '❤️' : '🤍'}}</view>
+      </view>
+      <view class="restaurant-meta">
+        <text wx:if="{{item.category}}">{{item.category}}</text>
+        <text wx:if="{{item.priceLabel}}"> · {{item.priceLabel}}</text>
+        <text wx:if="{{item.ratingLabel}}"> · {{item.ratingLabel}}</text>
+        <text wx:if="{{item.visited}}"> · 已去过</text>
+        <text wx:if="{{!item.enabled}}"> · 已下架</text>
+      </view>
+      <view class="restaurant-meta" wx:if="{{item.address}}">{{item.address}}</view>
+      <view class="restaurant-meta" wx:if="{{item.tagsLabel}}">{{item.tagsLabel}}</view>
+      <view class="restaurant-actions">
+        <view class="chip" data-id="{{item.id}}" bindtap="onEditRestaurant">编辑</view>
+        <view class="chip" data-id="{{item.id}}" bindtap="onShowVisitForm">安排去</view>
+        <view class="chip" data-id="{{item.id}}" bindtap="onHowToGo">怎么去</view>
+        <view class="chip" data-id="{{item.id}}" data-field="visited" bindtap="onToggleRestaurant">去过</view>
+        <view class="chip" data-id="{{item.id}}" data-field="enabled" bindtap="onToggleRestaurant">{{item.enabled ? '下架' : '上架'}}</view>
+        <view class="chip danger" wx:if="{{isOwner}}" data-id="{{item.id}}" bindtap="onDeleteRestaurant">删除</view>
+      </view>
+      <view class="photo-actions">
+        <view class="chip small" data-id="{{item.id}}" data-field="cover" bindtap="onUploadImage">封面</view>
+        <view class="chip small" data-id="{{item.id}}" data-field="images" bindtap="onUploadImage">餐厅照片</view>
+        <view class="chip small" data-id="{{item.id}}" data-field="menuImages" bindtap="onUploadImage">菜单图片</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="btn-row">
+    <button class="btn-primary flex-btn" bindtap="onShowForm">＋ 添加餐厅</button>
+    <button class="btn-secondary flex-btn" bindtap="onShowSearch">搜索导入</button>
+    <button class="btn-secondary flex-btn" bindtap="onOcr">菜单 OCR</button>
+  </view>
+
+  <!-- 搜索 -->
+  <view class="form" wx:if="{{showSearch}}">
+    <view class="form-title">搜索餐厅（腾讯位置服务）</view>
+    <input class="input" placeholder="关键词，如：日料 / 店名" value="{{searchKeyword}}" bindinput="onSearchKeyword" maxlength="30" />
+    <input class="input" placeholder="城市（可选，默认全国）" value="{{searchRegion}}" bindinput="onSearchRegion" maxlength="20" />
+    <view class="form-actions">
+      <button class="btn-secondary form-btn" bindtap="onHideSearch">取消</button>
+      <button class="btn-primary form-btn" bindtap="onSearch" loading="{{searching}}" disabled="{{searching}}">搜索</button>
+    </view>
+    <view class="search-result" wx:for="{{searchResults}}" wx:key="id" data-index="{{index}}" bindtap="onImportSearch">
+      <view class="search-name">{{item.name}}</view>
+      <view class="search-meta">{{item.address}}{{item.district ? ' · ' + item.district : ''}}{{item.category ? ' · ' + item.category : ''}}</view>
+    </view>
+  </view>
+
+  <!-- 餐厅表单 -->
+  <view class="form" wx:if="{{showForm}}">
+    <view class="form-title">{{editingId ? '编辑餐厅' : '添加餐厅'}}</view>
+    <view class="ocr-hint" wx:if="{{ocrHint}}">{{ocrHint}}</view>
+    <input class="input" placeholder="餐厅名称 *" value="{{fName}}" data-field="fName" bindinput="onFieldInput" maxlength="60" />
+    <input class="input" placeholder="地址" value="{{fAddress}}" data-field="fAddress" bindinput="onFieldInput" maxlength="200" />
+    <view class="two-col">
+      <input class="input" placeholder="城市" value="{{fCity}}" data-field="fCity" bindinput="onFieldInput" maxlength="20" />
+      <input class="input" placeholder="分类（日料/火锅…）" value="{{fCategory}}" data-field="fCategory" bindinput="onFieldInput" maxlength="20" />
+    </view>
+    <view class="two-col">
+      <input class="input" placeholder="人均 ¥" type="digit" value="{{fPrice}}" data-field="fPrice" bindinput="onFieldInput" maxlength="6" />
+      <input class="input" placeholder="评分 0-5" type="digit" value="{{fRating}}" data-field="fRating" bindinput="onFieldInput" maxlength="4" />
+    </view>
+    <view class="two-col">
+      <input class="input" placeholder="纬度（可选）" type="digit" value="{{fLat}}" data-field="fLat" bindinput="onFieldInput" maxlength="12" />
+      <input class="input" placeholder="经度（可选）" type="digit" value="{{fLng}}" data-field="fLng" bindinput="onFieldInput" maxlength="12" />
+    </view>
+    <input class="input" placeholder="标签，逗号分隔（如：约会,安静）" value="{{fTags}}" data-field="fTags" bindinput="onFieldInput" maxlength="100" />
+    <input class="input" placeholder="推荐菜，逗号分隔" value="{{fDishes}}" data-field="fDishes" bindinput="onFieldInput" maxlength="200" />
+    <input class="input" placeholder="营业时间（可选）" value="{{fHours}}" data-field="fHours" bindinput="onFieldInput" maxlength="50" />
+    <textarea class="input textarea" placeholder="备注（可选）" value="{{fNote}}" data-field="fNote" bindinput="onFieldInput" maxlength="500" />
+    <view class="switch-row">
+      <text>收藏</text>
+      <switch checked="{{fFavorite}}" data-field="fFavorite" bindchange="onToggleFormField" color="#D98E8E" />
+      <text>已去过</text>
+      <switch checked="{{fVisited}}" data-field="fVisited" bindchange="onToggleFormField" color="#7FA3B8" />
+    </view>
+    <view class="form-actions">
+      <button class="btn-secondary form-btn" bindtap="onHideForm">取消</button>
+      <button class="btn-primary form-btn" bindtap="onSaveRestaurant" loading="{{saving}}" disabled="{{saving}}">保存</button>
+    </view>
+  </view>
+
+  <!-- 行程表单 -->
+  <view class="form" wx:if="{{showVisitForm}}">
+    <view class="form-title">安排去：{{visitRestaurantName}}</view>
+    <input class="input" placeholder="日期 YYYY-MM-DD" value="{{vDate}}" data-field="vDate" bindinput="onFieldInput" maxlength="10" />
+    <input class="input" placeholder="时间（可选，如 18:30，填了会进日历）" value="{{vTime}}" data-field="vTime" bindinput="onFieldInput" maxlength="5" />
+    <input class="input" placeholder="备注（可选）" value="{{vNote}}" data-field="vNote" bindinput="onFieldInput" maxlength="200" />
+    <view class="form-actions">
+      <button class="btn-secondary form-btn" bindtap="onHideVisitForm">取消</button>
+      <button class="btn-primary form-btn" bindtap="onSaveVisit">保存</button>
+    </view>
+  </view>
+</view>
