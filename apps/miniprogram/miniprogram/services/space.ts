@@ -5,7 +5,7 @@ import type {
   GetMySpaceResult,
   JoinSpaceInput,
   JoinSpaceResult,
-} from '../lib/shared/types';
+} from '../lib/shared/types/index';
 
 export const SpaceService = {
   create(input: CreateSpaceInput): Promise<CreateSpaceResult> {

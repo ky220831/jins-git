@@ -1,4 +1,4 @@
-import type { ApiResponse } from '../lib/shared/types';
+import type { ApiResponse } from '../lib/shared/types/index';
 
 export class ApiError extends Error {
   constructor(

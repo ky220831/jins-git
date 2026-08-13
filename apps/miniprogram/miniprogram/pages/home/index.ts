@@ -1,5 +1,5 @@
 import { ApiError } from '../../api/cloud';
-import { ROLE_OWNER, type SpaceMemberView, type SpaceView } from '../../lib/shared/types';
+import { ROLE_OWNER, type SpaceMemberView, type SpaceView } from '../../lib/shared/types/index';
 import { SpaceService } from '../../services/space';
 import { formatDate, formatDateTime } from '../../utils/time';
 

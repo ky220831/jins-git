@@ -12,6 +12,7 @@
   "devDependencies": {
     "@types/node": "^24.13.3",
     "esbuild": "^0.28.2",
+    "miniprogram-automator": "^0.12.1",
     "tsx": "^4.23.12",
     "typescript": "^5.9.3",
     "wx-server-sdk": "^4.0.2"
