@@ -3,6 +3,14 @@
     <view class="loading">加载中…</view>
   </block>
 
+  <block wx:elif="{{error}}">
+    <view class="error-box">
+      <view class="error-title">页面加载失败</view>
+      <view class="error-text">{{error}}</view>
+      <button class="btn-secondary retry-btn" bindtap="onRetry">重试</button>
+    </view>
+  </block>
+
   <block wx:elif="{{space}}">
     <view class="space-name">{{space.spaceName}}</view>
     <view class="role-badge">{{isOwner ? '主账号 OWNER' : '副账号 MEMBER'}}</view>

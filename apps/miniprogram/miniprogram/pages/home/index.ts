@@ -16,6 +16,7 @@ Page({
     members: [] as MemberRow[],
     isOwner: false,
     inviteExpiresAt: '',
+    error: '',
   },
 
   onShow() {
@@ -23,7 +24,7 @@ Page({
   },
 
   async refresh() {
-    this.setData({ loading: true });
+    this.setData({ loading: true, error: '' });
     try {
       const res = await SpaceService.mySpace();
       const space = res.space;
@@ -38,6 +39,7 @@ Page({
         members,
         isOwner: space.myRole === ROLE_OWNER,
         inviteExpiresAt: space.inviteCodeExpiresAt ? formatDateTime(space.inviteCodeExpiresAt) : '',
+        error: '',
       });
     } catch (err) {
       if (err instanceof ApiError && err.code === 'NOT_IN_SPACE') {
@@ -45,10 +47,14 @@ Page({
         return;
       }
       const message = err instanceof ApiError ? err.message : '加载失败，请重试';
-      wx.showToast({ title: message, icon: 'none' });
+      this.setData({ error: message });
     } finally {
       this.setData({ loading: false });
     }
+  },
+
+  onRetry() {
+    this.refresh();
   },
 
   onCopyInvite() {
