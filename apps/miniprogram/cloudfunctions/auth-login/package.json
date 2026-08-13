@@ -1,0 +1,10 @@
+{
+  "name": "auth-login",
+  "version": "1.0.0",
+  "private": true,
+  "description": "登录：OPENID → User + UserIdentity → 用户与空间状态",
+  "main": "dist/index.js",
+  "dependencies": {
+    "wx-server-sdk": "^4.0.2"
+  }
+}
