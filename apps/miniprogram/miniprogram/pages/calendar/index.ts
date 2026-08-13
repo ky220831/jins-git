@@ -30,6 +30,16 @@ function dateKey(year: number, month: number, day: number): string {
   return `${year}-${pad(month)}-${pad(day)}`;
 }
 
+/** ISO 时间 → Asia/Shanghai 墙钟（日期键 + HH:mm），避免设备时区/UTC 差异（PRD §73） */
+function toShanghaiParts(iso: string): { date: string; time: string } {
+  const d = new Date(iso);
+  const shifted = new Date(d.getTime() + 8 * 3600000);
+  return {
+    date: `${shifted.getUTCFullYear()}-${pad(shifted.getUTCMonth() + 1)}-${pad(shifted.getUTCDate())}`,
+    time: `${pad(shifted.getUTCHours())}:${pad(shifted.getUTCMinutes())}`,
+  };
+}
+
 Page({
   data: {
     year: 0,
@@ -78,7 +88,7 @@ Page({
   buildMonth(todos: TodoView[], events: CalendarEventView[]) {
     const { year, month, selectedDate } = this.data;
     const todoDates = new Set(todos.map((todo) => todo.date));
-    const eventDates = new Set(events.map((event) => event.startTime.slice(0, 10)));
+    const eventDates = new Set(events.map((event) => toShanghaiParts(event.startTime).date));
     const todayKey = dateKey(new Date().getFullYear(), new Date().getMonth() + 1, new Date().getDate());
 
     const firstWeekday = new Date(year, month - 1, 1).getDay();
@@ -118,10 +128,11 @@ Page({
         priorityLabel: todo.priority === 'high' ? '高' : todo.priority === 'low' ? '低' : '普通',
       }));
     const dayEvents: EventRow[] = eventList
-      .filter((event) => event.startTime.slice(0, 10) === date)
-      .map((event) => ({
+      .map((event) => ({ event, parts: toShanghaiParts(event.startTime) }))
+      .filter(({ parts }) => parts.date === date)
+      .map(({ event, parts }) => ({
         ...event,
-        timeLabel: event.startTime.slice(11, 16),
+        timeLabel: parts.time,
       }));
     this.setData({ selectedDate: date, dayTodos, dayEvents });
   },
