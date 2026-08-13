@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "description": "创建双人空间：OWNER + 一次性邀请码",
-  "main": "dist/index.js",
+  "main": "index.js",
   "dependencies": {
     "wx-server-sdk": "^4.0.2"
   }

@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "description": "查询我所在的空间与成员角色",
-  "main": "dist/index.js",
+  "main": "index.js",
   "dependencies": {
     "wx-server-sdk": "^4.0.2"
   }

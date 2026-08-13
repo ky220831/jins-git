@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "description": "邀请码绑定：加入空间成为 MEMBER",
-  "main": "dist/index.js",
+  "main": "index.js",
   "dependencies": {
     "wx-server-sdk": "^4.0.2"
   }
