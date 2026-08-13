@@ -1,0 +1,45 @@
+<view class="container anniversary-page">
+  <view class="page-head">
+    <view class="page-title">纪念日</view>
+    <view class="page-sub">两个人的重要日子</view>
+  </view>
+
+  <view class="error-text" wx:if="{{error}}">{{error}}</view>
+
+  <view class="empty-list" wx:if="{{!items.length && !loading}}">还没有纪念日，点下面按钮添加第一个</view>
+  <view class="anniversary-card" wx:for="{{items}}" wx:key="id">
+    <view class="anniversary-head">
+      <view class="anniversary-name">❤️ {{item.name}}</view>
+      <view class="count-badge" data-today="{{item.daysToNext === 0}}">{{item.countLabel}}</view>
+    </view>
+    <view class="anniversary-meta">
+      {{item.nextOccurrence}} · {{item.repeatLabel}}{{item.time ? ' · ' + item.time : ''}}
+    </view>
+    <view class="anniversary-meta" wx:if="{{item.elapsedLabel}}">{{item.elapsedLabel}}</view>
+    <view class="anniversary-meta" wx:if="{{item.note}}">{{item.note}}</view>
+    <view class="anniversary-actions">
+      <view class="chip" data-id="{{item.id}}" bindtap="onEdit">编辑</view>
+      <view class="chip danger" wx:if="{{isOwner}}" data-id="{{item.id}}" bindtap="onDelete">删除</view>
+    </view>
+  </view>
+
+  <view class="btn-row">
+    <button class="btn-primary flex-btn" bindtap="onShowForm">＋ 添加纪念日</button>
+  </view>
+
+  <view class="form" wx:if="{{showForm}}">
+    <view class="form-title">{{editingId ? '编辑纪念日' : '添加纪念日'}}</view>
+    <input class="input" placeholder="名称，如：在一起 / 结婚纪念日 *" value="{{fName}}" data-field="fName" bindinput="onFieldInput" maxlength="50" />
+    <input class="input" placeholder="日期 YYYY-MM-DD *" value="{{fDate}}" data-field="fDate" bindinput="onFieldInput" maxlength="10" />
+    <input class="input" placeholder="时间（可选，如 18:30）" value="{{fTime}}" data-field="fTime" bindinput="onFieldInput" maxlength="5" />
+    <textarea class="input textarea" placeholder="备注（可选）" value="{{fNote}}" data-field="fNote" bindinput="onFieldInput" maxlength="200" />
+    <view class="switch-row">
+      <text>每年重复</text>
+      <switch checked="{{fYearly}}" bindchange="onToggleYearly" color="#C96F6F" />
+    </view>
+    <view class="form-actions">
+      <button class="btn-secondary form-btn" bindtap="onHideForm">取消</button>
+      <button class="btn-primary form-btn" bindtap="onSave" loading="{{saving}}" disabled="{{saving}}">保存</button>
+    </view>
+  </view>
+</view>

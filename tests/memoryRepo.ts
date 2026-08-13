@@ -1,6 +1,7 @@
 import { MEMBER_STATUS_ACTIVE, SPACE_STATUS_ACTIVE } from '../packages/types/src';
 import type {
   AuditLogRecord,
+  AnniversaryRecord,
   CalendarEventRecord,
   HolidayRecord,
   MealPlanRecord,
@@ -14,6 +15,8 @@ import type {
   SpaceSettingRecord,
   TodoRecord,
   TrashRecord,
+  TripPlanRecord,
+  TripRecord,
   UserIdentityRecord,
   UserRecord,
 } from '../apps/miniprogram/cloudfunctions/_shared/repo';
@@ -38,6 +41,9 @@ export class MemoryRepo implements Repo {
   trash = new Map<string, TrashRecord>();
   restaurants = new Map<string, RestaurantRecord>();
   restaurantVisits = new Map<string, RestaurantVisitRecord>();
+  anniversaries = new Map<string, AnniversaryRecord>();
+  trips = new Map<string, TripRecord>();
+  tripPlans = new Map<string, TripPlanRecord>();
 
   async findUserIdentity(provider: string, providerUserId: string): Promise<UserIdentityRecord | null> {
     for (const item of this.userIdentities.values()) {
@@ -301,6 +307,12 @@ export class MemoryRepo implements Repo {
       this.restaurants.set(id, record as unknown as RestaurantRecord);
     } else if (collection === 'restaurant_visits') {
       this.restaurantVisits.set(id, record as unknown as RestaurantVisitRecord);
+    } else if (collection === 'anniversaries') {
+      this.anniversaries.set(id, record as unknown as AnniversaryRecord);
+    } else if (collection === 'trips') {
+      this.trips.set(id, record as unknown as TripRecord);
+    } else if (collection === 'trip_plans') {
+      this.tripPlans.set(id, record as unknown as TripPlanRecord);
     } else if (collection === 'todos') {
       this.todos.set(id, record as unknown as TodoRecord);
     } else {
@@ -417,6 +429,111 @@ export class MemoryRepo implements Repo {
     const current = this.restaurantVisits.get(visitId);
     if (current && current.spaceId === spaceId) {
       this.restaurantVisits.delete(visitId);
+    }
+  }
+
+  async listAnniversaries(spaceId: string): Promise<AnniversaryRecord[]> {
+    return [...this.anniversaries.values()]
+      .filter((a) => a.spaceId === spaceId)
+      .map((a) => ({ ...a }));
+  }
+
+  async findAnniversaryById(
+    spaceId: string,
+    anniversaryId: string,
+  ): Promise<AnniversaryRecord | null> {
+    const a = this.anniversaries.get(anniversaryId);
+    return a && a.spaceId === spaceId ? { ...a } : null;
+  }
+
+  async createAnniversary(record: AnniversaryRecord): Promise<void> {
+    this.anniversaries.set(record.id, { ...record });
+  }
+
+  async updateAnniversary(
+    spaceId: string,
+    anniversaryId: string,
+    patch: Partial<AnniversaryRecord>,
+  ): Promise<void> {
+    const current = this.anniversaries.get(anniversaryId);
+    if (!current || current.spaceId !== spaceId) return;
+    this.anniversaries.set(anniversaryId, { ...current, ...patch });
+  }
+
+  async deleteAnniversary(spaceId: string, anniversaryId: string): Promise<void> {
+    const current = this.anniversaries.get(anniversaryId);
+    if (current && current.spaceId === spaceId) {
+      this.anniversaries.delete(anniversaryId);
+    }
+  }
+
+  async listTrips(spaceId: string): Promise<TripRecord[]> {
+    return [...this.trips.values()]
+      .filter((t) => t.spaceId === spaceId)
+      .map((t) => ({ ...t }));
+  }
+
+  async findTripById(spaceId: string, tripId: string): Promise<TripRecord | null> {
+    const t = this.trips.get(tripId);
+    return t && t.spaceId === spaceId ? { ...t } : null;
+  }
+
+  async createTrip(trip: TripRecord): Promise<void> {
+    this.trips.set(trip.id, { ...trip });
+  }
+
+  async updateTrip(spaceId: string, tripId: string, patch: Partial<TripRecord>): Promise<void> {
+    const current = this.trips.get(tripId);
+    if (!current || current.spaceId !== spaceId) return;
+    this.trips.set(tripId, { ...current, ...patch });
+  }
+
+  async deleteTrip(spaceId: string, tripId: string): Promise<void> {
+    const current = this.trips.get(tripId);
+    if (current && current.spaceId === spaceId) {
+      this.trips.delete(tripId);
+    }
+  }
+
+  async findTripPlanById(spaceId: string, planId: string): Promise<TripPlanRecord | null> {
+    const p = this.tripPlans.get(planId);
+    return p && p.spaceId === spaceId ? { ...p } : null;
+  }
+
+  async listTripPlansByDateRange(
+    spaceId: string,
+    startDate: string,
+    endDate: string,
+  ): Promise<TripPlanRecord[]> {
+    return [...this.tripPlans.values()]
+      .filter((p) => p.spaceId === spaceId && p.startDate >= startDate && p.startDate <= endDate)
+      .map((p) => ({ ...p }));
+  }
+
+  async listExpiredTripPlans(now: Date): Promise<TripPlanRecord[]> {
+    return [...this.tripPlans.values()]
+      .filter((p) => p.expireAt.getTime() <= now.getTime())
+      .map((p) => ({ ...p }));
+  }
+
+  async createTripPlan(plan: TripPlanRecord): Promise<void> {
+    this.tripPlans.set(plan.id, { ...plan });
+  }
+
+  async updateTripPlan(
+    spaceId: string,
+    planId: string,
+    patch: Partial<TripPlanRecord>,
+  ): Promise<void> {
+    const current = this.tripPlans.get(planId);
+    if (!current || current.spaceId !== spaceId) return;
+    this.tripPlans.set(planId, { ...current, ...patch });
+  }
+
+  async deleteTripPlan(spaceId: string, planId: string): Promise<void> {
+    const current = this.tripPlans.get(planId);
+    if (current && current.spaceId === spaceId) {
+      this.tripPlans.delete(planId);
     }
   }
 }

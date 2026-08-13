@@ -539,3 +539,159 @@ export interface HolidayDayView {
   isWorkday: boolean;
   isMakeupWorkday: boolean;
 }
+
+// ---- 纪念日（PRD §51：永久保存、每年重复、仅主账号删除）----
+export interface AnniversaryView {
+  id: string;
+  name: string;
+  /** 原始日期 YYYY-MM-DD（保留年份，用于正计时） */
+  date: string;
+  time?: string;
+  note?: string;
+  /** 每年重复（默认 true） */
+  yearly: boolean;
+  /** 下一次发生日 YYYY-MM-DD（Asia/Shanghai） */
+  nextOccurrence: string;
+  /** 距下一次发生还有几天（0 表示今天，正数未来，负数已过期） */
+  daysToNext: number;
+  /** 自原始日期到今天的正计时天数 */
+  elapsedDays: number;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+  version: number;
+}
+
+export interface CreateAnniversaryInput {
+  name: string;
+  date: string;
+  time?: string | null;
+  note?: string | null;
+  yearly?: boolean;
+}
+
+export interface UpdateAnniversaryInput {
+  anniversaryId: string;
+  name?: string;
+  date?: string;
+  time?: string | null;
+  note?: string | null;
+  yearly?: boolean;
+}
+
+export interface DeleteAnniversaryInput {
+  anniversaryId: string;
+}
+
+// ---- 旅游计划（PRD §52/§53：永久资料 + 14 天临时行程）----
+export interface TripItemView {
+  id: string;
+  /** 可选日期 YYYY-MM-DD */
+  date?: string;
+  title: string;
+  note?: string;
+}
+
+export interface TripView {
+  id: string;
+  name: string;
+  country?: string;
+  city?: string;
+  lat?: number | null;
+  lng?: number | null;
+  transport?: string;
+  hotel?: string;
+  note?: string;
+  images: string[];
+  itinerary: TripItemView[];
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+  version: number;
+}
+
+export interface TripItemInput {
+  date?: string | null;
+  title: string;
+  note?: string | null;
+}
+
+export interface CreateTripInput {
+  name: string;
+  country?: string | null;
+  city?: string | null;
+  lat?: number | null;
+  lng?: number | null;
+  transport?: string | null;
+  hotel?: string | null;
+  note?: string | null;
+  images?: string[] | null;
+  itinerary?: TripItemInput[] | null;
+}
+
+export interface UpdateTripInput {
+  tripId: string;
+  name?: string;
+  country?: string | null;
+  city?: string | null;
+  lat?: number | null;
+  lng?: number | null;
+  transport?: string | null;
+  hotel?: string | null;
+  note?: string | null;
+  images?: string[] | null;
+  itinerary?: TripItemInput[] | null;
+}
+
+export interface DeleteTripInput {
+  tripId: string;
+}
+
+export const TRIP_PLAN_STATUS_PLANNED = 'planned';
+export const TRIP_PLAN_STATUS_OFFLINE = 'offline';
+export type TripPlanStatus =
+  | typeof TRIP_PLAN_STATUS_PLANNED
+  | typeof TRIP_PLAN_STATUS_OFFLINE;
+
+export interface TripPlanView {
+  id: string;
+  tripId?: string;
+  name: string;
+  startDate: string;
+  endDate?: string;
+  time?: string;
+  note?: string;
+  status: TripPlanStatus;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+  version: number;
+}
+
+export interface CreateTripPlanInput {
+  tripId?: string;
+  name?: string | null;
+  startDate: string;
+  endDate?: string | null;
+  time?: string | null;
+  note?: string | null;
+}
+
+export interface UpdateTripPlanInput {
+  planId: string;
+  tripId?: string;
+  name?: string;
+  startDate?: string;
+  endDate?: string | null;
+  time?: string | null;
+  note?: string | null;
+  status?: TripPlanStatus;
+}
+
+export interface DeleteTripPlanInput {
+  planId: string;
+}
+
+export interface OfflineTripPlanInput {
+  planId: string;
+}

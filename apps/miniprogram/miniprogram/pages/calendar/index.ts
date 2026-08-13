@@ -225,7 +225,7 @@ Page({
       .filter(({ parts }) => parts.date === date)
       .map(({ event, parts }) => ({
         ...event,
-        timeLabel: parts.time,
+        timeLabel: parts.time === '00:00' ? '全天' : parts.time,
       }));
     const period = this.data.periodVisible
       ? this.data.periodDays.find((p) => p.date === date)
@@ -269,6 +269,22 @@ Page({
     if (!key) return;
     this.setData({ selectedDate: key });
     this.updateDayDetail(key);
+  },
+
+  /** 日程 → 业务模块（PRD §20/§21 双向联动） */
+  onTapEvent(e: WechatMiniprogram.TouchEvent) {
+    const { type, id } = e.currentTarget.dataset as { type: string; id: string };
+    if (!type || !id) return;
+    const routes: Record<string, string> = {
+      meal: '/pages/meal/index',
+      restaurant: '/pages/restaurant/index',
+      anniversary: '/pages/anniversary/index',
+      trip: '/pages/travel/index',
+    };
+    const route = routes[type];
+    if (route) {
+      wx.navigateTo({ url: route });
+    }
   },
 
   async onTogglePeriodVisible(e: WechatMiniprogram.SwitchChange) {

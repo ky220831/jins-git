@@ -14,6 +14,9 @@ export const COLLECTIONS = {
   trashRecords: 'trash_records',
   restaurants: 'restaurants',
   restaurantVisits: 'restaurant_visits',
+  anniversaries: 'anniversaries',
+  trips: 'trips',
+  tripPlans: 'trip_plans',
 } as const;
 
 /** 邀请码有效期：7 天（可调整） */
@@ -32,6 +35,14 @@ export const RESTAURANT_DISHES_MAX = 20;
 export const MEAL_PLAN_TTL_DAYS = 14;
 /** 漂亮饭临时行程：创建后 14 天进入回收站（PRD §42/§79） */
 export const RESTAURANT_VISIT_TTL_DAYS = 14;
+/** 旅游临时行程：创建后 14 天进入回收站（PRD §53/§79） */
+export const TRIP_PLAN_TTL_DAYS = 14;
+export const ANNIVERSARY_NAME_MAX_LENGTH = 50;
+export const ANNIVERSARY_NOTE_MAX_LENGTH = 200;
+export const TRIP_NAME_MAX_LENGTH = 60;
+export const TRIP_NOTE_MAX_LENGTH = 500;
+export const TRIP_ITEMS_MAX = 30;
+export const TRIP_IMAGES_MAX = 20;
 /** 回收站保留 72 小时后永久删除（PRD §56） */
 export const TRASH_RETENTION_HOURS = 72;
 /** 定时任务等系统操作使用的虚拟身份 */

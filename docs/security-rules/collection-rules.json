@@ -20,6 +20,58 @@
     "audit_logs": {
       "read": false,
       "write": false
+    },
+    "todos": {
+      "read": false,
+      "write": false
+    },
+    "calendar_events": {
+      "read": false,
+      "write": false
+    },
+    "period_records": {
+      "read": false,
+      "write": false
+    },
+    "holiday_calendar": {
+      "read": false,
+      "write": false
+    },
+    "space_settings": {
+      "read": false,
+      "write": false
+    },
+    "meal_templates": {
+      "read": false,
+      "write": false
+    },
+    "meal_plans": {
+      "read": false,
+      "write": false
+    },
+    "trash_records": {
+      "read": false,
+      "write": false
+    },
+    "restaurants": {
+      "read": false,
+      "write": false
+    },
+    "restaurant_visits": {
+      "read": false,
+      "write": false
+    },
+    "anniversaries": {
+      "read": false,
+      "write": false
+    },
+    "trips": {
+      "read": false,
+      "write": false
+    },
+    "trip_plans": {
+      "read": false,
+      "write": false
     }
   },
   "indexes": {
@@ -31,6 +83,16 @@
     ],
     "space_members": [
       ["spaceId", "userId"]
+    ],
+    "anniversaries": [
+      ["spaceId"]
+    ],
+    "trips": [
+      ["spaceId"]
+    ],
+    "trip_plans": [
+      ["spaceId", "startDate"],
+      ["expireAt"]
     ]
   },
   "index_unique": {

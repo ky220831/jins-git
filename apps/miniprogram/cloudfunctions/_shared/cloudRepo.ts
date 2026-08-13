@@ -2,6 +2,7 @@ import cloud from 'wx-server-sdk';
 import { COLLECTIONS } from './constants';
 import type {
   AuditLogRecord,
+  AnniversaryRecord,
   CalendarEventRecord,
   HolidayRecord,
   MealPlanRecord,
@@ -14,6 +15,8 @@ import type {
   SpaceRecord,
   SpaceSettingRecord,
   TodoRecord,
+  TripPlanRecord,
+  TripRecord,
   TrashRecord,
   UserIdentityRecord,
   UserRecord,
@@ -424,6 +427,125 @@ export class CloudRepo implements Repo {
   async deleteRestaurantVisit(spaceId: string, visitId: string): Promise<void> {
     await this.col(COLLECTIONS.restaurantVisits)
       .where({ _id: visitId, spaceId })
+      .remove();
+  }
+
+  async listAnniversaries(spaceId: string): Promise<AnniversaryRecord[]> {
+    const res = await this.col(COLLECTIONS.anniversaries)
+      .where({ spaceId })
+      .limit(200)
+      .get();
+    return res.data.map((d) => mapDoc<AnniversaryRecord>(d));
+  }
+
+  async findAnniversaryById(
+    spaceId: string,
+    anniversaryId: string,
+  ): Promise<AnniversaryRecord | null> {
+    const res = await this.col(COLLECTIONS.anniversaries)
+      .where({ _id: anniversaryId, spaceId })
+      .limit(1)
+      .get();
+    return res.data.length > 0 ? mapDoc<AnniversaryRecord>(res.data[0]) : null;
+  }
+
+  async createAnniversary(record: AnniversaryRecord): Promise<void> {
+    await this.col(COLLECTIONS.anniversaries).doc(record.id).set({ data: record });
+  }
+
+  async updateAnniversary(
+    spaceId: string,
+    anniversaryId: string,
+    patch: Partial<AnniversaryRecord>,
+  ): Promise<void> {
+    await this.col(COLLECTIONS.anniversaries)
+      .where({ _id: anniversaryId, spaceId })
+      .update({ data: patch });
+  }
+
+  async deleteAnniversary(spaceId: string, anniversaryId: string): Promise<void> {
+    await this.col(COLLECTIONS.anniversaries)
+      .where({ _id: anniversaryId, spaceId })
+      .remove();
+  }
+
+  async listTrips(spaceId: string): Promise<TripRecord[]> {
+    const res = await this.col(COLLECTIONS.trips)
+      .where({ spaceId })
+      .limit(200)
+      .get();
+    return res.data.map((d) => mapDoc<TripRecord>(d));
+  }
+
+  async findTripById(spaceId: string, tripId: string): Promise<TripRecord | null> {
+    const res = await this.col(COLLECTIONS.trips)
+      .where({ _id: tripId, spaceId })
+      .limit(1)
+      .get();
+    return res.data.length > 0 ? mapDoc<TripRecord>(res.data[0]) : null;
+  }
+
+  async createTrip(trip: TripRecord): Promise<void> {
+    await this.col(COLLECTIONS.trips).doc(trip.id).set({ data: trip });
+  }
+
+  async updateTrip(spaceId: string, tripId: string, patch: Partial<TripRecord>): Promise<void> {
+    await this.col(COLLECTIONS.trips)
+      .where({ _id: tripId, spaceId })
+      .update({ data: patch });
+  }
+
+  async deleteTrip(spaceId: string, tripId: string): Promise<void> {
+    await this.col(COLLECTIONS.trips)
+      .where({ _id: tripId, spaceId })
+      .remove();
+  }
+
+  async findTripPlanById(spaceId: string, planId: string): Promise<TripPlanRecord | null> {
+    const res = await this.col(COLLECTIONS.tripPlans)
+      .where({ _id: planId, spaceId })
+      .limit(1)
+      .get();
+    return res.data.length > 0 ? mapDoc<TripPlanRecord>(res.data[0]) : null;
+  }
+
+  async listTripPlansByDateRange(
+    spaceId: string,
+    startDate: string,
+    endDate: string,
+  ): Promise<TripPlanRecord[]> {
+    const res = await this.col(COLLECTIONS.tripPlans)
+      .where({ spaceId, startDate: _.gte(startDate).and(_.lte(endDate)) })
+      .limit(100)
+      .get();
+    return res.data.map((d) => mapDoc<TripPlanRecord>(d));
+  }
+
+  async listExpiredTripPlans(now: Date): Promise<TripPlanRecord[]> {
+    const res = await this.col(COLLECTIONS.tripPlans)
+      .where({ expireAt: _.lte(now) })
+      .limit(1000)
+      .get();
+    return res.data.map((d) => mapDoc<TripPlanRecord>(d));
+  }
+
+  async createTripPlan(plan: TripPlanRecord): Promise<void> {
+    await this.col(COLLECTIONS.tripPlans).doc(plan.id).set({ data: plan });
+  }
+
+  async updateTripPlan(
+    spaceId: string,
+    planId: string,
+    patch: Partial<TripPlanRecord>,
+  ): Promise<void> {
+    await this.col(COLLECTIONS.tripPlans)
+      .where({ _id: planId, spaceId })
+      .update({ data: patch });
+  }
+
+  async deleteTripPlan(spaceId: string, planId: string): Promise<void> {
+    await this.col(COLLECTIONS.tripPlans)
+      .where({ _id: planId, spaceId })
       .remove();
   }
 }

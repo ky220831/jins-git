@@ -3,6 +3,7 @@ import { ROLE_OWNER, type SpaceMemberView, type SpaceView } from '../../lib/shar
 import { CalendarService } from '../../services/calendar';
 import { PeriodService } from '../../services/period';
 import { SpaceService } from '../../services/space';
+import { AnniversaryService } from '../../services/anniversary';
 import { formatDate, formatDateTime } from '../../utils/time';
 
 interface MemberRow extends SpaceMemberView {
@@ -19,6 +20,7 @@ interface TodaySummary {
   todoCount: number;
   eventCount: number;
   nextPredictedLabel: string;
+  anniversaryLabel: string;
 }
 
 function pad(n: number): string {
@@ -54,10 +56,11 @@ Page({
     this.setData({ loading: true, error: '' });
     try {
       const now = new Date();
-      const [spaceRes, monthRes, periodInfo] = await Promise.all([
+      const [spaceRes, monthRes, periodInfo, anniversaries] = await Promise.all([
         SpaceService.mySpace(),
         CalendarService.month({ year: now.getFullYear(), month: now.getMonth() + 1 }),
         PeriodService.info(),
+        AnniversaryService.list(),
       ]);
       const space = spaceRes.space;
       const members: MemberRow[] = space.members.map((m) => ({
@@ -83,6 +86,14 @@ Page({
             : '生理期'
           : '休息'
         : '';
+      const upcoming = anniversaries
+        .filter((a) => a.daysToNext >= 0)
+        .sort((a, b) => a.daysToNext - b.daysToNext)[0];
+      const anniversaryLabel = upcoming
+        ? upcoming.daysToNext === 0
+          ? `❤️ ${upcoming.name}：就是今天`
+          : `❤️ ${upcoming.name}：还有 ${upcoming.daysToNext} 天`
+        : '';
       const today: TodaySummary = {
         date: todayKey,
         weekday: `星期${['日', '一', '二', '三', '四', '五', '六'][now.getDay()]}`,
@@ -97,6 +108,7 @@ Page({
         nextPredictedLabel: periodInfo.nextPredicted
           ? `预计 ${periodInfo.nextPredicted.startDate} ~ ${periodInfo.nextPredicted.endDate}`
           : '',
+        anniversaryLabel,
       };
       this.setData({
         space,
@@ -143,5 +155,13 @@ Page({
 
   onOpenRestaurant() {
     wx.navigateTo({ url: '/pages/restaurant/index' });
+  },
+
+  onOpenAnniversary() {
+    wx.navigateTo({ url: '/pages/anniversary/index' });
+  },
+
+  onOpenTravel() {
+    wx.navigateTo({ url: '/pages/travel/index' });
   },
 });

@@ -1,0 +1,102 @@
+<view class="container travel-page">
+  <view class="page-head">
+    <view class="page-title">旅游计划</view>
+    <view class="page-sub">两个人的下一站</view>
+  </view>
+
+  <view class="error-text" wx:if="{{error}}">{{error}}</view>
+
+  <view class="card">
+    <view class="card-title">本月行程（14 天后自动进回收站）</view>
+    <view class="empty" wx:if="{{!plans.length}}">还没有行程，点“安排行程”</view>
+    <view class="plan-row" wx:for="{{plans}}" wx:key="id">
+      <view class="plan-left">
+        <view class="plan-name">✈️ {{item.name}}</view>
+        <view class="plan-meta">{{item.dateLabel}} {{item.timeLabel}}{{item.note ? ' · ' + item.note : ''}}</view>
+      </view>
+      <view class="plan-actions">
+        <view class="link-btn" data-plan-id="{{item.id}}" bindtap="onShowPlanForm">编辑</view>
+        <view class="link-btn" data-id="{{item.id}}" bindtap="onOfflinePlan">下架</view>
+        <view class="link-btn danger" wx:if="{{isOwner}}" data-id="{{item.id}}" bindtap="onDeletePlan">删除</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="empty-list" wx:if="{{!trips.length && !loading}}">永久旅行资料会显示在这里（不自动清理）</view>
+  <view class="trip-card" wx:for="{{trips}}" wx:key="id">
+    <image class="cover" wx:if="{{item.coverUrl}}" src="{{item.coverUrl}}" mode="aspectFill" />
+    <view class="trip-body">
+      <view class="trip-head">
+        <view class="trip-name">🧳 {{item.name}}</view>
+        <view class="trip-actions">
+          <view class="chip" data-id="{{item.id}}" bindtap="onShowTripForm">编辑</view>
+          <view class="chip danger" wx:if="{{isOwner}}" data-id="{{item.id}}" bindtap="onDeleteTrip">删除</view>
+        </view>
+      </view>
+      <view class="trip-meta" wx:if="{{item.country || item.city}}">
+        {{item.country}}{{item.city ? ' · ' + item.city : ''}}
+      </view>
+      <view class="trip-meta" wx:if="{{item.transport}}">交通：{{item.transport}}</view>
+      <view class="trip-meta" wx:if="{{item.hotel}}">酒店：{{item.hotel}}</view>
+      <view class="trip-meta" wx:if="{{item.itinLabel}}">行程：{{item.itinLabel}}</view>
+      <view class="trip-meta" wx:if="{{item.note}}">{{item.note}}</view>
+      <view class="trip-actions-row">
+        <view class="chip" data-trip-id="{{item.id}}" bindtap="onShowPlanForm">✈️ 安排行程</view>
+        <view class="chip" data-id="{{item.id}}" bindtap="onShowTripForm">🧳 完善资料</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="btn-row">
+    <button class="btn-primary flex-btn" bindtap="onShowTripForm">＋ 添加旅行资料</button>
+    <button class="btn-secondary flex-btn" bindtap="onShowPlanForm">安排行程</button>
+  </view>
+
+  <!-- 旅行资料表单 -->
+  <view class="form" wx:if="{{showTripForm}}">
+    <view class="form-title">{{editingTripId ? '编辑旅行资料' : '添加旅行资料'}}（永久保存）</view>
+    <input class="input" placeholder="旅行名称，如：北海道之旅 *" value="{{tName}}" data-field="tName" bindinput="onFieldInput" maxlength="60" />
+    <view class="two-col">
+      <input class="input" placeholder="国家/地区" value="{{tCountry}}" data-field="tCountry" bindinput="onFieldInput" maxlength="30" />
+      <input class="input" placeholder="城市" value="{{tCity}}" data-field="tCity" bindinput="onFieldInput" maxlength="30" />
+    </view>
+    <input class="input" placeholder="交通（如：飞机 + JR）" value="{{tTransport}}" data-field="tTransport" bindinput="onFieldInput" maxlength="100" />
+    <input class="input" placeholder="酒店（可选）" value="{{tHotel}}" data-field="tHotel" bindinput="onFieldInput" maxlength="100" />
+    <view class="two-col">
+      <input class="input" placeholder="纬度（可选）" type="digit" value="{{tLat}}" data-field="tLat" bindinput="onFieldInput" maxlength="12" />
+      <input class="input" placeholder="经度（可选）" type="digit" value="{{tLng}}" data-field="tLng" bindinput="onFieldInput" maxlength="12" />
+    </view>
+    <textarea class="input textarea tall" placeholder="行程安排：每行一个，格式：日期 标题 | 备注&#10;例如：&#10;2026-08-20 小樽运河 | 拍照" value="{{tItinerary}}" data-field="tItinerary" bindinput="onFieldInput" />
+    <textarea class="input textarea" placeholder="备注（可选）" value="{{tNote}}" data-field="tNote" bindinput="onFieldInput" maxlength="500" />
+    <view class="photo-strip" wx:if="{{tImageUrls.length}}">
+      <image class="thumb" wx:for="{{tImageUrls}}" wx:key="*this" src="{{item}}" mode="aspectFill" />
+    </view>
+    <button class="btn-secondary upload-btn" bindtap="onUploadTripImage">＋ 添加照片</button>
+    <view class="form-actions">
+      <button class="btn-secondary form-btn" bindtap="onHideTripForm">取消</button>
+      <button class="btn-primary form-btn" bindtap="onSaveTrip" loading="{{savingTrip}}" disabled="{{savingTrip}}">保存</button>
+    </view>
+  </view>
+
+  <!-- 临时行程表单 -->
+  <view class="form" wx:if="{{showPlanForm}}">
+    <view class="form-title">{{editingPlanId ? '编辑行程' : '安排行程'}}（14 天后自动进回收站）</view>
+    <picker range="{{trips}}" range-key="name" value="{{pTripIndex}}" bindchange="onTripPickerChange">
+      <view class="picker-value">{{pTripIndex > 0 ? '关联：' + trips[pTripIndex - 1].name : '不关联旅行资料（自定义名称）'}}</view>
+    </picker>
+    <input class="input" placeholder="行程名称（可选，默认用关联资料名）" value="{{pName}}" data-field="pName" bindinput="onFieldInput" maxlength="60" />
+    <view class="two-col">
+      <input class="input" placeholder="开始日期 YYYY-MM-DD *" value="{{pStart}}" data-field="pStart" bindinput="onFieldInput" maxlength="10" />
+      <input class="input" placeholder="结束日期（可选）" value="{{pEnd}}" data-field="pEnd" bindinput="onFieldInput" maxlength="10" />
+    </view>
+    <view class="two-col">
+      <input class="input" placeholder="时间（可选，如 08:00）" value="{{pTime}}" data-field="pTime" bindinput="onFieldInput" maxlength="5" />
+      <button class="btn-secondary today-btn" bindtap="onPlanDateToday">今天</button>
+    </view>
+    <input class="input" placeholder="备注（可选）" value="{{pNote}}" data-field="pNote" bindinput="onFieldInput" maxlength="200" />
+    <view class="form-actions">
+      <button class="btn-secondary form-btn" bindtap="onHidePlanForm">取消</button>
+      <button class="btn-primary form-btn" bindtap="onSavePlan" loading="{{savingPlan}}" disabled="{{savingPlan}}">保存</button>
+    </view>
+  </view>
+</view>

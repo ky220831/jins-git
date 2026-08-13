@@ -23,6 +23,7 @@
         To Do {{today.todoCount}} 项 · 日程 {{today.eventCount}} 条
       </view>
       <view class="today-row" wx:if="{{today.nextPredictedLabel}}">{{today.nextPredictedLabel}}</view>
+      <view class="today-row anniversary-text" wx:if="{{today.anniversaryLabel}}">{{today.anniversaryLabel}}</view>
     </view>
 
     <view class="card">
@@ -50,5 +51,7 @@
     <button class="btn-primary calendar-btn" bindtap="onOpenCalendar">打开日历</button>
     <button class="btn-secondary calendar-btn" bindtap="onOpenMeal">今日菜单</button>
     <button class="btn-secondary calendar-btn" bindtap="onOpenRestaurant">漂亮饭</button>
+    <button class="btn-secondary calendar-btn" bindtap="onOpenAnniversary">纪念日</button>
+    <button class="btn-secondary calendar-btn" bindtap="onOpenTravel">旅游计划</button>
   </block>
 </view>

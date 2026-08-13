@@ -82,6 +82,10 @@
   color: var(--color-red);
 }
 
+.anniversary-text {
+  color: var(--color-red);
+}
+
 .invite-code {
   margin-top: 8rpx;
   font-size: 48rpx;

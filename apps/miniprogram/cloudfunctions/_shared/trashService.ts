@@ -11,6 +11,7 @@ import {
   MEAL_PLAN_TTL_DAYS,
   RESTAURANT_VISIT_TTL_DAYS,
   SYSTEM_ACTOR,
+  TRIP_PLAN_TTL_DAYS,
 } from './constants';
 import { toShanghaiDate } from './dateTime';
 import { AppError, ErrorCodes } from './errors';
@@ -22,6 +23,9 @@ const RESTORABLE_COLLECTIONS: string[] = [
   COLLECTIONS.mealPlans,
   COLLECTIONS.restaurants,
   COLLECTIONS.restaurantVisits,
+  COLLECTIONS.anniversaries,
+  COLLECTIONS.trips,
+  COLLECTIONS.tripPlans,
 ];
 
 /** 恢复后需要重建日历事件的临时记录集合（业务数据为唯一真实来源） */
@@ -31,6 +35,7 @@ const CALENDAR_RESTORE_COLLECTIONS: Record<
 > = {
   [COLLECTIONS.mealPlans]: { ttlDays: MEAL_PLAN_TTL_DAYS, sourceType: 'meal' },
   [COLLECTIONS.restaurantVisits]: { ttlDays: RESTAURANT_VISIT_TTL_DAYS, sourceType: 'restaurant' },
+  [COLLECTIONS.tripPlans]: { ttlDays: TRIP_PLAN_TTL_DAYS, sourceType: 'trip' },
 };
 
 function toTrashItemView(t: TrashRecord): TrashItemView {
@@ -100,14 +105,21 @@ export class TrashService {
     if (calendarConfig) {
       const record = snapshot as unknown as MealPlanRecord;
       const rawStatus = (record as { status?: string }).status;
-      if (record.time && (rawStatus === 'published' || rawStatus === 'planned')) {
+      const tripWholeDay = calendarConfig.sourceType === 'trip';
+      if (
+        (record.time || tripWholeDay) &&
+        (rawStatus === 'published' || rawStatus === 'planned')
+      ) {
         await this.repo.createCalendarEvent({
           id: newId('ce'),
           spaceId,
           sourceType: calendarConfig.sourceType,
           sourceId: record.id,
-          title: `🍴 ${record.name}`,
-          startTime: toShanghaiDate(record.date, record.time),
+          title:
+            calendarConfig.sourceType === 'trip'
+              ? `✈️ ${record.name}`
+              : `🍴 ${record.name}`,
+          startTime: toShanghaiDate(record.date, record.time || '00:00'),
           endTime: null,
           colorToken: 'accent',
           createdBy: record.createdBy,

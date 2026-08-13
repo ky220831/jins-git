@@ -10,6 +10,7 @@ import {
 import { requireSpaceMember } from './access';
 import { monthRange, toShanghaiDate, validateYearMonth } from './dateTime';
 import { AppError, ErrorCodes } from './errors';
+import { AnniversaryService } from './anniversaryService';
 import { HolidayService } from './holidayService';
 import { newId } from './ids';
 import { PeriodService } from './periodService';
@@ -45,12 +46,19 @@ export class CalendarService {
     );
     const periodDays = await new PeriodService(this.repo).monthDaysForSpace(spaceId, year, month);
     const holidays = await new HolidayService(this.repo).month(year, month);
+    const anniversaryEvents = await new AnniversaryService(this.repo).monthEventsForSpace(
+      spaceId,
+      year,
+      month,
+    );
 
     return {
       year,
       month,
       todos: todos.filter((todo) => todo.status !== TODO_STATUS_ARCHIVED).map(toTodoView),
-      events: events.map(toCalendarEventView),
+      events: [...events.map(toCalendarEventView), ...anniversaryEvents].sort((a, b) =>
+        a.startTime < b.startTime ? -1 : 1,
+      ),
       periodDays,
       holidays,
     };

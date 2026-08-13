@@ -228,6 +228,64 @@ export interface RestaurantVisitRecord {
   expireAt: Date;
 }
 
+export interface AnniversaryRecord {
+  id: string;
+  spaceId: string;
+  name: string;
+  /** 原始日期 YYYY-MM-DD（保留年份，用于正计时） */
+  date: string;
+  time: string | null;
+  note: string | null;
+  yearly: boolean;
+  createdBy: string;
+  createdAt: Date;
+  updatedAt: Date;
+  version: number;
+}
+
+export interface TripItemRecord {
+  id: string;
+  date: string | null;
+  title: string;
+  note: string | null;
+}
+
+export interface TripRecord {
+  id: string;
+  spaceId: string;
+  name: string;
+  country: string | null;
+  city: string | null;
+  lat: number | null;
+  lng: number | null;
+  transport: string | null;
+  hotel: string | null;
+  note: string | null;
+  images: string[];
+  itinerary: TripItemRecord[];
+  createdBy: string;
+  createdAt: Date;
+  updatedAt: Date;
+  version: number;
+}
+
+export interface TripPlanRecord {
+  id: string;
+  spaceId: string;
+  tripId: string | null;
+  name: string;
+  startDate: string;
+  endDate: string | null;
+  time: string | null;
+  note: string | null;
+  status: 'planned' | 'offline';
+  createdBy: string;
+  createdAt: Date;
+  updatedAt: Date;
+  version: number;
+  expireAt: Date;
+}
+
 /**
  * 数据访问层接口：云函数用 CloudRepo（真实数据库），测试用 MemoryRepo。
  * 业务逻辑（SpaceService）只依赖该接口，不直接操作数据库。
@@ -301,4 +359,22 @@ export interface Repo {
   createRestaurantVisit(visit: RestaurantVisitRecord): Promise<void>;
   updateRestaurantVisit(spaceId: string, visitId: string, patch: Partial<RestaurantVisitRecord>): Promise<void>;
   deleteRestaurantVisit(spaceId: string, visitId: string): Promise<void>;
+
+  // ---- 第六阶段：纪念日与旅游计划 ----
+  listAnniversaries(spaceId: string): Promise<AnniversaryRecord[]>;
+  findAnniversaryById(spaceId: string, anniversaryId: string): Promise<AnniversaryRecord | null>;
+  createAnniversary(record: AnniversaryRecord): Promise<void>;
+  updateAnniversary(spaceId: string, anniversaryId: string, patch: Partial<AnniversaryRecord>): Promise<void>;
+  deleteAnniversary(spaceId: string, anniversaryId: string): Promise<void>;
+  listTrips(spaceId: string): Promise<TripRecord[]>;
+  findTripById(spaceId: string, tripId: string): Promise<TripRecord | null>;
+  createTrip(trip: TripRecord): Promise<void>;
+  updateTrip(spaceId: string, tripId: string, patch: Partial<TripRecord>): Promise<void>;
+  deleteTrip(spaceId: string, tripId: string): Promise<void>;
+  findTripPlanById(spaceId: string, planId: string): Promise<TripPlanRecord | null>;
+  listTripPlansByDateRange(spaceId: string, startDate: string, endDate: string): Promise<TripPlanRecord[]>;
+  listExpiredTripPlans(now: Date): Promise<TripPlanRecord[]>;
+  createTripPlan(plan: TripPlanRecord): Promise<void>;
+  updateTripPlan(spaceId: string, planId: string, patch: Partial<TripPlanRecord>): Promise<void>;
+  deleteTripPlan(spaceId: string, planId: string): Promise<void>;
 }
