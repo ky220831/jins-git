@@ -1,8 +1,12 @@
 import cloud from 'wx-server-sdk';
 import type { RestaurantOcrDraft, RestaurantOcrInput } from '../../../../../packages/types/src';
+import { requireSpaceMember } from '../../_shared/access';
+import { CloudRepo } from '../../_shared/cloudRepo';
 import { AppError, ErrorCodes } from '../../_shared/errors';
 import { createHandler } from '../../_shared/handler';
 import { WechatOcrProvider } from '../../_shared/ocrProvider';
+
+const repo = new CloudRepo();
 
 function contentTypeOf(fileID: string): string {
   const lower = fileID.toLowerCase();
@@ -12,6 +16,8 @@ function contentTypeOf(fileID: string): string {
 }
 
 export const main = createHandler<RestaurantOcrInput, RestaurantOcrDraft>(async (event) => {
+  const { OPENID } = cloud.getWXContext();
+  await requireSpaceMember(repo, OPENID);
   const fileID = (event?.fileID ?? '').trim();
   if (!fileID) {
     throw new AppError(ErrorCodes.VALIDATION, '缺少图片 fileID');
