@@ -53,5 +53,6 @@
     <button class="btn-secondary calendar-btn" bindtap="onOpenRestaurant">漂亮饭</button>
     <button class="btn-secondary calendar-btn" bindtap="onOpenAnniversary">纪念日</button>
     <button class="btn-secondary calendar-btn" bindtap="onOpenTravel">旅游计划</button>
+    <button class="btn-secondary calendar-btn" bindtap="onOpenManage">管理</button>
   </block>
 </view>

@@ -161,6 +161,41 @@ export class SpaceService {
     return { space };
   }
 
+  /** 重新生成一次性邀请码：仅主账号，副账号未加入时可用（PRD §13 家庭管理） */
+  async regenerateInviteCode(providerUserId: string): Promise<CreateSpaceResult> {
+    const identity = await resolveIdentity(this.repo, providerUserId);
+    const membership = await this.repo.findActiveMembershipByUser(identity.userId);
+    if (!membership) {
+      throw new AppError(ErrorCodes.NOT_IN_SPACE, '你还没有加入任何空间');
+    }
+    if (membership.role !== ROLE_OWNER) {
+      throw new AppError(ErrorCodes.FORBIDDEN, '只有主账号可以重新生成邀请码');
+    }
+    const space = await this.repo.findSpaceById(membership.spaceId);
+    if (!space || space.status !== SPACE_STATUS_ACTIVE) {
+      throw new AppError(ErrorCodes.SPACE_NOT_FOUND, '空间不存在或已停用');
+    }
+    if (space.inviteCodeUsedAt || space.memberCount >= 2) {
+      throw new AppError(ErrorCodes.INTERNAL, '副账号已加入，无需邀请码');
+    }
+    const now = new Date();
+    const inviteCode = await this.uniqueInviteCode();
+    const inviteCodeExpiresAt = new Date(now.getTime() + INVITE_CODE_TTL_MS);
+    await this.repo.updateSpace(space.id, {
+      inviteCode,
+      inviteCodeExpiresAt,
+      version: space.version + 1,
+      updatedAt: now,
+    });
+    await this.writeAudit(identity.userId, space.id, 'space.invite_regen', 'space', space.id);
+    const view = await this.getSpaceView(identity.userId, space.id);
+    return {
+      space: view,
+      inviteCode,
+      inviteCodeExpiresAt: inviteCodeExpiresAt.toISOString(),
+    };
+  }
+
   private async uniqueInviteCode(): Promise<string> {
     for (let i = 0; i < 5; i += 1) {
       const code = generateInviteCode();

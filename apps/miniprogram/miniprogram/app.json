@@ -9,7 +9,8 @@
     "pages/meal/index",
     "pages/restaurant/index",
     "pages/anniversary/index",
-    "pages/travel/index"
+    "pages/travel/index",
+    "pages/manage/index"
   ],
   "window": {
     "navigationBarBackgroundColor": "#FAF7F2",

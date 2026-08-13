@@ -1,0 +1,123 @@
+<view class="container manage-page">
+  <view class="page-head">
+    <view class="page-title">管理</view>
+    <view class="page-sub">{{isOwner ? '主管理' : '副管理'}}</view>
+  </view>
+
+  <view class="error-text" wx:if="{{error}}">{{error}}</view>
+
+  <!-- 主管理 -->
+  <block wx:if="{{isOwner}}">
+    <view class="card">
+      <view class="card-title">数据概览</view>
+      <view class="count-grid">
+        <view class="count-item"><view class="count-num">{{counts.todos}}</view><view class="count-label">To Do</view></view>
+        <view class="count-item"><view class="count-num">{{counts.mealTemplates}}</view><view class="count-label">菜单素材</view></view>
+        <view class="count-item"><view class="count-num">{{counts.mealPlans}}</view><view class="count-label">今日菜单</view></view>
+        <view class="count-item"><view class="count-num">{{counts.restaurants}}</view><view class="count-label">餐厅</view></view>
+        <view class="count-item"><view class="count-num">{{counts.restaurantVisits}}</view><view class="count-label">餐厅行程</view></view>
+        <view class="count-item"><view class="count-num">{{counts.anniversaries}}</view><view class="count-label">纪念日</view></view>
+        <view class="count-item"><view class="count-num">{{counts.trips}}</view><view class="count-label">旅行资料</view></view>
+        <view class="count-item"><view class="count-num">{{counts.tripPlans}}</view><view class="count-label">旅游行程</view></view>
+        <view class="count-item"><view class="count-num">{{counts.trash}}</view><view class="count-label">回收站</view></view>
+      </view>
+    </view>
+
+    <view class="card">
+      <view class="card-title">数据导出（JSON）</view>
+      <view class="manage-desc">导出全部业务数据为 JSON 文件，链接 1 小时内有效，不会永久公开。</view>
+      <view class="manage-result" wx:if="{{exportUrl}}">
+        {{exportName}}（{{exportSizeLabel}}）
+      </view>
+      <view class="btn-row">
+        <button class="btn-primary flex-btn" bindtap="onExport" loading="{{exporting}}" disabled="{{exporting}}">导出数据</button>
+        <button class="btn-secondary flex-btn" wx:if="{{exportUrl}}" bindtap="onCopyExportUrl">复制链接</button>
+      </view>
+    </view>
+
+    <view class="card">
+      <view class="card-title">回收站（72 小时内可恢复）</view>
+      <picker range="{{collectionOptions}}" range-key="label" value="{{trashFilterIndex}}" bindchange="onTrashFilterChange">
+        <view class="picker-value">筛选：{{trashFilterLabel}}</view>
+      </picker>
+      <view class="empty" wx:if="{{!trash.length}}">回收站是空的</view>
+      <view class="trash-row" wx:for="{{trash}}" wx:key="id">
+        <view class="trash-check" data-id="{{item.id}}" bindtap="onToggleSelect">{{item.selected ? '☑' : '☐'}}</view>
+        <view class="trash-body">
+          <view class="trash-title">{{item.collectionLabel}} · {{item.title}}</view>
+          <view class="trash-meta">删除于 {{item.deletedLabel}} · 将于 {{item.purgeLabel}} 永久删除</view>
+          <view class="trash-meta">{{item.deleteReason === 'auto_expire' ? '自动清理' : '手动删除'}} · {{item.retentionType === 'temporary' ? '临时数据' : '永久数据'}}</view>
+        </view>
+        <view class="trash-actions">
+          <view class="link-btn" data-id="{{item.id}}" bindtap="onRestoreOne">恢复</view>
+          <view class="link-btn danger" data-id="{{item.id}}" bindtap="onPurgeOne">删除</view>
+        </view>
+      </view>
+      <view class="btn-row" wx:if="{{trash.length}}">
+        <button class="btn-secondary flex-btn" bindtap="onSelectAll">全选/取消</button>
+        <button class="btn-secondary flex-btn" bindtap="onBatchRestore">批量恢复</button>
+        <button class="btn-secondary flex-btn danger-btn" bindtap="onBatchPurge">批量删除</button>
+      </view>
+      <button class="btn-secondary danger-btn purge-all-btn" wx:if="{{trash.length}}" bindtap="onPurgeAll">清空回收站（{{trash.length}}）</button>
+    </view>
+
+    <view class="card">
+      <view class="card-title">家庭管理</view>
+      <view class="member" wx:for="{{members}}" wx:key="userId">
+        <view class="member-left">
+          <view class="member-role">{{item.roleLabel}}</view>
+          <view class="member-id">ID {{item.userId}}</view>
+        </view>
+      </view>
+      <view class="invite-box" wx:if="{{inviteCode}}">
+        <view class="invite-code" bindtap="onCopyInvite">{{inviteCode}}</view>
+        <view class="invite-meta">有效期至 {{inviteExpiresAt}} · 点击复制</view>
+        <button class="btn-secondary regen-btn" bindtap="onRegenInvite">重新生成邀请码</button>
+      </view>
+      <view class="bound" wx:if="{{!inviteCode}}">双人已绑定 ✅</view>
+    </view>
+
+    <view class="card">
+      <view class="card-title">业务管理入口</view>
+      <view class="btn-row">
+        <button class="btn-secondary flex-btn" bindtap="onOpenMeal">今日菜单</button>
+        <button class="btn-secondary flex-btn" bindtap="onOpenRestaurant">漂亮饭</button>
+      </view>
+      <view class="btn-row">
+        <button class="btn-secondary flex-btn" bindtap="onOpenAnniversary">纪念日</button>
+        <button class="btn-secondary flex-btn" bindtap="onOpenTravel">旅游计划</button>
+      </view>
+    </view>
+  </block>
+
+  <!-- 副管理 -->
+  <block wx:else>
+    <view class="card">
+      <view class="card-title">今日菜单下架</view>
+      <view class="empty" wx:if="{{!mealPlans.length}}">今天没有已上架的菜单</view>
+      <view class="plan-row" wx:for="{{mealPlans}}" wx:key="id">
+        <view class="plan-left">
+          <view class="plan-name">🍚 {{item.name}}</view>
+          <view class="plan-meta">{{item.date}}{{item.time ? ' ' + item.time : ''}}</view>
+        </view>
+        <view class="plan-actions">
+          <view class="link-btn" data-id="{{item.id}}" bindtap="onOfflineMeal">下架</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="card">
+      <view class="card-title">漂亮饭下架</view>
+      <view class="empty" wx:if="{{!restaurants.length}}">没有已上架的餐厅</view>
+      <view class="plan-row" wx:for="{{restaurants}}" wx:key="id">
+        <view class="plan-left">
+          <view class="plan-name">🍴 {{item.name}}</view>
+          <view class="plan-meta">{{item.category || '未分类'}}</view>
+        </view>
+        <view class="plan-actions">
+          <view class="link-btn" data-id="{{item.id}}" bindtap="onOfflineRestaurant">下架</view>
+        </view>
+      </view>
+    </view>
+  </block>
+</view>

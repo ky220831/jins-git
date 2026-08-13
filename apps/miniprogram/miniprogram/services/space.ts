@@ -19,4 +19,8 @@ export const SpaceService = {
   mySpace(): Promise<GetMySpaceResult> {
     return callFunction<GetMySpaceResult>('space-info');
   },
+
+  regenInvite(): Promise<CreateSpaceResult> {
+    return callFunction<CreateSpaceResult>('space-info', { action: 'regen-invite' });
+  },
 };

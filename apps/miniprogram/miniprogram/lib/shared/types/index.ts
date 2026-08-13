@@ -695,3 +695,29 @@ export interface DeleteTripPlanInput {
 export interface OfflineTripPlanInput {
   planId: string;
 }
+
+// ---- 管理（第七阶段：主管理 / 副管理）----
+export interface ManageOverview {
+  role: SpaceRole;
+  counts: {
+    mealTemplates: number;
+    mealPlans: number;
+    restaurants: number;
+    restaurantVisits: number;
+    anniversaries: number;
+    trips: number;
+    tripPlans: number;
+    todos: number;
+    trash: number;
+  };
+}
+
+export interface ExportDataResult {
+  fileName: string;
+  tempFileURL: string;
+  sizeBytes: number;
+}
+
+export interface TrashBatchInput {
+  trashIds: string[];
+}

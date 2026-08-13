@@ -1,6 +1,7 @@
 import {
   ROLE_OWNER,
   type CalendarSourceType,
+  type TrashBatchInput,
   type TrashActionInput,
   type TrashItemView,
   type TrashListInput,
@@ -82,26 +83,100 @@ export class TrashService {
     if (!item) {
       throw new AppError(ErrorCodes.NOT_FOUND, '回收站记录不存在');
     }
+    await this.restoreOne(spaceId, userId, item, new Date());
+  }
+
+  /** 永久删除：仅主账号，二次确认后调用（PRD §81） */
+  async purge(providerUserId: string, input: TrashActionInput): Promise<void> {
+    const { spaceId, role, userId } = await requireSpaceMember(this.repo, providerUserId);
+    if (role !== ROLE_OWNER) {
+      throw new AppError(ErrorCodes.FORBIDDEN, '只有主账号可以永久删除');
+    }
+    const trashId = input?.trashId?.trim();
+    if (!trashId) {
+      throw new AppError(ErrorCodes.VALIDATION, '缺少回收站记录 ID');
+    }
+    const item = await this.repo.findTrashById(spaceId, trashId);
+    if (!item) {
+      throw new AppError(ErrorCodes.NOT_FOUND, '回收站记录不存在');
+    }
+    await this.repo.deleteTrash(spaceId, trashId);
+    await this.audit(userId, spaceId, 'trash.purge', 'trash_record', trashId, new Date());
+  }
+
+  /** 批量恢复：仅主账号（PRD §13 批量操作） */
+  async restoreMany(providerUserId: string, input: TrashBatchInput): Promise<void> {
+    const { spaceId, role, userId } = await requireSpaceMember(this.repo, providerUserId);
+    if (role !== ROLE_OWNER) {
+      throw new AppError(ErrorCodes.FORBIDDEN, '只有主账号可以恢复数据');
+    }
+    const ids = Array.isArray(input?.trashIds) ? [...new Set(input.trashIds.map((s) => s.trim()).filter(Boolean))] : [];
+    if (ids.length === 0) {
+      throw new AppError(ErrorCodes.VALIDATION, '请选择要恢复的记录');
+    }
+    const now = new Date();
+    for (const trashId of ids) {
+      const item = await this.repo.findTrashById(spaceId, trashId);
+      if (!item) continue;
+      await this.restoreOne(spaceId, userId, item, now);
+    }
+  }
+
+  /** 批量永久删除：仅主账号 */
+  async purgeMany(providerUserId: string, input: TrashBatchInput): Promise<void> {
+    const { spaceId, role, userId } = await requireSpaceMember(this.repo, providerUserId);
+    if (role !== ROLE_OWNER) {
+      throw new AppError(ErrorCodes.FORBIDDEN, '只有主账号可以永久删除');
+    }
+    const ids = Array.isArray(input?.trashIds) ? [...new Set(input.trashIds.map((s) => s.trim()).filter(Boolean))] : [];
+    if (ids.length === 0) {
+      throw new AppError(ErrorCodes.VALIDATION, '请选择要删除的记录');
+    }
+    const now = new Date();
+    for (const trashId of ids) {
+      const item = await this.repo.findTrashById(spaceId, trashId);
+      if (!item) continue;
+      await this.repo.deleteTrash(spaceId, trashId);
+      await this.audit(userId, spaceId, 'trash.purge', 'trash_record', trashId, now);
+    }
+  }
+
+  /** 清空回收站（全局清理）：仅主账号，二次确认后调用 */
+  async purgeAll(providerUserId: string): Promise<number> {
+    const { spaceId, role, userId } = await requireSpaceMember(this.repo, providerUserId);
+    if (role !== ROLE_OWNER) {
+      throw new AppError(ErrorCodes.FORBIDDEN, '只有主账号可以清理回收站');
+    }
+    const items = await this.repo.listTrash(spaceId);
+    const now = new Date();
+    for (const item of items) {
+      await this.repo.deleteTrash(spaceId, item.id);
+      await this.audit(userId, spaceId, 'trash.purge_all', 'trash_record', item.id, now);
+    }
+    return items.length;
+  }
+
+  private async restoreOne(
+    spaceId: string,
+    userId: string,
+    item: TrashRecord,
+    now: Date,
+  ): Promise<void> {
     if (!RESTORABLE_COLLECTIONS.includes(item.collection)) {
       throw new AppError(ErrorCodes.INTERNAL, '该类型数据暂不支持恢复');
     }
-
-    const now = new Date();
     const snapshot = { ...(item.snapshot as Record<string, unknown>) };
     const calendarConfig = CALENDAR_RESTORE_COLLECTIONS[item.collection];
     if (calendarConfig) {
-      // 恢复后重新获得 14 天临时周期，避免立刻又被自动清理
       snapshot.expireAt = new Date(now.getTime() + calendarConfig.ttlDays * 24 * 3600000);
     }
     await this.repo.restoreRecord(item.collection, snapshot);
-    await this.repo.updateTrash(spaceId, trashId, {
+    await this.repo.updateTrash(spaceId, item.id, {
       status: 'restored',
       restoredAt: now,
       restoredBy: userId,
       updatedAt: now,
     });
-
-    // 带时间的临时记录恢复后，重新生成日历事件
     if (calendarConfig) {
       const record = snapshot as unknown as MealPlanRecord;
       const rawStatus = (record as { status?: string }).status;
@@ -129,25 +204,7 @@ export class TrashService {
         });
       }
     }
-    await this.audit(userId, spaceId, 'trash.restore', 'trash_record', trashId, now);
-  }
-
-  /** 永久删除：仅主账号，二次确认后调用（PRD §81） */
-  async purge(providerUserId: string, input: TrashActionInput): Promise<void> {
-    const { spaceId, role, userId } = await requireSpaceMember(this.repo, providerUserId);
-    if (role !== ROLE_OWNER) {
-      throw new AppError(ErrorCodes.FORBIDDEN, '只有主账号可以永久删除');
-    }
-    const trashId = input?.trashId?.trim();
-    if (!trashId) {
-      throw new AppError(ErrorCodes.VALIDATION, '缺少回收站记录 ID');
-    }
-    const item = await this.repo.findTrashById(spaceId, trashId);
-    if (!item) {
-      throw new AppError(ErrorCodes.NOT_FOUND, '回收站记录不存在');
-    }
-    await this.repo.deleteTrash(spaceId, trashId);
-    await this.audit(userId, spaceId, 'trash.purge', 'trash_record', trashId, new Date());
+    await this.audit(userId, spaceId, 'trash.restore', 'trash_record', item.id, now);
   }
 
   /** 定时任务：72 小时到期的回收站记录永久删除（PRD §58） */

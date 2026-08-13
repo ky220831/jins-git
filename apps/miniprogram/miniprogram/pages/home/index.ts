@@ -164,4 +164,8 @@ Page({
   onOpenTravel() {
     wx.navigateTo({ url: '/pages/travel/index' });
   },
+
+  onOpenManage() {
+    wx.navigateTo({ url: '/pages/manage/index' });
+  },
 });
