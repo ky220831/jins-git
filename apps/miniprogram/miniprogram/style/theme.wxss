@@ -1,0 +1,17 @@
+/* 统一设计 Token：与 packages/design-tokens 保持一致（第一阶段基础色） */
+page {
+  --color-bg: #FAF7F2;
+  --color-surface: #FFFFFF;
+  --color-text: #3A3A3A;
+  --color-text-secondary: #8C8C8C;
+  --color-border: #EDE7DF;
+  --color-primary: #D98E8E;
+  --color-accent: #E0A06E;
+  --color-blue: #7FA3B8;
+  --color-red: #C96F6F;
+  --color-success: #7FA98C;
+  --color-danger: #C0564F;
+  --radius-sm: 8rpx;
+  --radius-md: 14rpx;
+  --radius-lg: 20rpx;
+}

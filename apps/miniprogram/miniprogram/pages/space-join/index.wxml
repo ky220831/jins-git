@@ -1,0 +1,13 @@
+<view class="container">
+  <view class="tip">输入对方给你的 8 位邀请码</view>
+  <input
+    class="input"
+    placeholder="例如：AB23CD45"
+    value="{{inviteCode}}"
+    maxlength="8"
+    bindinput="onCodeInput"
+  />
+  <button class="btn-primary submit" bindtap="onSubmit" loading="{{submitting}}" disabled="{{submitting}}">
+    加入空间
+  </button>
+</view>

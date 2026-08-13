@@ -1,0 +1,21 @@
+<view class="container">
+  <view class="tip">给你们的空间起个名字吧</view>
+  <input
+    class="input"
+    placeholder="例如：我们的家"
+    value="{{name}}"
+    maxlength="20"
+    bindinput="onNameInput"
+  />
+  <button class="btn-primary submit" bindtap="onSubmit" loading="{{submitting}}" disabled="{{submitting}}">
+    创建空间
+  </button>
+
+  <view class="card result" wx:if="{{result}}">
+    <view class="result-title">空间创建成功 🎉</view>
+    <view class="code" bindtap="onCopyInvite">{{result.inviteCode}}</view>
+    <view class="result-meta">有效期至 {{result.inviteCodeExpiresAt}} · 点击邀请码可复制</view>
+    <view class="result-meta">邀请码仅可绑定 1 人，绑定后立即失效</view>
+    <button class="btn-secondary go-home" bindtap="onGoHome">进入空间</button>
+  </view>
+</view>

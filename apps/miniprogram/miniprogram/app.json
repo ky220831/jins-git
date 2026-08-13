@@ -1,0 +1,18 @@
+{
+  "pages": [
+    "pages/login/index",
+    "pages/space/index",
+    "pages/space-create/index",
+    "pages/space-join/index",
+    "pages/home/index"
+  ],
+  "window": {
+    "navigationBarBackgroundColor": "#FAF7F2",
+    "navigationBarTitleText": "我们的生活",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#FAF7F2",
+    "backgroundTextStyle": "light"
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

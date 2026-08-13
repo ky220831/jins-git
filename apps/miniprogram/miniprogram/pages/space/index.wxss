@@ -1,0 +1,35 @@
+.headline {
+  font-size: 40rpx;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.hint {
+  margin-top: 12rpx;
+  font-size: 26rpx;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+.action-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 48rpx 32rpx;
+}
+
+.action-icon {
+  font-size: 56rpx;
+}
+
+.action-title {
+  margin-top: 16rpx;
+  font-size: 34rpx;
+  font-weight: 600;
+}
+
+.action-desc {
+  margin-top: 8rpx;
+  font-size: 24rpx;
+  color: var(--color-text-secondary);
+}

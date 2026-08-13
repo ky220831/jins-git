@@ -1,0 +1,49 @@
+@import "style/theme.wxss";
+
+page {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding: 48rpx 40rpx;
+  box-sizing: border-box;
+}
+
+.btn-primary {
+  background: var(--color-primary);
+  color: #ffffff;
+  border-radius: var(--radius-lg);
+  font-size: 32rpx;
+  font-weight: 500;
+  border: none;
+}
+
+.btn-primary::after {
+  border: none;
+}
+
+.btn-secondary {
+  background: var(--color-surface);
+  color: var(--color-text);
+  border: 1rpx solid var(--color-border);
+  border-radius: var(--radius-lg);
+  font-size: 32rpx;
+}
+
+.card {
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  padding: 32rpx;
+  margin-top: 24rpx;
+}
+
+.card-title {
+  font-size: 26rpx;
+  color: var(--color-text-secondary);
+  margin-bottom: 16rpx;
+}

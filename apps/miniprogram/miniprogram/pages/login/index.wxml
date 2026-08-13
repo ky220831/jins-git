@@ -1,0 +1,13 @@
+<view class="container login-page">
+  <view class="hero">
+    <view class="logo">🌿</view>
+    <view class="title">我们的生活</view>
+    <view class="subtitle">只属于两个人的私密空间</view>
+  </view>
+
+  <button class="btn-primary login-btn" bindtap="onLogin" loading="{{logging}}" disabled="{{logging}}">
+    微信一键登录
+  </button>
+
+  <view class="privacy">仅绑定后的两人可见 · 数据不上传第三方</view>
+</view>

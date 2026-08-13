@@ -1,0 +1,16 @@
+<view class="container">
+  <view class="headline">创建你们的空间</view>
+  <view class="hint">空间只能有两位成员：主账号创建空间，副账号通过邀请码加入。</view>
+
+  <view class="card action-card" bindtap="onCreateSpace">
+    <view class="action-icon">✨</view>
+    <view class="action-title">创建空间</view>
+    <view class="action-desc">我是主账号，创建属于我们的空间</view>
+  </view>
+
+  <view class="card action-card" bindtap="onJoinSpace">
+    <view class="action-icon">🔗</view>
+    <view class="action-title">加入空间</view>
+    <view class="action-desc">我有邀请码，加入对方的空间</view>
+  </view>
+</view>

@@ -1,0 +1,32 @@
+<view class="container">
+  <block wx:if="{{loading}}">
+    <view class="loading">加载中…</view>
+  </block>
+
+  <block wx:elif="{{space}}">
+    <view class="space-name">{{space.spaceName}}</view>
+    <view class="role-badge">{{isOwner ? '主账号 OWNER' : '副账号 MEMBER'}}</view>
+
+    <view class="card">
+      <view class="card-title">成员</view>
+      <view class="member" wx:for="{{members}}" wx:key="userId">
+        <view class="member-left">
+          <view class="member-role">{{item.roleLabel}}</view>
+          <view class="member-id">ID {{item.shortId}}</view>
+        </view>
+        <view class="member-time">{{item.joinedAtLabel}} 加入</view>
+      </view>
+    </view>
+
+    <view class="card" wx:if="{{isOwner && space.inviteCode}}">
+      <view class="card-title">邀请码（绑定副账号）</view>
+      <view class="invite-code" bindtap="onCopyInvite">{{space.inviteCode}}</view>
+      <view class="invite-meta">有效期至 {{inviteExpiresAt}} · 点击复制</view>
+    </view>
+
+    <view class="card" wx:if="{{isOwner && !space.inviteCode}}">
+      <view class="card-title">绑定状态</view>
+      <view class="bound">双人已绑定 ✅</view>
+    </view>
+  </block>
+</view>

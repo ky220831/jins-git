@@ -1,0 +1,9 @@
+{
+  "name": "our-life-miniprogram",
+  "version": "0.1.0",
+  "private": true,
+  "description": "小程序前端（TypeScript，由微信开发者工具内置编译器处理）",
+  "devDependencies": {
+    "miniprogram-api-typings": "^5.2.3"
+  }
+}
