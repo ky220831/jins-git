@@ -20,6 +20,12 @@ function send(method, params = {}) {
     const id = `r${seq++}`;
     pending.set(id, { resolve, reject });
     ws.send(JSON.stringify({ id, method, params }));
+    setTimeout(() => {
+      if (pending.has(id)) {
+        pending.delete(id);
+        reject(new Error(`TIMEOUT ${method}`));
+      }
+    }, 12000);
   });
 }
 
@@ -61,7 +67,7 @@ async function probe() {
       month: cal.data.month,
       selectedDate: cal.data.selectedDate,
       periodCells: (cal.data.days || []).filter((d) => d.periodKind).length,
-      periodKinds: (cal.data.days || []).filter((d) => d.periodKind).slice(0, 8).map((d) => d.key + ':' + d.periodKind),
+      periodKinds: (cal.data.days || []).filter((d) => d.periodKind).slice(0, 16).map((d) => d.key + ':' + d.periodKind),
       holidayCells: (cal.data.days || []).filter((d) => d.holidayLabel).length,
       holidayLabels: (cal.data.days || []).filter((d) => d.holidayLabel).slice(0, 8).map((d) => d.key + ':' + d.holidayLabel),
       periodVisible: cal.data.periodVisible,
@@ -75,15 +81,25 @@ async function probe() {
 ws.on('open', async () => {
   try {
     await send('App.enableLog', {});
+    console.log('[step] enableLog ok');
 
     const stack0 = await send('App.getPageStack');
     const routes0 = (stack0.pageStack || stack0 || []).map((p) => p.path);
+    console.log('[step] stack:', JSON.stringify(routes0));
     if (!routes0.includes('pages/calendar/index')) {
       await send('App.callWxMethod', { method: 'navigateTo', args: [{ url: '/pages/calendar/index' }] });
       await sleep(4000);
     }
+    // 确保日历回到“今天”（避免上次运行残留的翻页状态）
+    await evaluate(`() => {
+      const cal = getCurrentPages().find((p) => p.route === 'pages/calendar/index');
+      if (cal) cal.onToday();
+      return { ok: true };
+    }`);
+    await sleep(4000);
 
     // ---- 1. 记录生理期 08-01~05 ----
+    console.log('[step] record period...');
     await evaluate(`() => {
       const cal = getCurrentPages().find((p) => p.route === 'pages/calendar/index');
       if (!cal) return { ok: false };
@@ -92,15 +108,17 @@ ws.on('open', async () => {
       return { ok: true };
     }`);
     await sleep(6000);
+    console.log('[step] probe after record...');
 
     let data = await probe();
     check(
-      '记录生理期后：8 月出现 5 实际红 + 1 休息蓝 + 5 预测红（共 11 个标记）',
+      '记录生理期后：8 月出现 5 实际红 + 1 休息蓝 + 5 预测红（预测 08-27 起，共 11 个标记）',
       data.error === '' &&
         data.periodCells === 11 &&
         data.periodKinds.includes('2026-08-01:period') &&
         data.periodKinds.includes('2026-08-06:rest') &&
-        data.periodKinds.includes('2026-08-23:period'),
+        data.periodKinds.includes('2026-08-27:period') &&
+        data.periodKinds.includes('2026-08-31:period'),
       `periodCells=${data.periodCells} (${(data.periodKinds || []).join(', ')})`,
     );
     check(
@@ -112,12 +130,14 @@ ws.on('open', async () => {
     );
 
     // ---- 2. 关闭显示开关 ----
+    console.log('[step] toggle off...');
     await evaluate(`() => {
       const cal = getCurrentPages().find((p) => p.route === 'pages/calendar/index');
       cal.onTogglePeriodVisible({ detail: { value: false } });
       return { ok: true };
     }`);
     await sleep(5000);
+    console.log('[step] probe after toggle off...');
     data = await probe();
     check(
       '关闭开关：格子标记隐藏但记录仍保留（PRD §29）',
@@ -126,12 +146,14 @@ ws.on('open', async () => {
     );
 
     // ---- 3. 恢复开关并翻到 10 月看节假日 ----
+    console.log('[step] toggle on...');
     await evaluate(`() => {
       const cal = getCurrentPages().find((p) => p.route === 'pages/calendar/index');
       cal.onTogglePeriodVisible({ detail: { value: true } });
       return { ok: true };
     }`);
     await sleep(5000);
+    console.log('[step] navigate to october...');
     await evaluate(`() => {
       const cal = getCurrentPages().find((p) => p.route === 'pages/calendar/index');
       cal.onNext();
@@ -144,6 +166,7 @@ ws.on('open', async () => {
       return { ok: true };
     }`);
     await sleep(5000);
+    console.log('[step] probe october...');
     data = await probe();
     check(
       '10 月显示国庆节（10-01~07）与调休上班（10-10）',
@@ -160,6 +183,7 @@ ws.on('open', async () => {
     );
 
     try {
+      console.log('[step] screenshot...');
       const shot = await send('App.captureScreenshot', {});
       const buf = Buffer.from(shot.data, 'base64');
       const file = path.join(__dirname, '..', 'work', 'phase3-october.png');
@@ -170,18 +194,19 @@ ws.on('open', async () => {
     }
 
     // ---- 4. 清理：删除实际记录 + 恢复开关 ----
-    const actualId = (data.periodRecords || []).find((r) => r.type === 'actual');
-    if (actualId) {
+    console.log('[step] cleanup...');
+    const actualIds = (data.periodRecords || []).filter((r) => r.type === 'actual').map((r) => r.id);
+    for (const id of actualIds) {
       await evaluate(`() => {
         wx.cloud.callFunction({
           name: 'period-record',
-          data: { action: 'delete', recordId: ${JSON.stringify(actualId.id)} },
+          data: { action: 'delete', recordId: ${JSON.stringify(id)} },
           fail: (e) => console.error('cleanup delete failed', e),
         });
         return { ok: true };
       }`);
-      await sleep(4000);
     }
+    if (actualIds.length) await sleep(4000);
     await evaluate(`() => {
       const cal = getCurrentPages().find((p) => p.route === 'pages/calendar/index');
       wx.cloud.callFunction({
@@ -194,6 +219,7 @@ ws.on('open', async () => {
       return { ok: true };
     }`);
     await sleep(6000);
+    console.log('[step] probe after cleanup...');
     data = await probe();
     check(
       '清理完成：生理期记录已删除、开关已恢复',

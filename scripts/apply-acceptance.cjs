@@ -34,6 +34,9 @@ const collections = [
   'period_records',
   'holiday_calendar',
   'space_settings',
+  'meal_templates',
+  'meal_plans',
+  'trash_records',
 ];
 
 const indexDefs = {
@@ -124,6 +127,46 @@ const indexDefs = {
           { Name: 'key', Direction: '1' },
         ],
         MgoIsUnique: true,
+      },
+    },
+  ],
+  meal_templates: [
+    {
+      IndexName: 'idx_spaceId',
+      MgoKeySchema: {
+        MgoIndexKeys: [{ Name: 'spaceId', Direction: '1' }],
+        MgoIsUnique: false,
+      },
+    },
+  ],
+  meal_plans: [
+    {
+      IndexName: 'idx_spaceId_date',
+      MgoKeySchema: {
+        MgoIndexKeys: [
+          { Name: 'spaceId', Direction: '1' },
+          { Name: 'date', Direction: '1' },
+        ],
+        MgoIsUnique: false,
+      },
+    },
+  ],
+  trash_records: [
+    {
+      IndexName: 'idx_spaceId_status',
+      MgoKeySchema: {
+        MgoIndexKeys: [
+          { Name: 'spaceId', Direction: '1' },
+          { Name: 'status', Direction: '1' },
+        ],
+        MgoIsUnique: false,
+      },
+    },
+    {
+      IndexName: 'idx_purgeAt',
+      MgoKeySchema: {
+        MgoIndexKeys: [{ Name: 'purgeAt', Direction: '1' }],
+        MgoIsUnique: false,
       },
     },
   ],

@@ -4,12 +4,15 @@ import type {
   AuditLogRecord,
   CalendarEventRecord,
   HolidayRecord,
+  MealPlanRecord,
+  MealTemplateRecord,
   PeriodRecordRecord,
   Repo,
   SpaceMemberRecord,
   SpaceRecord,
   SpaceSettingRecord,
   TodoRecord,
+  TrashRecord,
   UserIdentityRecord,
   UserRecord,
 } from './repo';
@@ -203,5 +206,135 @@ export class CloudRepo implements Repo {
 
   async upsertSpaceSetting(setting: SpaceSettingRecord): Promise<void> {
     await this.col(COLLECTIONS.spaceSettings).doc(setting.id).set({ data: setting });
+  }
+
+  async listMealTemplates(spaceId: string): Promise<MealTemplateRecord[]> {
+    const res = await this.col(COLLECTIONS.mealTemplates)
+      .where({ spaceId })
+      .limit(200)
+      .get();
+    return res.data.map((d) => mapDoc<MealTemplateRecord>(d));
+  }
+
+  async findMealTemplateById(
+    spaceId: string,
+    templateId: string,
+  ): Promise<MealTemplateRecord | null> {
+    const res = await this.col(COLLECTIONS.mealTemplates)
+      .where({ _id: templateId, spaceId })
+      .limit(1)
+      .get();
+    return res.data.length > 0 ? mapDoc<MealTemplateRecord>(res.data[0]) : null;
+  }
+
+  async createMealTemplate(template: MealTemplateRecord): Promise<void> {
+    await this.col(COLLECTIONS.mealTemplates).doc(template.id).set({ data: template });
+  }
+
+  async updateMealTemplate(
+    spaceId: string,
+    templateId: string,
+    patch: Partial<MealTemplateRecord>,
+  ): Promise<void> {
+    await this.col(COLLECTIONS.mealTemplates)
+      .where({ _id: templateId, spaceId })
+      .update({ data: patch });
+  }
+
+  async deleteMealTemplate(spaceId: string, templateId: string): Promise<void> {
+    await this.col(COLLECTIONS.mealTemplates)
+      .where({ _id: templateId, spaceId })
+      .remove();
+  }
+
+  async findMealPlanById(spaceId: string, planId: string): Promise<MealPlanRecord | null> {
+    const res = await this.col(COLLECTIONS.mealPlans)
+      .where({ _id: planId, spaceId })
+      .limit(1)
+      .get();
+    return res.data.length > 0 ? mapDoc<MealPlanRecord>(res.data[0]) : null;
+  }
+
+  async listMealPlansByDateRange(
+    spaceId: string,
+    startDate: string,
+    endDate: string,
+  ): Promise<MealPlanRecord[]> {
+    const res = await this.col(COLLECTIONS.mealPlans)
+      .where({ spaceId, date: _.gte(startDate).and(_.lte(endDate)) })
+      .limit(100)
+      .get();
+    return res.data.map((d) => mapDoc<MealPlanRecord>(d));
+  }
+
+  async listExpiredMealPlans(now: Date): Promise<MealPlanRecord[]> {
+    const res = await this.col(COLLECTIONS.mealPlans)
+      .where({ expireAt: _.lte(now) })
+      .limit(1000)
+      .get();
+    return res.data.map((d) => mapDoc<MealPlanRecord>(d));
+  }
+
+  async createMealPlan(plan: MealPlanRecord): Promise<void> {
+    await this.col(COLLECTIONS.mealPlans).doc(plan.id).set({ data: plan });
+  }
+
+  async updateMealPlan(spaceId: string, planId: string, patch: Partial<MealPlanRecord>): Promise<void> {
+    await this.col(COLLECTIONS.mealPlans)
+      .where({ _id: planId, spaceId })
+      .update({ data: patch });
+  }
+
+  async deleteMealPlan(spaceId: string, planId: string): Promise<void> {
+    await this.col(COLLECTIONS.mealPlans)
+      .where({ _id: planId, spaceId })
+      .remove();
+  }
+
+  async createTrash(item: TrashRecord): Promise<void> {
+    await this.col(COLLECTIONS.trashRecords).doc(item.id).set({ data: item });
+  }
+
+  async restoreRecord(collection: string, record: Record<string, unknown>): Promise<void> {
+    const id = record.id as string;
+    await this.col(collection).doc(id).set({ data: record });
+  }
+
+  async listTrash(spaceId: string, collection?: string): Promise<TrashRecord[]> {
+    const where: Record<string, unknown> = { spaceId, status: 'in_trash' };
+    if (collection) where.collection = collection;
+    const res = await this.col(COLLECTIONS.trashRecords)
+      .where(where)
+      .limit(200)
+      .get();
+    return res.data.map((d) => mapDoc<TrashRecord>(d));
+  }
+
+  async findTrashById(spaceId: string, trashId: string): Promise<TrashRecord | null> {
+    const res = await this.col(COLLECTIONS.trashRecords)
+      .where({ _id: trashId, spaceId })
+      .limit(1)
+      .get();
+    return res.data.length > 0 ? mapDoc<TrashRecord>(res.data[0]) : null;
+  }
+
+  async updateTrash(spaceId: string, trashId: string, patch: Partial<TrashRecord>): Promise<void> {
+    await this.col(COLLECTIONS.trashRecords)
+      .where({ _id: trashId, spaceId })
+      .update({ data: patch });
+  }
+
+  async deleteTrash(spaceId: string, trashId: string): Promise<void> {
+    await this.col(COLLECTIONS.trashRecords)
+      .where({ _id: trashId, spaceId })
+      .remove();
+  }
+
+  async listTrashDueForPurge(now: Date): Promise<TrashRecord[]> {
+    const res = await this.col(COLLECTIONS.trashRecords)
+      .where({ status: 'in_trash', purgeAt: _.lte(now) })
+      .limit(1000)
+      .get();
+    return res.data.map((d) => mapDoc<TrashRecord>(d));
   }
 }

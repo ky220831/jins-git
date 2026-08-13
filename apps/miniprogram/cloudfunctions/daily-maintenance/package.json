@@ -1,0 +1,10 @@
+{
+  "name": "daily-maintenance",
+  "version": "1.0.0",
+  "private": true,
+  "description": "每日维护：14 天临时数据进回收站、72 小时回收站永久删除",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "^4.0.2"
+  }
+}

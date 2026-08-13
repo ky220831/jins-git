@@ -136,4 +136,8 @@ Page({
   onOpenCalendar() {
     wx.navigateTo({ url: '/pages/calendar/index' });
   },
+
+  onOpenMeal() {
+    wx.navigateTo({ url: '/pages/meal/index' });
+  },
 });

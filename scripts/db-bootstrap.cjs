@@ -19,6 +19,9 @@ const names = [
   'period_records',
   'holiday_calendar',
   'space_settings',
+  'meal_templates',
+  'meal_plans',
+  'trash_records',
 ];
 
 if (!envId) {

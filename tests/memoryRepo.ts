@@ -3,12 +3,15 @@ import type {
   AuditLogRecord,
   CalendarEventRecord,
   HolidayRecord,
+  MealPlanRecord,
+  MealTemplateRecord,
   PeriodRecordRecord,
   Repo,
   SpaceMemberRecord,
   SpaceRecord,
   SpaceSettingRecord,
   TodoRecord,
+  TrashRecord,
   UserIdentityRecord,
   UserRecord,
 } from '../apps/miniprogram/cloudfunctions/_shared/repo';
@@ -28,6 +31,9 @@ export class MemoryRepo implements Repo {
   periodRecords = new Map<string, PeriodRecordRecord>();
   holidays = new Map<string, HolidayRecord>();
   spaceSettings = new Map<string, SpaceSettingRecord>();
+  mealTemplates = new Map<string, MealTemplateRecord>();
+  mealPlans = new Map<string, MealPlanRecord>();
+  trash = new Map<string, TrashRecord>();
 
   async findUserIdentity(provider: string, providerUserId: string): Promise<UserIdentityRecord | null> {
     for (const item of this.userIdentities.values()) {
@@ -202,5 +208,130 @@ export class MemoryRepo implements Repo {
 
   async upsertSpaceSetting(setting: SpaceSettingRecord): Promise<void> {
     this.spaceSettings.set(setting.id, { ...setting });
+  }
+
+  async listMealTemplates(spaceId: string): Promise<MealTemplateRecord[]> {
+    return [...this.mealTemplates.values()]
+      .filter((t) => t.spaceId === spaceId)
+      .map((t) => ({ ...t }));
+  }
+
+  async findMealTemplateById(
+    spaceId: string,
+    templateId: string,
+  ): Promise<MealTemplateRecord | null> {
+    const t = this.mealTemplates.get(templateId);
+    return t && t.spaceId === spaceId ? { ...t } : null;
+  }
+
+  async createMealTemplate(template: MealTemplateRecord): Promise<void> {
+    this.mealTemplates.set(template.id, { ...template });
+  }
+
+  async updateMealTemplate(
+    spaceId: string,
+    templateId: string,
+    patch: Partial<MealTemplateRecord>,
+  ): Promise<void> {
+    const current = this.mealTemplates.get(templateId);
+    if (!current || current.spaceId !== spaceId) return;
+    this.mealTemplates.set(templateId, { ...current, ...patch });
+  }
+
+  async deleteMealTemplate(spaceId: string, templateId: string): Promise<void> {
+    const current = this.mealTemplates.get(templateId);
+    if (current && current.spaceId === spaceId) {
+      this.mealTemplates.delete(templateId);
+    }
+  }
+
+  async findMealPlanById(spaceId: string, planId: string): Promise<MealPlanRecord | null> {
+    const plan = this.mealPlans.get(planId);
+    return plan && plan.spaceId === spaceId ? { ...plan } : null;
+  }
+
+  async listMealPlansByDateRange(
+    spaceId: string,
+    startDate: string,
+    endDate: string,
+  ): Promise<MealPlanRecord[]> {
+    return [...this.mealPlans.values()]
+      .filter((p) => p.spaceId === spaceId && p.date >= startDate && p.date <= endDate)
+      .map((p) => ({ ...p }));
+  }
+
+  async listExpiredMealPlans(now: Date): Promise<MealPlanRecord[]> {
+    return [...this.mealPlans.values()]
+      .filter((p) => p.expireAt.getTime() <= now.getTime())
+      .map((p) => ({ ...p }));
+  }
+
+  async createMealPlan(plan: MealPlanRecord): Promise<void> {
+    this.mealPlans.set(plan.id, { ...plan });
+  }
+
+  async updateMealPlan(spaceId: string, planId: string, patch: Partial<MealPlanRecord>): Promise<void> {
+    const current = this.mealPlans.get(planId);
+    if (!current || current.spaceId !== spaceId) return;
+    this.mealPlans.set(planId, { ...current, ...patch });
+  }
+
+  async deleteMealPlan(spaceId: string, planId: string): Promise<void> {
+    const current = this.mealPlans.get(planId);
+    if (current && current.spaceId === spaceId) {
+      this.mealPlans.delete(planId);
+    }
+  }
+
+  async createTrash(item: TrashRecord): Promise<void> {
+    this.trash.set(item.id, { ...item });
+  }
+
+  async restoreRecord(collection: string, record: Record<string, unknown>): Promise<void> {
+    const id = record.id as string;
+    if (collection === 'meal_templates') {
+      this.mealTemplates.set(id, record as unknown as MealTemplateRecord);
+    } else if (collection === 'meal_plans') {
+      this.mealPlans.set(id, record as unknown as MealPlanRecord);
+    } else if (collection === 'todos') {
+      this.todos.set(id, record as unknown as TodoRecord);
+    } else {
+      throw new Error(`restoreRecord: unsupported collection ${collection}`);
+    }
+  }
+
+  async listTrash(spaceId: string, collection?: string): Promise<TrashRecord[]> {
+    return [...this.trash.values()]
+      .filter(
+        (t) =>
+          t.spaceId === spaceId &&
+          t.status === 'in_trash' &&
+          (!collection || t.collection === collection),
+      )
+      .map((t) => ({ ...t }));
+  }
+
+  async findTrashById(spaceId: string, trashId: string): Promise<TrashRecord | null> {
+    const t = this.trash.get(trashId);
+    return t && t.spaceId === spaceId ? { ...t } : null;
+  }
+
+  async updateTrash(spaceId: string, trashId: string, patch: Partial<TrashRecord>): Promise<void> {
+    const current = this.trash.get(trashId);
+    if (!current || current.spaceId !== spaceId) return;
+    this.trash.set(trashId, { ...current, ...patch });
+  }
+
+  async deleteTrash(spaceId: string, trashId: string): Promise<void> {
+    const current = this.trash.get(trashId);
+    if (current && current.spaceId === spaceId) {
+      this.trash.delete(trashId);
+    }
+  }
+
+  async listTrashDueForPurge(now: Date): Promise<TrashRecord[]> {
+    return [...this.trash.values()]
+      .filter((t) => t.status === 'in_trash' && t.purgeAt.getTime() <= now.getTime())
+      .map((t) => ({ ...t }));
   }
 }

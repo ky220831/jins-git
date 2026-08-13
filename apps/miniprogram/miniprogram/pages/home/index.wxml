@@ -48,5 +48,6 @@
     </view>
 
     <button class="btn-primary calendar-btn" bindtap="onOpenCalendar">打开日历</button>
+    <button class="btn-secondary calendar-btn" bindtap="onOpenMeal">今日菜单</button>
   </block>
 </view>

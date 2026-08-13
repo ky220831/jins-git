@@ -12,6 +12,7 @@ import {
 import { requireSpaceMember } from './access';
 import {
   DEFAULT_CYCLE_LENGTH,
+  DEFAULT_PREDICTED_DURATION,
   PERIOD_ACTUAL_MAX,
   PERIOD_REST_DAYS,
 } from './constants';
@@ -36,14 +37,6 @@ function addDays(date: string, n: number): string {
   const { y, m, d } = dateParts(date);
   const t = new Date(Date.UTC(y, m - 1, d + n));
   return `${t.getUTCFullYear()}-${pad(t.getUTCMonth() + 1)}-${pad(t.getUTCDate())}`;
-}
-
-function daySpan(startDate: string, endDate: string): number {
-  const a = dateParts(startDate);
-  const b = dateParts(endDate);
-  return (
-    Math.round((Date.UTC(b.y, b.m - 1, b.d) - Date.UTC(a.y, a.m - 1, a.d)) / 86400000) + 1
-  );
 }
 
 function toPeriodRecordView(record: PeriodRecordRecord): PeriodRecordView {
@@ -261,13 +254,13 @@ export class PeriodService {
 
     const latest = actuals[actuals.length - 1];
     const cycleLength = latest.cycleLength || DEFAULT_CYCLE_LENGTH;
-    const duration = daySpan(latest.startDate, latest.endDate);
-    const predictedStart = addDays(latest.startDate, cycleLength);
+    // 用户口径：预计开始日 = 最近一次实际“结束节点”+ 22 天；预计持续 7 天
+    const predictedStart = addDays(latest.endDate, cycleLength);
     const predicted: PeriodRecordRecord = {
       id: newId('pr'),
       spaceId,
       startDate: predictedStart,
-      endDate: addDays(predictedStart, duration - 1),
+      endDate: addDays(predictedStart, DEFAULT_PREDICTED_DURATION - 1),
       type: PERIOD_TYPE_PREDICTED,
       isEstimated: true,
       cycleLength,

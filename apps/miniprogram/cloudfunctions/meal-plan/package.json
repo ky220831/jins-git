@@ -1,0 +1,10 @@
+{
+  "name": "meal-plan",
+  "version": "1.0.0",
+  "private": true,
+  "description": "今日菜单临时记录：按月/今日 / 上架 / 编辑 / 下架 / 删除 / 随机选择",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "^4.0.2"
+  }
+}

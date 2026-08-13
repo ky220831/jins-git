@@ -232,6 +232,126 @@ export interface DeletePeriodInput {
   recordId: string;
 }
 
+// ---- 今日菜单 ----
+export const MEAL_PLAN_STATUS_PUBLISHED = 'published';
+export const MEAL_PLAN_STATUS_OFFLINE = 'offline';
+export type MealPlanStatus =
+  | typeof MEAL_PLAN_STATUS_PUBLISHED
+  | typeof MEAL_PLAN_STATUS_OFFLINE;
+
+export interface MealTemplateView {
+  id: string;
+  name: string;
+  image?: string;
+  category?: string;
+  enabled: boolean;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+  version: number;
+}
+
+export interface CreateMealTemplateInput {
+  name: string;
+  category?: string;
+  image?: string;
+}
+
+export interface UpdateMealTemplateInput {
+  templateId: string;
+  name?: string;
+  category?: string | null;
+  image?: string | null;
+  enabled?: boolean;
+}
+
+export interface DeleteMealTemplateInput {
+  templateId: string;
+}
+
+export interface MealPlanView {
+  id: string;
+  templateId?: string;
+  name: string;
+  date: string;
+  time?: string;
+  category?: string;
+  note?: string;
+  status: MealPlanStatus;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+  version: number;
+}
+
+export interface CreateMealPlanInput {
+  date: string;
+  templateId?: string;
+  name?: string;
+  time?: string;
+  category?: string;
+  note?: string;
+}
+
+export interface UpdateMealPlanInput {
+  planId: string;
+  date?: string;
+  time?: string | null;
+  name?: string;
+  category?: string | null;
+  note?: string | null;
+  status?: MealPlanStatus;
+}
+
+export interface OfflineMealPlanInput {
+  planId: string;
+}
+
+export interface DeleteMealPlanInput {
+  planId: string;
+}
+
+export interface MealRandomInput {
+  /** 默认今天 */
+  date?: string;
+}
+
+// ---- 回收站 ----
+export const TRASH_STATUS_IN_TRASH = 'in_trash';
+export const TRASH_STATUS_RESTORED = 'restored';
+export const TRASH_STATUS_PURGED = 'purged';
+export type TrashStatus =
+  | typeof TRASH_STATUS_IN_TRASH
+  | typeof TRASH_STATUS_RESTORED
+  | typeof TRASH_STATUS_PURGED;
+
+export const TRASH_RETENTION_TEMPORARY = 'temporary';
+export const TRASH_RETENTION_PERMANENT = 'permanent';
+export type TrashRetentionType =
+  | typeof TRASH_RETENTION_TEMPORARY
+  | typeof TRASH_RETENTION_PERMANENT;
+
+export interface TrashItemView {
+  id: string;
+  collection: string;
+  recordId: string;
+  title: string;
+  deletedAt: string;
+  deletedBy: string;
+  deleteReason: string;
+  purgeAt: string;
+  retentionType: TrashRetentionType;
+  originalStatus?: string;
+}
+
+export interface TrashListInput {
+  collection?: string;
+}
+
+export interface TrashActionInput {
+  trashId: string;
+}
+
 // ---- 节假日 ----
 export const HOLIDAY_TYPE_HOLIDAY = 'holiday';
 export const HOLIDAY_TYPE_MAKEUP_WORKDAY = 'makeup_workday';

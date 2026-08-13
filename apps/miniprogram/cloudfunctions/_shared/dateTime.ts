@@ -51,3 +51,10 @@ export function validateYearMonth(input: { year?: number; month?: number }): {
 export function toShanghaiDate(date: string, time: string): Date {
   return new Date(`${date}T${time}:00+08:00`);
 }
+
+/** Asia/Shanghai 当前墙钟日期（YYYY-MM-DD），不依赖设备时区 */
+export function todayShanghaiString(clock: () => Date = () => new Date()): string {
+  const shifted = new Date(clock().getTime() + 8 * 3600000);
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${shifted.getUTCFullYear()}-${pad(shifted.getUTCMonth() + 1)}-${pad(shifted.getUTCDate())}`;
+}

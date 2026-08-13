@@ -34,6 +34,7 @@ const OPENID_A = `e2e3-a-${Date.now()}`;
 const OPENID_B = `e2e3-b-${Date.now()}`;
 const OPENID_C = `e2e3-c-${Date.now()}`;
 let testSpaceId = '';
+let cTestSpaceId = '';
 
 let failures = 0;
 
@@ -81,6 +82,11 @@ async function cleanup(): Promise<void> {
       await db.collection('calendar_events').where({ spaceId: testSpaceId }).remove();
       await db.collection('todos').where({ spaceId: testSpaceId }).remove();
     }
+    if (cTestSpaceId) {
+      await db.collection('spaces').doc(cTestSpaceId).remove();
+      await db.collection('space_members').where({ spaceId: cTestSpaceId }).remove();
+      await db.collection('audit_logs').where({ spaceId: cTestSpaceId }).remove();
+    }
     console.log('[清理] 第三阶段临时测试数据已删除');
   } catch (err) {
     console.log('[清理] 部分失败（不影响结论）:', String((err as Error).message || err));
@@ -95,6 +101,7 @@ async function main(): Promise<void> {
   await spaceService.joinSpace(OPENID_B, { inviteCode: created.inviteCode });
   const cSpace = await spaceService.createSpace(OPENID_C, { name: 'E2E3-C空间' });
   const cSpaceId = cSpace.space.spaceId;
+  cTestSpaceId = cSpaceId;
   console.log(`[准备] A/B 同一空间 ${testSpaceId}，C 独立空间 ${cSpaceId}`);
 
   // ---- 生理期记录与预测 ----
@@ -104,8 +111,8 @@ async function main(): Promise<void> {
   });
   const predicted1 = first.find((v) => v.type === 'predicted');
   check(
-    '第一次记录生成 22 天预测 08-14~08-18',
-    !!predicted1 && predicted1.startDate === '2026-08-14' && predicted1.endDate === '2026-08-18',
+    '第一次记录生成预测：结束日 07-27 + 22 天 = 08-18~08-24',
+    !!predicted1 && predicted1.startDate === '2026-08-18' && predicted1.endDate === '2026-08-24',
     predicted1 ? `${predicted1.startDate}~${predicted1.endDate}` : '无预测',
   );
 
@@ -123,7 +130,8 @@ async function main(): Promise<void> {
     '滚动：只保留最近 2 条 actual + 1 条 predicted',
     actuals.length === 2 &&
       viewsAfterRoll.filter((v) => v.type === 'predicted').length === 1 &&
-      predictedAfter?.startDate === '2026-09-05',
+      predictedAfter?.startDate === '2026-09-09' &&
+      predictedAfter?.endDate === '2026-09-15',
     actuals.map((v) => v.startDate).join(', ') +
       (predictedAfter ? ` / 预测 ${predictedAfter.startDate}~${predictedAfter.endDate}` : ''),
   );
@@ -134,7 +142,7 @@ async function main(): Promise<void> {
   const augByDate = new Map(aug.periodDays.map((d) => [d.date, d]));
   check(
     '8 月日历含生理期 08-14~18 与休息 08-19',
-    augByDate.get('2026-08-14')?.kind === 'period' &&
+      augByDate.get('2026-08-14')?.kind === 'period' &&
       augByDate.get('2026-08-18')?.kind === 'period' &&
       augByDate.get('2026-08-19')?.kind === 'rest' &&
       augByDate.get('2026-08-20') === undefined,

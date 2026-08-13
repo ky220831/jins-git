@@ -52,7 +52,7 @@ function seedHoliday(
   });
 }
 
-test('记录第一次实际生理期：自动生成 22 天后的预测，长度为最近实际天数', async () => {
+test('记录第一次实际生理期：预计开始 = 结束日 + 22 天，预计持续 7 天', async () => {
   const { periodService } = await fresh();
   const views = await periodService.recordActual('openid-A', {
     startDate: '2026-07-23',
@@ -65,8 +65,8 @@ test('记录第一次实际生理期：自动生成 22 天后的预测，长度�
   assert.ok(actual && predicted);
   assert.equal(actual.startDate, '2026-07-23');
   assert.equal(actual.isEstimated, false);
-  assert.equal(predicted.startDate, '2026-08-14');
-  assert.equal(predicted.endDate, '2026-08-18');
+  assert.equal(predicted.startDate, '2026-08-18');
+  assert.equal(predicted.endDate, '2026-08-24');
   assert.equal(predicted.isEstimated, true);
   assert.equal(predicted.cycleLength, 22);
 });
@@ -94,12 +94,12 @@ test('第二次实际生理期：只保留最近 2 条 actual + 1 条 predicted�
     actuals.map((v) => v.startDate),
     ['2026-07-23', '2026-08-14'],
   );
-  // 预测 = 最近实际 08-14 + 22 天
-  assert.equal(predicted[0].startDate, '2026-09-05');
-  assert.equal(predicted[0].endDate, '2026-09-09');
+  // 预测 = 最近实际结束 08-18 + 22 天 = 09-09，持续 7 天
+  assert.equal(predicted[0].startDate, '2026-09-09');
+  assert.equal(predicted[0].endDate, '2026-09-15');
 });
 
-test('月视图：生理期红色 + 结束后 1 天蓝色休息；预测不产生休息标记', async () => {
+test('月视图：生理期红色 + 结束后 1 天蓝色休息；预测（08-27 起）不产生休息标记', async () => {
   const { calendarService, periodService } = await fresh();
   await periodService.recordActual('openid-A', {
     startDate: '2026-08-01',
@@ -111,20 +111,24 @@ test('月视图：生理期红色 + 结束后 1 天蓝色休息；预测不产�
   assert.equal(byDate.get('2026-08-05')?.kind, 'period');
   assert.equal(byDate.get('2026-08-06')?.kind, 'rest');
   assert.equal(byDate.get('2026-08-07'), undefined);
-  // 预测 08-23~08-27 不应产生休息日
-  assert.equal(byDate.get('2026-08-28'), undefined);
+  // 预测 = 08-05 + 22 天 = 08-27 ~ 09-02；8 月内为 08-27~08-31
+  assert.equal(byDate.get('2026-08-23'), undefined);
+  assert.equal(byDate.get('2026-08-27')?.kind, 'period');
+  assert.equal(byDate.get('2026-08-31')?.kind, 'period');
+  // 预测结束后一天 09-03 不应标记休息
+  assert.equal(byDate.get('2026-09-03'), undefined);
 });
 
-test('今日状态：今日处于预测生理期，返回 today=period 与下次预测', async () => {
-  const clock = () => new Date('2026-08-15T00:00:00+08:00');
+test('今日状态：今日处于预测生理期，返回 today=period 与下次预测（08-18~08-24）', async () => {
+  const clock = () => new Date('2026-08-20T00:00:00+08:00');
   const { periodService } = await fresh(clock);
   await periodService.recordActual('openid-A', {
     startDate: '2026-07-23',
     endDate: '2026-07-27',
   });
   const info = await periodService.info('openid-A');
-  assert.deepEqual(info.today, { date: '2026-08-15', kind: 'period' });
-  assert.deepEqual(info.nextPredicted, { startDate: '2026-08-14', endDate: '2026-08-18' });
+  assert.deepEqual(info.today, { date: '2026-08-20', kind: 'period' });
+  assert.deepEqual(info.nextPredicted, { startDate: '2026-08-18', endDate: '2026-08-24' });
   assert.equal(info.calendarVisible, true);
 });
 
@@ -140,14 +144,14 @@ test('休息日状态：实际生理期结束后第 1 天为 rest（Asia/Shangha
 });
 
 test('时区：UTC 23 点（上海已是次日 07:00）按 Asia/Shanghai 判定', async () => {
-  const clock = () => new Date('2026-08-14T23:00:00Z');
+  const clock = () => new Date('2026-08-19T23:00:00Z');
   const { periodService } = await fresh(clock);
   await periodService.recordActual('openid-A', {
     startDate: '2026-07-23',
     endDate: '2026-07-27',
   });
   const info = await periodService.info('openid-A');
-  assert.deepEqual(info.today, { date: '2026-08-15', kind: 'period' });
+  assert.deepEqual(info.today, { date: '2026-08-20', kind: 'period' });
 });
 
 test('跨空间：C 无法读取 A 的生理期记录；同空间 B 可共享', async () => {

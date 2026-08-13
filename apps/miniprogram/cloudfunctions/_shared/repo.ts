@@ -1,12 +1,15 @@
 import type {
   CalendarSourceType,
   HolidayType,
+  MealPlanStatus,
   MemberStatus,
   PeriodType,
   SpaceRole,
   SpaceStatus,
   TodoPriority,
   TodoStatus,
+  TrashRetentionType,
+  TrashStatus,
   UserStatus,
 } from '../../../../packages/types/src';
 
@@ -130,6 +133,55 @@ export interface SpaceSettingRecord {
   updatedAt: Date;
 }
 
+export interface MealTemplateRecord {
+  id: string;
+  spaceId: string;
+  name: string;
+  image: string | null;
+  category: string | null;
+  enabled: boolean;
+  createdBy: string;
+  createdAt: Date;
+  updatedAt: Date;
+  version: number;
+}
+
+export interface MealPlanRecord {
+  id: string;
+  spaceId: string;
+  templateId: string | null;
+  name: string;
+  date: string;
+  time: string | null;
+  category: string | null;
+  note: string | null;
+  status: MealPlanStatus;
+  createdBy: string;
+  createdAt: Date;
+  updatedAt: Date;
+  version: number;
+  expireAt: Date;
+}
+
+export interface TrashRecord {
+  id: string;
+  spaceId: string;
+  collection: string;
+  recordId: string;
+  snapshot: unknown;
+  deletedAt: Date;
+  deletedBy: string;
+  deleteReason: string;
+  purgeAt: Date;
+  originalStatus: string | null;
+  retentionType: TrashRetentionType;
+  status: TrashStatus;
+  restoredAt: Date | null;
+  restoredBy: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 /**
  * 数据访问层接口：云函数用 CloudRepo（真实数据库），测试用 MemoryRepo。
  * 业务逻辑（SpaceService）只依赖该接口，不直接操作数据库。
@@ -170,4 +222,24 @@ export interface Repo {
   upsertHoliday(record: HolidayRecord): Promise<void>;
   findSpaceSetting(spaceId: string, key: string): Promise<SpaceSettingRecord | null>;
   upsertSpaceSetting(setting: SpaceSettingRecord): Promise<void>;
+
+  // ---- 第四阶段：今日菜单与回收站 ----
+  listMealTemplates(spaceId: string): Promise<MealTemplateRecord[]>;
+  findMealTemplateById(spaceId: string, templateId: string): Promise<MealTemplateRecord | null>;
+  createMealTemplate(template: MealTemplateRecord): Promise<void>;
+  updateMealTemplate(spaceId: string, templateId: string, patch: Partial<MealTemplateRecord>): Promise<void>;
+  deleteMealTemplate(spaceId: string, templateId: string): Promise<void>;
+  findMealPlanById(spaceId: string, planId: string): Promise<MealPlanRecord | null>;
+  listMealPlansByDateRange(spaceId: string, startDate: string, endDate: string): Promise<MealPlanRecord[]>;
+  listExpiredMealPlans(now: Date): Promise<MealPlanRecord[]>;
+  createMealPlan(plan: MealPlanRecord): Promise<void>;
+  updateMealPlan(spaceId: string, planId: string, patch: Partial<MealPlanRecord>): Promise<void>;
+  deleteMealPlan(spaceId: string, planId: string): Promise<void>;
+  createTrash(item: TrashRecord): Promise<void>;
+  restoreRecord(collection: string, record: Record<string, unknown>): Promise<void>;
+  listTrash(spaceId: string, collection?: string): Promise<TrashRecord[]>;
+  findTrashById(spaceId: string, trashId: string): Promise<TrashRecord | null>;
+  updateTrash(spaceId: string, trashId: string, patch: Partial<TrashRecord>): Promise<void>;
+  deleteTrash(spaceId: string, trashId: string): Promise<void>;
+  listTrashDueForPurge(now: Date): Promise<TrashRecord[]>;
 }
