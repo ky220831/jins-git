@@ -34,6 +34,18 @@ function todayKey(): string {
   return dateKey(now.getFullYear(), now.getMonth() + 1, now.getDate());
 }
 
+/** 分类清洗：导入值如“美食·火锅” → 只保留最后一段“火锅”（用户自填简单分类） */
+function normalizeCategory(v: string): string {
+  const s = v.trim();
+  if (!s) return '';
+  const last = s
+    .split('·')
+    .map((x) => x.trim())
+    .filter(Boolean)
+    .pop();
+  return (last || s).slice(0, 20);
+}
+
 Page({
   data: {
     themeClass: currentThemeClass(),
@@ -57,6 +69,9 @@ Page({
     fHours: '',
     fFavorite: false,
     fVisited: false,
+    fEnabled: true,
+    showAdvanced: false,
+    categoryOptions: ['火锅', '炒菜', '自助', '烧烤', '日料', '西餐', '甜品', '咖啡', '小吃', '面食'],
     fLat: '',
     fLng: '',
     saving: false,
@@ -145,6 +160,8 @@ Page({
       fHours: '',
       fFavorite: false,
       fVisited: false,
+      fEnabled: true,
+      showAdvanced: false,
       fLat: '',
       fLng: '',
       ocrHint: '',
@@ -170,6 +187,8 @@ Page({
       fHours: r.businessHours || '',
       fFavorite: r.favorite,
       fVisited: r.visited,
+      fEnabled: r.enabled,
+      showAdvanced: false,
       fLat: typeof r.lat === 'number' ? String(r.lat) : '',
       fLng: typeof r.lng === 'number' ? String(r.lng) : '',
       ocrHint: '',
@@ -195,6 +214,16 @@ Page({
     this.setData({ [field]: !!e.detail.value } as Record<string, boolean>);
   },
 
+  /** 常用分类快捷点选（分类由用户自填，PRD：归类更简单） */
+  onPickCategory(e: WechatMiniprogram.TouchEvent) {
+    const cat = e.currentTarget.dataset.cat as string;
+    if (cat) this.setData({ fCategory: cat });
+  },
+
+  onToggleAdvanced() {
+    this.setData({ showAdvanced: !this.data.showAdvanced });
+  },
+
   async onSaveRestaurant() {
     const name = this.data.fName.trim();
     if (!name) {
@@ -209,11 +238,12 @@ Page({
           .split(/[,，、]/)
           .map((s) => s.trim())
           .filter(Boolean);
+      const category = normalizeCategory(this.data.fCategory);
       const common = {
         name,
         address: this.data.fAddress.trim() || null,
         city: this.data.fCity.trim() || null,
-        category: this.data.fCategory.trim() || null,
+        category: category || null,
         pricePerPerson: this.data.fPrice.trim() ? Number(this.data.fPrice) : null,
         rating: this.data.fRating.trim() ? Number(this.data.fRating) : null,
         tags: splitList(this.data.fTags),
@@ -222,6 +252,7 @@ Page({
         businessHours: this.data.fHours.trim() || null,
         favorite: this.data.fFavorite,
         visited: this.data.fVisited,
+        enabled: this.data.fEnabled,
         lat: this.data.fLat.trim() ? Number(this.data.fLat) : null,
         lng: this.data.fLng.trim() ? Number(this.data.fLng) : null,
       };
@@ -324,7 +355,7 @@ Page({
       fName: item.name,
       fAddress: item.address || '',
       fCity: item.city || '',
-      fCategory: item.category || '',
+      fCategory: normalizeCategory(item.category || ''),
       fLat: typeof item.lat === 'number' ? String(item.lat) : '',
       fLng: typeof item.lng === 'number' ? String(item.lng) : '',
     });
@@ -347,7 +378,7 @@ Page({
         editingId: '',
         fName: draft.name || '',
         fAddress: draft.address || '',
-        fCategory: draft.category || '',
+        fCategory: normalizeCategory(draft.category || ''),
         fPrice: typeof draft.pricePerPerson === 'number' ? String(draft.pricePerPerson) : '',
         fHours: draft.businessHours || '',
         fDishes: (draft.dishes || []).join(', '),
@@ -463,20 +494,50 @@ Page({
   },
 
   // ---- 怎么去（仅在主动点击时获取位置，不保存，PRD §48/§50）----
-  onHowToGo(e: WechatMiniprogram.TouchEvent) {
+  async onHowToGo(e: WechatMiniprogram.TouchEvent) {
     const id = e.currentTarget.dataset.id as string;
     const r = this.data.restaurants.find((x) => x.id === id);
-    if (!r || typeof r.lat !== 'number' || typeof r.lng !== 'number') {
-      wx.showToast({ title: '该餐厅还没有坐标，请先补充地址', icon: 'none' });
+    if (!r) return;
+    // 有精确坐标 → 直接导航
+    if (typeof r.lat === 'number' && typeof r.lng === 'number') {
+      wx.openLocation({
+        latitude: r.lat,
+        longitude: r.lng,
+        name: r.name,
+        address: r.address || '',
+      });
       return;
     }
-    // 直接调起地图导航（wx.openLocation 无需定位权限，地图自行处理当前位置）
-    wx.openLocation({
-      latitude: r.lat as number,
-      longitude: r.lng as number,
-      name: r.name,
-      address: r.address || '',
-    });
+    // 只有地址 → 按地址模糊搜索定位后导航（地址不精准也能用）
+    const keyword = (r.address || r.name || '').trim();
+    if (!keyword) {
+      wx.showToast({ title: '请先补充餐厅地址', icon: 'none' });
+      return;
+    }
+    wx.showLoading({ title: '正在定位地址' });
+    try {
+      const res = await RestaurantSearchService.search({
+        keyword,
+        region: r.city || '',
+      });
+      const first = res.items[0];
+      if (!first) {
+        throw new Error('未找到匹配地址');
+      }
+      wx.hideLoading();
+      wx.openLocation({
+        latitude: first.lat,
+        longitude: first.lng,
+        name: first.name,
+        address: first.address || '',
+      });
+    } catch {
+      wx.hideLoading();
+      wx.showToast({
+        title: '未能自动定位该地址，请复制地址到地图 App 搜索',
+        icon: 'none',
+      });
+    }
   },
 
     onRemind() {

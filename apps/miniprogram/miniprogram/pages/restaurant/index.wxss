@@ -161,6 +161,39 @@
   margin-bottom: 12rpx;
 }
 
+.category-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+  margin: -4rpx 0 12rpx;
+}
+
+.cat-chip {
+  padding: 8rpx 20rpx;
+  font-size: 22rpx;
+  color: var(--color-text-secondary);
+  background: rgba(240, 138, 155, 0.06);
+  border: 2rpx solid var(--color-border);
+  border-radius: 999rpx;
+}
+
+.cat-chip.active {
+  color: var(--color-primary-deep);
+  background: rgba(240, 138, 155, 0.12);
+  border-color: rgba(240, 138, 155, 0.35);
+  font-weight: 600;
+}
+
+.advanced-toggle {
+  margin: 4rpx 0 8rpx;
+  padding: 14rpx 0;
+  text-align: center;
+  font-size: 24rpx;
+  color: var(--color-primary-deep);
+  background: rgba(240, 138, 155, 0.05);
+  border-radius: var(--radius-sm);
+}
+
 .input {
   background: var(--color-bg);
   border-radius: var(--radius-sm);

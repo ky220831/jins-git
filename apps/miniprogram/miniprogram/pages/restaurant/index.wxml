@@ -42,8 +42,6 @@
         <view class="chip" data-id="{{item.id}}" bindtap="onEditRestaurant">编辑</view>
         <view class="chip" data-id="{{item.id}}" bindtap="onShowVisitForm">安排去</view>
         <view class="chip" data-id="{{item.id}}" bindtap="onHowToGo">怎么去</view>
-        <view class="chip" data-id="{{item.id}}" data-field="visited" bindtap="onToggleRestaurant">去过</view>
-        <view class="chip" data-id="{{item.id}}" data-field="enabled" bindtap="onToggleRestaurant">{{item.enabled ? '下架' : '上架'}}</view>
         <view class="chip danger" wx:if="{{isOwner}}" data-id="{{item.id}}" bindtap="onDeleteRestaurant">删除</view>
       </view>
       <view class="photo-actions">
@@ -102,8 +100,14 @@
           <textarea class="input textarea auto-grow" placeholder="如：日料/火锅" value="{{fCategory}}" data-field="fCategory" bindinput="onFieldInput" maxlength="20" auto-height />
         </view>
       </view>
-      <!-- 高级信息：仅编辑已有餐厅时显示 -->
-      <block wx:if="{{editingId}}">
+      <view class="category-chips">
+        <view class="cat-chip {{fCategory === cat ? 'active' : ''}}" wx:for="{{categoryOptions}}" wx:key="*this" data-cat="{{item}}" bindtap="onPickCategory">{{item}}</view>
+      </view>
+      <!-- 更多信息：默认折叠，收纳人均/评分/坐标/标签/推荐菜/营业时间/备注/收藏/已去过/上架 -->
+      <view class="advanced-toggle" bindtap="onToggleAdvanced">
+        <text>{{showAdvanced ? '收起更多信息 ▴' : '更多信息 ▾'}}</text>
+      </view>
+      <block wx:if="{{showAdvanced}}">
         <view class="form-row">
           <view class="form-col">
             <view class="field-label">人均 ¥</view>
@@ -137,6 +141,8 @@
           <switch checked="{{fFavorite}}" data-field="fFavorite" bindchange="onToggleFormField" color="#D98E8E" />
           <text>已去过</text>
           <switch checked="{{fVisited}}" data-field="fVisited" bindchange="onToggleFormField" color="#7FA3B8" />
+          <text>上架</text>
+          <switch checked="{{fEnabled}}" data-field="fEnabled" bindchange="onToggleFormField" color="#7FA3B8" />
         </view>
       </block>
       <view class="form-actions">
