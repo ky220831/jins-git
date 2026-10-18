@@ -467,24 +467,12 @@ Page({
       wx.showToast({ title: '该餐厅还没有坐标，请先补充地址', icon: 'none' });
       return;
     }
-    wx.getLocation({
-      type: 'gcj02',
-      success: () => {
-        wx.openLocation({
-          latitude: r.lat as number,
-          longitude: r.lng as number,
-          name: r.name,
-          address: r.address || '',
-        });
-      },
-      fail: () => {
-        wx.openLocation({
-          latitude: r.lat as number,
-          longitude: r.lng as number,
-          name: r.name,
-          address: r.address || '',
-        });
-      },
+    // 直接调起地图导航（wx.openLocation 无需定位权限，地图自行处理当前位置）
+    wx.openLocation({
+      latitude: r.lat as number,
+      longitude: r.lng as number,
+      name: r.name,
+      address: r.address || '',
     });
   },
 });
