@@ -1,6 +1,6 @@
 <view class="container {{themeClass}} travel-page">
   <view class="page-head">
-    <view class="page-title">旅游计划</view>
+    <view class="page-title">旅行</view>
     <view class="page-sub">两个人的下一站</view>
   </view>
 

@@ -1,6 +1,6 @@
 <view class="container {{themeClass}} meal-page">
   <view class="page-head">
-    <view class="page-title">今日菜单</view>
+    <view class="page-title">今天吃什么</view>
     <view class="page-date">{{todayDate}}</view>
   </view>
 
@@ -96,7 +96,7 @@
         <switch checked="{{planSaveAsTemplate}}" bindchange="onToggleSaveTemplate" color="#F08A9B" />
         <text>同时加入预选素材库（以后可随机选）</text>
       </view>
-      <view class="reminder-link" bindtap="onRemind">🔔 开启今日菜单提醒</view>
+      <view class="reminder-link" bindtap="onRemind">🔔 开启菜单提醒</view>
       <view class="form-actions">
         <button class="btn-secondary form-btn" bindtap="onHidePlanForm">取消</button>
         <button class="btn-primary form-btn" bindtap="onSavePlan" loading="{{saving}}" disabled="{{saving}}">保存</button>

@@ -24,7 +24,7 @@ async function notifyMealChange(openid: string, plan: MealPlanView): Promise<voi
     await new ReminderService(repo).notifyChange(
       spaceId,
       'meal',
-      `菜单已更新：${plan.name}`,
+      `今天吃什么已更新：${plan.name}`,
       plan.date,
       plan.time || undefined,
       openid,

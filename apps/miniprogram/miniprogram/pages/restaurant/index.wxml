@@ -1,6 +1,6 @@
 <view class="container {{themeClass}} restaurant-page">
   <view class="page-head">
-    <view class="page-title">漂亮饭</view>
+    <view class="page-title">下馆子</view>
     <view class="page-sub">两个人的餐厅收藏库</view>
   </view>
 

@@ -10,6 +10,7 @@ import { CalendarService } from '../../services/calendar';
 import { PeriodService } from '../../services/period';
 import { SpaceService } from '../../services/space';
 import { TodoService } from '../../services/todo';
+import { moduleLabels } from '../../lib/shared/tokens';
 import { startSilentRefresh } from '../../utils/realtime';
 import { lunarDayName, termNameOf, toLunar } from '../../utils/solar';
 import { formatDateTime } from '../../utils/time';
@@ -47,17 +48,6 @@ interface EventRow extends CalendarEventView {
   icon: string;
   moduleLabel: string;
 }
-
-/** 与功能页完全一致的模块图标与名称（1.0.14） */
-const MODULE_META: Record<string, { icon: string; label: string }> = {
-  meal: { icon: '🍚', label: '今日菜单' },
-  restaurant: { icon: '🍴', label: '漂亮饭' },
-  anniversary: { icon: '❤️', label: '纪念日' },
-  trip: { icon: '✈️', label: '旅游计划' },
-  period: { icon: '🌸', label: '生理期' },
-  todo: { icon: '📝', label: 'To Do' },
-  custom: { icon: '📌', label: '事项' },
-};
 
 /** 日程分类 → 圆点/色条 class（与功能页图标一致，V2 分类语义色） */
 const DOT_CLASS: Record<string, string> = {
@@ -403,14 +393,14 @@ Page({
         ...todo,
         timeLabel: todo.time || '全天',
         priorityLabel: todo.priority === 'high' ? '高' : todo.priority === 'low' ? '低' : '普通',
-        icon: (todo.businessType && MODULE_META[todo.businessType]?.icon) || '📝',
-        moduleLabel: (todo.businessType && MODULE_META[todo.businessType]?.label) || 'To Do',
+        icon: (todo.businessType && moduleLabels[todo.businessType]?.icon) || '📝',
+        moduleLabel: (todo.businessType && moduleLabels[todo.businessType]?.label) || '待办',
       }));
     const dayEvents: EventRow[] = eventList
       .map((event) => ({ event, parts: toShanghaiParts(event.startTime) }))
       .filter(({ parts }) => parts.date === date)
       .map(({ event, parts }) => {
-        const meta = MODULE_META[event.sourceType] || MODULE_META.custom;
+        const meta = moduleLabels[event.sourceType] || moduleLabels.custom;
         return {
           ...event,
           title: stripModuleEmoji(event.title, meta.icon),

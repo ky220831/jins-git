@@ -39,10 +39,10 @@ const ACTION_LABELS: Record<string, string> = {
   'meal.template.create': '新增菜单素材',
   'meal.template.update': '编辑菜单素材',
   'meal.template.delete': '删除菜单素材',
-  'meal.plan.create': '上架今日菜单',
-  'meal.plan.update': '编辑今日菜单',
-  'meal.plan.offline': '下架今日菜单',
-  'meal.plan.delete': '删除今日菜单',
+  'meal.plan.create': '上架菜单',
+  'meal.plan.update': '编辑菜单',
+  'meal.plan.offline': '下架菜单',
+  'meal.plan.delete': '删除菜单',
   'meal.plan.random': '随机选择菜单',
   'meal.plan.auto_expire': '菜单自动清理',
   'restaurant.create': '新增餐厅',
@@ -59,10 +59,10 @@ const ACTION_LABELS: Record<string, string> = {
   'trip.create': '新增旅行资料',
   'trip.update': '编辑旅行资料',
   'trip.delete': '删除旅行资料',
-  'trip.plan.create': '新增旅游行程',
-  'trip.plan.update': '编辑旅游行程',
-  'trip.plan.offline': '下架旅游行程',
-  'trip.plan.delete': '删除旅游行程',
+  'trip.plan.create': '新增旅行行程',
+  'trip.plan.update': '编辑旅行行程',
+  'trip.plan.offline': '下架旅行行程',
+  'trip.plan.delete': '删除旅行行程',
   'trip.plan.auto_expire': '行程自动清理',
   'trash.restore': '恢复数据',
   'trash.purge': '永久删除',
@@ -74,13 +74,13 @@ const ACTION_LABELS: Record<string, string> = {
 };
 
 const COLLECTION_LABELS: Record<string, string> = {
-  meal_templates: '今日菜单素材',
-  meal_plans: '今日菜单',
+  meal_templates: '菜单素材',
+  meal_plans: '今天吃什么',
   restaurants: '餐厅',
   restaurant_visits: '餐厅行程',
   anniversaries: '纪念日',
   trips: '旅行资料',
-  trip_plans: '旅游行程',
+  trip_plans: '旅行行程',
 };
 
 const COLLECTION_OPTIONS = [

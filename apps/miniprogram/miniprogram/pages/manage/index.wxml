@@ -1,6 +1,6 @@
 <view class="container {{themeClass}} manage-page">
   <view class="page-head">
-    <view class="page-title">管理</view>
+    <view class="page-title">设置与数据</view>
     <view class="page-sub">{{isOwner ? '主管理' : '副管理'}}</view>
   </view>
 
@@ -11,14 +11,14 @@
     <view class="card">
       <view class="card-title">数据概览</view>
       <view class="count-grid">
-        <view class="count-item"><view class="count-num">{{counts.todos}}</view><view class="count-label">To Do</view></view>
+        <view class="count-item"><view class="count-num">{{counts.todos}}</view><view class="count-label">待办</view></view>
         <view class="count-item"><view class="count-num">{{counts.mealTemplates}}</view><view class="count-label">菜单素材</view></view>
-        <view class="count-item"><view class="count-num">{{counts.mealPlans}}</view><view class="count-label">今日菜单</view></view>
+        <view class="count-item"><view class="count-num">{{counts.mealPlans}}</view><view class="count-label">今天吃什么</view></view>
         <view class="count-item"><view class="count-num">{{counts.restaurants}}</view><view class="count-label">餐厅</view></view>
         <view class="count-item"><view class="count-num">{{counts.restaurantVisits}}</view><view class="count-label">餐厅行程</view></view>
         <view class="count-item"><view class="count-num">{{counts.anniversaries}}</view><view class="count-label">纪念日</view></view>
         <view class="count-item"><view class="count-num">{{counts.trips}}</view><view class="count-label">旅行资料</view></view>
-        <view class="count-item"><view class="count-num">{{counts.tripPlans}}</view><view class="count-label">旅游行程</view></view>
+        <view class="count-item"><view class="count-num">{{counts.tripPlans}}</view><view class="count-label">旅行行程</view></view>
         <view class="count-item"><view class="count-num">{{counts.trash}}</view><view class="count-label">回收站</view></view>
       </view>
     </view>
@@ -89,12 +89,12 @@
     <view class="card">
       <view class="card-title">业务管理入口</view>
       <view class="btn-row">
-        <button class="btn-secondary flex-btn" bindtap="onOpenMeal">今日菜单</button>
-        <button class="btn-secondary flex-btn" bindtap="onOpenRestaurant">漂亮饭</button>
+        <button class="btn-secondary flex-btn" bindtap="onOpenMeal">今天吃什么</button>
+        <button class="btn-secondary flex-btn" bindtap="onOpenRestaurant">下馆子</button>
       </view>
       <view class="btn-row">
         <button class="btn-secondary flex-btn" bindtap="onOpenAnniversary">纪念日</button>
-        <button class="btn-secondary flex-btn" bindtap="onOpenTravel">旅游计划</button>
+        <button class="btn-secondary flex-btn" bindtap="onOpenTravel">旅行</button>
       </view>
     </view>
   </block>
@@ -102,7 +102,7 @@
   <!-- 副管理 -->
   <block wx:else>
     <view class="card">
-      <view class="card-title">今日菜单下架</view>
+      <view class="card-title">今天吃什么下架</view>
       <view class="empty" wx:if="{{!mealPlans.length}}">今天没有已上架的菜单</view>
       <view class="plan-row" wx:for="{{mealPlans}}" wx:key="id">
         <view class="plan-left">
@@ -116,7 +116,7 @@
     </view>
 
     <view class="card">
-      <view class="card-title">漂亮饭下架</view>
+      <view class="card-title">下馆子下架</view>
       <view class="empty" wx:if="{{!restaurants.length}}">没有已上架的餐厅</view>
       <view class="plan-row" wx:for="{{restaurants}}" wx:key="id">
         <view class="plan-left">

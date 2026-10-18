@@ -255,7 +255,7 @@ export interface UpdatePeriodInput {
   endDate: string;
 }
 
-// ---- 今日菜单 ----
+// ---- 今天吃什么（菜单）----
 export const MEAL_PLAN_STATUS_PUBLISHED = 'published';
 export const MEAL_PLAN_STATUS_OFFLINE = 'offline';
 export type MealPlanStatus =
@@ -381,7 +381,7 @@ export interface TrashActionInput {
   trashId: string;
 }
 
-// ---- 漂亮饭（餐厅）----
+// ---- 下馆子（餐厅）----
 export const RESTAURANT_SOURCE_MANUAL = 'manual';
 export const RESTAURANT_SOURCE_POI = 'poi';
 export const RESTAURANT_SOURCE_OCR = 'ocr';
@@ -618,7 +618,7 @@ export interface DeleteAnniversaryInput {
   anniversaryId: string;
 }
 
-// ---- 旅游计划（PRD §52/§53：永久资料 + 14 天临时行程）----
+// ---- 旅行（PRD §52/§53：永久资料 + 14 天临时行程）----
 export interface TripItemView {
   id: string;
   /** 可选日期 YYYY-MM-DD */

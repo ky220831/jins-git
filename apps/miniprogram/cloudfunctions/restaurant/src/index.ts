@@ -30,7 +30,7 @@ async function notifyVisitChange(
     await new ReminderService(repo).notifyChange(
       spaceId,
       'visit',
-      `餐厅行程已更新：${visit.name}`,
+      `下馆子已更新：${visit.name}`,
       visit.date,
       visit.time || undefined,
       openid,

@@ -35,7 +35,7 @@
       },
       {
         "pagePath": "pages/features/index",
-        "text": "功能",
+        "text": "更多",
         "iconPath": "images/tab/features.png",
         "selectedIconPath": "images/tab/features-active.png"
       }

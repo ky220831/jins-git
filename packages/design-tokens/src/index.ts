@@ -118,3 +118,19 @@ export const festivals = {
   chongyang: { name: '重阳', accent: '#C29B6B' },
   dongzhi: { name: '冬至', accent: '#9AA0B8' },
 } as const;
+
+/**
+ * 业务模块统一显示名（v1.1.9 命名规范，单一事实源）。
+ * 全局（功能页 / 日历日程 / TabBar / 订阅消息 / 管理页）都从这里取，
+ * 改模块名只需改这一处，禁止在各页面散落硬编码模块名。
+ */
+export const moduleLabels: Record<string, { icon: string; label: string }> = {
+  meal: { icon: '🍚', label: '今天吃什么' },
+  restaurant: { icon: '🍴', label: '下馆子' },
+  anniversary: { icon: '❤️', label: '纪念日' },
+  trip: { icon: '✈️', label: '旅行' },
+  period: { icon: '🌸', label: '生理期' },
+  todo: { icon: '📝', label: '待办' },
+  custom: { icon: '📌', label: '事项' },
+  manage: { icon: '🛠️', label: '设置与数据' },
+};

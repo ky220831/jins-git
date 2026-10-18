@@ -62,9 +62,9 @@ export const RESTAURANT_NAME_MAX_LENGTH = 60;
 export const RESTAURANT_NOTE_MAX_LENGTH = 500;
 export const RESTAURANT_TAGS_MAX = 10;
 export const RESTAURANT_DISHES_MAX = 20;
-/** 今日菜单临时记录：创建后 14 天进入回收站（PRD §38/§79） */
+/** 今天吃什么（菜单）临时记录：创建后 14 天进入回收站（PRD §38/§79） */
 export const MEAL_PLAN_TTL_DAYS = 14;
-/** 漂亮饭临时行程：创建后 14 天进入回收站（PRD §42/§79） */
+/** 下馆子（餐厅）临时行程：创建后 14 天进入回收站（PRD §42/§79） */
 export const RESTAURANT_VISIT_TTL_DAYS = 14;
 /** 旅游临时行程：创建后 14 天进入回收站（PRD §53/§79） */
 export const TRIP_PLAN_TTL_DAYS = 14;

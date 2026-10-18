@@ -72,12 +72,12 @@ export class ReminderService {
     }
     for (const m of await this.repo.listAllMealPlans()) {
       if (m.status === 'published' && m.date === today && m.time) {
-        items.push({ spaceId: m.spaceId, topic: 'meal', title: `今日菜单：${m.name}`, date: today, time: m.time });
+        items.push({ spaceId: m.spaceId, topic: 'meal', title: `今天吃什么：${m.name}`, date: today, time: m.time });
       }
     }
     for (const v of await this.repo.listAllRestaurantVisits()) {
       if (v.status === 'planned' && v.date === today) {
-        items.push({ spaceId: v.spaceId, topic: 'visit', title: `餐厅行程：${v.name}`, date: today, time: v.time || undefined });
+        items.push({ spaceId: v.spaceId, topic: 'visit', title: `下馆子：${v.name}`, date: today, time: v.time || undefined });
       }
     }
     return items;

@@ -90,7 +90,7 @@ Page({
     }
   },
 
-  // ---- 今日菜单 ----
+  // ---- 今天吃什么（菜单）----
   onShowPlanForm() {
     this.setData({
       showPlanForm: true,

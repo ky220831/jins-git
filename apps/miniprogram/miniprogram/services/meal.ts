@@ -28,7 +28,7 @@ export const MealService = {
     return callFunction<{ ok: true }>('meal-template', { action: 'delete', ...input });
   },
 
-  // 今日菜单
+  // 今天吃什么（菜单）
   month(input: CalendarMonthInput): Promise<MealPlanView[]> {
     return callFunction<MealPlanView[]>('meal-plan', { action: 'month', ...input });
   },
