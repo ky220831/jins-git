@@ -91,6 +91,8 @@ Page({
     days: [] as DayCell[],
     myDisplayName: '',
     partnerDisplayName: '',
+    myNameLong: false,
+    partnerNameLong: false,
     inviteCode: '',
     inviteExpiresAt: '',
     showNameEdit: false,
@@ -182,6 +184,8 @@ Page({
         isOwner,
         myDisplayName: me?.nickname || (me?.role === ROLE_OWNER ? '主账号' : '副账号'),
         partnerDisplayName: partner?.nickname || (partner?.role === ROLE_OWNER ? '主账号' : '副账号'),
+        myNameLong: (me?.nickname?.length ?? 0) > 6,
+        partnerNameLong: (partner?.nickname?.length ?? 0) > 6,
         inviteCode: space.inviteCode || '',
         inviteExpiresAt: space.inviteCodeExpiresAt
           ? formatDateTime(space.inviteCodeExpiresAt)

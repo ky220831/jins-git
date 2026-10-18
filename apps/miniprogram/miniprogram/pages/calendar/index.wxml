@@ -4,12 +4,12 @@
     <view class="couple">
       <view class="mini-avatar me" bindtap="onStartEditName">
         <text class="mini-emoji">{{isOwner ? '👑' : '💗'}}</text>
-        <text class="mini-name">{{myDisplayName}}</text>
+        <text class="mini-name {{myNameLong ? 'long' : ''}}">{{myDisplayName}}</text>
       </view>
       <view class="heart">❤️</view>
       <view class="mini-avatar">
-        <text class="mini-emoji">{{isOwner ? '💗' : '👑'}}</text>
-        <text class="mini-name">{{partnerDisplayName}}</text>
+          <text class="mini-emoji">{{isOwner ? '💗' : '👑'}}</text>
+          <text class="mini-name {{partnerNameLong ? 'long' : ''}}">{{partnerDisplayName}}</text>
       </view>
     </view>
     <view class="invite-badge" wx:if="{{isOwner && inviteCode}}" bindtap="onCopyInvite">🔑 {{inviteCode}}</view>

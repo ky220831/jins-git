@@ -405,7 +405,22 @@
   max-width: 130rpx;
   overflow: hidden;
   white-space: nowrap;
-  text-overflow: ellipsis;
+}
+
+/* 昵称过长时用“弹幕滚轮”效果完整展示（1.0.12） */
+.mini-name.long {
+  display: inline-block;
+  padding-left: 24rpx;
+  animation: name-marquee 8s linear infinite;
+}
+
+@keyframes name-marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
 }
 
 .heart {

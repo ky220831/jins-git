@@ -218,6 +218,13 @@ button::after {
   margin: 20rpx 0 10rpx;
 }
 
+/* 长名称输入：自动增高换行，避免单行截断（1.0.12） */
+.name-field {
+  min-height: 88rpx;
+  height: auto;
+  line-height: 1.5;
+}
+
 /* ---- 交互规范：所有新增/编辑表单统一用底部弹窗 + 遮罩（1.0.9） ---- */
 .modal {
   position: fixed;

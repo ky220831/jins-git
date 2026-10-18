@@ -33,7 +33,7 @@
       <view class="sheet-handle"></view>
       <view class="form-title">{{editingId ? '编辑纪念日' : '添加纪念日'}}</view>
       <view class="field-label">名称 *</view>
-      <input class="input" placeholder="如：在一起 / 结婚纪念日" value="{{fName}}" data-field="fName" bindinput="onFieldInput" maxlength="50" />
+      <textarea class="input textarea name-field" placeholder="如：在一起 / 结婚纪念日" value="{{fName}}" data-field="fName" bindinput="onFieldInput" maxlength="50" auto-height />
       <view class="form-row">
         <view class="form-col">
           <view class="field-label">日期 *</view>

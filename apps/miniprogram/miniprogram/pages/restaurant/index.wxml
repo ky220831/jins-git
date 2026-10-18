@@ -89,7 +89,7 @@
       <view class="form-title">{{editingId ? '编辑餐厅' : '添加餐厅'}}</view>
       <view class="ocr-hint" wx:if="{{ocrHint}}">{{ocrHint}}</view>
       <view class="field-label">餐厅名称 *</view>
-      <input class="input" placeholder="餐厅名称 *" value="{{fName}}" data-field="fName" bindinput="onFieldInput" maxlength="60" />
+      <textarea class="input textarea name-field" placeholder="餐厅名称 *" value="{{fName}}" data-field="fName" bindinput="onFieldInput" maxlength="60" auto-height />
       <view class="field-label">地址</view>
       <input class="input" placeholder="地址" value="{{fAddress}}" data-field="fAddress" bindinput="onFieldInput" maxlength="200" />
       <view class="form-row">
