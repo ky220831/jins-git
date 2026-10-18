@@ -21,12 +21,19 @@ Page({
     fDate: '',
     fTime: '',
     fNote: '',
+    pendingDate: '',
     fYearly: true,
     saving: false,
   },
 
   onShow() {
     this.refresh();
+  },
+
+  onLoad(options?: Record<string, string>) {
+    if (options?.date && /^\d{4}-\d{2}-\d{2}$/.test(options.date)) {
+      this.setData({ pendingDate: options.date });
+    }
   },
 
   async refresh() {
@@ -64,7 +71,7 @@ Page({
       showForm: true,
       editingId: '',
       fName: '',
-      fDate: '',
+      fDate: this.data.pendingDate || '',
       fTime: '',
       fNote: '',
       fYearly: true,

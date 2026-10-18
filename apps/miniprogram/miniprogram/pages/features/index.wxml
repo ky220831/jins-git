@@ -1,0 +1,56 @@
+<view class="container features-page">
+  <view class="page-head">
+    <view class="page-title">功能</view>
+    <view class="page-sub">日历在左侧 Tab · 点这里进入各功能</view>
+  </view>
+
+  <view class="error-text" wx:if="{{error}}">{{error}}</view>
+
+  <view class="feature-list">
+    <view class="feature-row" bindtap="onOpenMeal">
+      <text class="fe-emoji">🍚</text>
+      <view class="fe-body">
+        <view class="fe-label">今日菜单</view>
+        <view class="fe-sub">今天吃什么 · 随机选 · 预选素材库</view>
+      </view>
+      <text class="fe-arrow">›</text>
+    </view>
+    <view class="feature-row" bindtap="onOpenRestaurant">
+      <text class="fe-emoji">🍴</text>
+      <view class="fe-body">
+        <view class="fe-label">漂亮饭</view>
+        <view class="fe-sub">两个人的餐厅收藏库 · 行程 · 搜索</view>
+      </view>
+      <text class="fe-arrow">›</text>
+    </view>
+    <view class="feature-row" bindtap="onOpenAnniversary">
+      <text class="fe-emoji">❤️</text>
+      <view class="fe-body">
+        <view class="fe-label">纪念日</view>
+        <view class="fe-sub">倒计时 · 正计时 · 每年重复</view>
+      </view>
+      <text class="fe-arrow">›</text>
+    </view>
+    <view class="feature-row" bindtap="onOpenTravel">
+      <text class="fe-emoji">✈️</text>
+      <view class="fe-body">
+        <view class="fe-label">旅游计划</view>
+        <view class="fe-sub">我们的下一站 · 行程清单</view>
+      </view>
+      <text class="fe-arrow">›</text>
+    </view>
+    <view class="feature-row" bindtap="onOpenManage">
+      <text class="fe-emoji">🛠️</text>
+      <view class="fe-body">
+        <view class="fe-label">管理</view>
+        <view class="fe-sub">{{isOwner ? '主管理 · 回收站 · 导出 · 操作记录' : '副管理'}}</view>
+      </view>
+      <text class="fe-arrow">›</text>
+    </view>
+  </view>
+
+  <view class="tip-card">
+    <view class="tip-title">💡 小贴士</view>
+    <view class="tip-text">在“日历”里点某一天，可以直接为该天添加菜单、餐厅行程、旅游行程或纪念日。</view>
+  </view>
+</view>

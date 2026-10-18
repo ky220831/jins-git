@@ -12,7 +12,7 @@ Page({
     // 已登录且已有空间时，直接进入首页；否则停留在登录页
     SpaceService.mySpace()
       .then(() => {
-        wx.reLaunch({ url: '/pages/home/index' });
+        wx.reLaunch({ url: '/pages/calendar/index' });
       })
       .catch(() => {
         // 未登录或无空间：停留在登录页
@@ -25,7 +25,7 @@ Page({
     try {
       const res = await AuthService.login();
       if (res.hasSpace) {
-        wx.reLaunch({ url: '/pages/home/index' });
+        wx.reLaunch({ url: '/pages/calendar/index' });
       } else {
         wx.navigateTo({ url: '/pages/space/index' });
       }

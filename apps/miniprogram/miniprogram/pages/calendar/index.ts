@@ -12,6 +12,7 @@ import { PeriodService } from '../../services/period';
 import { SpaceService } from '../../services/space';
 import { TodoService } from '../../services/todo';
 import { startSilentRefresh } from '../../utils/realtime';
+import { formatDateTime } from '../../utils/time';
 
 interface DayCell {
   uid: number;
@@ -19,11 +20,16 @@ interface DayCell {
   day: number;
   inMonth: boolean;
   isToday: boolean;
+  /** 普通周末（无节假日时显示“周末”标识） */
+  isWeekend: boolean;
   hasTodo: boolean;
   hasEvent: boolean;
-  periodKind: '' | 'period' | 'rest';
+  eventCount: number;
+  /** 生理期三态 + 休息：ongoing 进行中 / past 已过去 / predicted 预计 / rest 休息 */
+  periodState: '' | 'ongoing' | 'past' | 'predicted' | 'rest';
   holidayLabel: string;
-  holidayType: string;
+  /** holiday 法定节假日 / makeup_workday 调休上班 / weekend 普通周末 */
+  holidayKind: '' | 'holiday' | 'makeup_workday' | 'weekend';
 }
 
 interface TodoRow extends TodoView {
@@ -64,12 +70,37 @@ function holidayLabel(h: HolidayDayView): string {
   return name.length > 2 && name.endsWith('节') ? name.slice(0, -1) : name;
 }
 
+function isWeekendKey(key: string): boolean {
+  const [y, m, d] = key.split('-').map(Number);
+  const dow = new Date(y, m - 1, d).getDay();
+  return dow === 0 || dow === 6;
+}
+
+/** 生理期状态：预计（isEstimated）优先，其次按日期是否已过区分过去/进行中 */
+function periodStateOf(
+  period: PeriodDayView | undefined,
+  key: string,
+  todayKey: string,
+): '' | 'ongoing' | 'past' | 'predicted' | 'rest' {
+  if (!period) return '';
+  if (period.kind === 'rest') return 'rest';
+  if (period.isEstimated) return 'predicted';
+  return key < todayKey ? 'past' : 'ongoing';
+}
+
 Page({
   data: {
     year: 0,
     month: 0,
     weekdays: ['日', '一', '二', '三', '四', '五', '六'],
     days: [] as DayCell[],
+    myDisplayName: '',
+    partnerDisplayName: '',
+    inviteCode: '',
+    inviteExpiresAt: '',
+    showNameEdit: false,
+    nameInput: '',
+    savingName: false,
     selectedDate: '',
     monthTodos: [] as TodoView[],
     monthEvents: [] as CalendarEventView[],
@@ -78,6 +109,8 @@ Page({
     dayTodos: [] as TodoRow[],
     dayEvents: [] as EventRow[],
     dayPeriod: null as { kind: 'period' | 'rest'; isEstimated: boolean } | null,
+    dayPeriodState: '' as '' | 'ongoing' | 'past' | 'predicted' | 'rest',
+    dayMarks: [] as { label: string; kind: string }[],
     dayHoliday: null as HolidayDayView | null,
     periodVisible: true,
     periodRecords: [] as PeriodRow[],
@@ -146,10 +179,24 @@ Page({
       this.setData({ loading: true, error: '' });
     }
     try {
-      const [monthRes, periodInfo] = await Promise.all([
+      const [monthRes, periodInfo, spaceRes] = await Promise.all([
         CalendarService.month({ year, month }),
         PeriodService.info(),
+        SpaceService.mySpace(),
       ]);
+      const space = spaceRes.space;
+      const isOwner = space.myRole === ROLE_OWNER;
+      const me = space.members.find((m) => (isOwner ? m.role === ROLE_OWNER : m.role !== ROLE_OWNER));
+      const partner = space.members.find((m) => (isOwner ? m.role !== ROLE_OWNER : m.role === ROLE_OWNER));
+      this.setData({
+        isOwner,
+        myDisplayName: me?.nickname || (me?.role === ROLE_OWNER ? '主账号' : '副账号'),
+        partnerDisplayName: partner?.nickname || (partner?.role === ROLE_OWNER ? '主账号' : '副账号'),
+        inviteCode: space.inviteCode || '',
+        inviteExpiresAt: space.inviteCodeExpiresAt
+          ? formatDateTime(space.inviteCodeExpiresAt)
+          : '',
+      });
       this.buildMonth(
         monthRes.todos,
         monthRes.events,
@@ -187,10 +234,15 @@ Page({
   ) {
     const { year, month, selectedDate } = this.data;
     const todoDates = new Set(todos.map((todo) => todo.date));
-    const eventDates = new Set(events.map((event) => toShanghaiParts(event.startTime).date));
+    const eventDates = new Map<string, number>();
+    for (const event of events) {
+      const date = toShanghaiParts(event.startTime).date;
+      eventDates.set(date, (eventDates.get(date) ?? 0) + 1);
+    }
     const periodByDate = new Map(periodDays.map((d) => [d.date, d]));
     const holidayByDate = new Map(holidays.map((h) => [h.date, h]));
     const todayKey = dateKey(new Date().getFullYear(), new Date().getMonth() + 1, new Date().getDate());
+    const todayKeyLocal = todayKey;
 
     const firstWeekday = new Date(year, month - 1, 1).getDay();
     const daysInMonth = new Date(year, month, 0).getDate();
@@ -200,11 +252,13 @@ Page({
       day: 0,
       inMonth: false,
       isToday: false,
+      isWeekend: false,
       hasTodo: false,
       hasEvent: false,
-      periodKind: '',
+      eventCount: 0,
+      periodState: '',
       holidayLabel: '',
-      holidayType: '',
+      holidayKind: '',
     });
     const cells: DayCell[] = [];
     let uid = 0;
@@ -215,17 +269,22 @@ Page({
       const key = dateKey(year, month, day);
       const period = periodByDate.get(key);
       const holiday = holidayByDate.get(key);
+      const weekend = !holiday && isWeekendKey(key);
+      const eventCount = eventDates.get(key) ?? 0;
       cells.push({
         uid: (uid += 1),
         key,
         day,
         inMonth: true,
         isToday: key === todayKey,
+        isWeekend: weekend,
         hasTodo: todoDates.has(key),
-        hasEvent: eventDates.has(key),
-        periodKind: periodVisible && period ? period.kind : '',
-        holidayLabel: holiday ? holidayLabel(holiday) : '',
-        holidayType: holiday ? holiday.type : '',
+        hasEvent: eventCount > 0,
+        eventCount,
+        periodState:
+          periodVisible && period ? periodStateOf(period, key, todayKeyLocal) : '',
+        holidayLabel: holiday ? holidayLabel(holiday) : weekend ? '周末' : '',
+        holidayKind: holiday ? holiday.type : weekend ? 'weekend' : '',
       });
     }
     while (cells.length % 7 !== 0) {
@@ -262,11 +321,24 @@ Page({
       ? this.data.periodDays.find((p) => p.date === date)
       : undefined;
     const holiday = this.data.holidays.find((h) => h.date === date);
+    const marks: { label: string; kind: string }[] = [];
+    if (holiday) {
+      marks.push({
+        label: holiday.type === 'makeup_workday' ? '🔄 调休上班' : `🇨🇳 ${holiday.name}`,
+        kind: holiday.type,
+      });
+    } else if (isWeekendKey(date)) {
+      marks.push({ label: '☕ 周末', kind: 'weekend' });
+    }
+    const todayKey = dateKey(new Date().getFullYear(), new Date().getMonth() + 1, new Date().getDate());
+    const dayPeriodState = period ? periodStateOf(period, date, todayKey) : '';
     this.setData({
       selectedDate: date,
       dayTodos,
       dayEvents,
       dayPeriod: period ? { kind: period.kind, isEstimated: period.isEstimated } : null,
+      dayPeriodState,
+      dayMarks: marks,
       dayHoliday: holiday || null,
     });
   },
@@ -329,6 +401,67 @@ Page({
       wx.showToast({ title: message, icon: 'none' });
       this.refresh();
     }
+  },
+
+  // ---- 顶部双人头部：邀请码 + 昵称 ----
+  onCopyInvite() {
+    const code = this.data.inviteCode;
+    if (!code) return;
+    wx.setClipboardData({
+      data: code,
+      success: () => {
+        wx.showToast({ title: '已复制邀请码', icon: 'success' });
+      },
+    });
+  },
+
+  onStartEditName() {
+    this.setData({ showNameEdit: true, nameInput: this.data.myDisplayName });
+  },
+
+  onHideNameEdit() {
+    this.setData({ showNameEdit: false });
+  },
+
+  onNameInput(e: WechatMiniprogram.Input) {
+    this.setData({ nameInput: e.detail.value });
+  },
+
+  async onSaveName() {
+    const nickname = this.data.nameInput.trim();
+    if (!nickname) {
+      wx.showToast({ title: '昵称不能为空', icon: 'none' });
+      return;
+    }
+    if (this.data.savingName) return;
+    this.setData({ savingName: true });
+    try {
+      await SpaceService.setNickname({ nickname });
+      this.setData({ showNameEdit: false });
+      this.refresh();
+      wx.showToast({ title: '昵称已更新', icon: 'success' });
+    } catch (err) {
+      wx.showToast({ title: err instanceof ApiError ? err.message : '保存失败', icon: 'none' });
+    } finally {
+      this.setData({ savingName: false });
+    }
+  },
+
+  // ---- 日历 → 核心功能快速入口（PRD §19：自动带入日期）----
+  onQuickMeal() {
+    wx.navigateTo({ url: `/pages/meal/index?date=${this.data.selectedDate}` });
+  },
+
+  onQuickRestaurant() {
+    wx.navigateTo({ url: `/pages/restaurant/index?date=${this.data.selectedDate}` });
+  },
+
+  onQuickTravel() {
+    wx.navigateTo({ url: `/pages/travel/index?date=${this.data.selectedDate}` });
+  },
+
+  onQuickAnniversary() {
+    wx.navigateTo({ url: `/pages/anniversary/index?date=${this.data.selectedDate}` });
   },
 
   onShowForm() {

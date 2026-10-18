@@ -24,7 +24,7 @@ Page({
       await SpaceService.join({ inviteCode: code });
       wx.showToast({ title: '绑定成功', icon: 'success' });
       setTimeout(() => {
-        wx.reLaunch({ url: '/pages/home/index' });
+        wx.reLaunch({ url: '/pages/calendar/index' });
       }, 800);
     } catch (err) {
       const message = err instanceof ApiError ? err.message : '加入失败，请重试';

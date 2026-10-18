@@ -55,6 +55,6 @@ Page({
   },
 
   onGoHome() {
-    wx.reLaunch({ url: '/pages/home/index' });
+    wx.reLaunch({ url: '/pages/calendar/index' });
   },
 });

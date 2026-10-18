@@ -1,4 +1,21 @@
 <view class="container calendar-page">
+  <!-- 顶部：双人爱心连接 + 右上角小邀请码 -->
+  <view class="top-bar">
+    <view class="couple">
+      <view class="mini-avatar me" bindtap="onStartEditName">
+        <text class="mini-emoji">{{isOwner ? '👑' : '💗'}}</text>
+        <text class="mini-name">{{myDisplayName}}</text>
+      </view>
+      <view class="heart">❤️</view>
+      <view class="mini-avatar">
+        <text class="mini-emoji">{{isOwner ? '💗' : '👑'}}</text>
+        <text class="mini-name">{{partnerDisplayName}}</text>
+      </view>
+    </view>
+    <view class="invite-badge" wx:if="{{isOwner && inviteCode}}" bindtap="onCopyInvite">🔑 {{inviteCode}}</view>
+    <view class="invite-badge bound" wx:if="{{!inviteCode}}">💗</view>
+  </view>
+
   <view class="cal-header">
     <view class="cal-nav" bindtap="onPrev">‹</view>
     <view class="cal-title">{{year}}年{{month}}月</view>
@@ -19,24 +36,33 @@
 
   <view class="grid">
     <view
-      class="day-cell {{item.inMonth ? '' : 'dim'}} {{item.isToday ? 'today' : ''}} {{item.key === selectedDate ? 'selected' : ''}} {{item.periodKind === 'period' ? 'period' : ''}} {{item.periodKind === 'rest' ? 'rest' : ''}}"
+      class="day-cell {{item.inMonth ? '' : 'dim'}} {{item.isToday ? 'today' : ''}} {{item.key === selectedDate ? 'selected' : ''}} {{item.isWeekend ? 'weekend' : ''}} {{item.periodState === 'ongoing' ? 'period-ongoing' : ''}} {{item.periodState === 'past' ? 'period-past' : ''}} {{item.periodState === 'predicted' ? 'period-predicted' : ''}} {{item.periodState === 'rest' ? 'rest' : ''}}"
       wx:for="{{days}}"
       wx:key="uid"
       data-key="{{item.key}}"
       bindtap="onTapDay"
     >
       <view class="day-num">{{item.day ? item.day : ''}}</view>
-      <view class="holiday-label {{item.holidayType === 'makeup_workday' ? 'makeup' : ''}}" wx:if="{{item.holidayLabel}}">{{item.holidayLabel}}</view>
+      <view
+        class="holiday-label {{item.holidayKind === 'makeup_workday' ? 'makeup' : ''}} {{item.holidayKind === 'weekend' ? 'weekend-badge' : ''}}"
+        wx:if="{{item.holidayLabel}}"
+      >{{item.holidayLabel}}</view>
       <view class="dots">
+        <view class="dot {{item.periodState === 'ongoing' ? 'dot-period-ongoing' : ''}} {{item.periodState === 'past' ? 'dot-period-past' : ''}} {{item.periodState === 'predicted' ? 'dot-period-predicted' : ''}} {{item.periodState === 'rest' ? 'dot-rest' : ''}}" wx:if="{{item.periodState}}"></view>
         <view class="dot dot-todo" wx:if="{{item.hasTodo}}"></view>
         <view class="dot dot-event" wx:if="{{item.hasEvent}}"></view>
       </view>
+      <view class="event-count" wx:if="{{item.eventCount > 1}}">{{item.eventCount}}</view>
     </view>
   </view>
 
   <view class="legend">
-    <view class="legend-item"><view class="legend-dot period"></view>🔴 生理期</view>
+    <view class="legend-item"><view class="legend-dot period-ongoing"></view>生理期进行中</view>
+    <view class="legend-item"><view class="legend-dot period-predicted"></view>生理期预计</view>
+    <view class="legend-item"><view class="legend-dot period-past"></view>生理期已过</view>
     <view class="legend-item"><view class="legend-dot rest"></view>🔵 休息</view>
+    <view class="legend-item"><view class="legend-dot weekend"></view>周末</view>
+    <view class="legend-item"><view class="legend-dot makeup"></view>调休</view>
     <view class="legend-item"><view class="legend-dot todo"></view>To Do</view>
     <view class="legend-item"><view class="legend-dot event"></view>日程</view>
   </view>
@@ -45,14 +71,24 @@
 
   <view class="day-panel" wx:if="{{selectedDate}}">
     <view class="day-title">{{selectedDate}}</view>
-    <view class="status-line" wx:if="{{dayHoliday}}">
-      {{dayHoliday.type === 'makeup_workday' ? '🔄 调休上班' : '🇨🇳 ' + dayHoliday.name}}
+    <view class="mark-chips">
+      <view class="mark-chip {{item.kind === 'makeup_workday' ? 'makeup' : ''}} {{item.kind === 'weekend' ? 'weekend' : ''}}" wx:for="{{dayMarks}}" wx:key="label">{{item.label}}</view>
     </view>
-    <view class="status-line period" wx:if="{{dayPeriod && dayPeriod.kind === 'period'}}">
-      {{dayPeriod.isEstimated ? '🔴 生理期（预计）' : '🔴 生理期'}}
+    <view class="status-line period-ongoing" wx:if="{{dayPeriodState === 'ongoing'}}">🔴 生理期（进行中）</view>
+    <view class="status-line period-predicted" wx:if="{{dayPeriodState === 'predicted'}}">🌸 生理期（预计）</view>
+    <view class="status-line period-past" wx:if="{{dayPeriodState === 'past'}}">🩷 生理期（已过去）</view>
+    <view class="status-line rest" wx:if="{{dayPeriodState === 'rest'}}">🔵 休息日</view>
+    <view class="day-empty" wx:if="{{!dayTodos.length && !dayEvents.length && !dayPeriodState && !dayMarks.length}}">🌷 这一天还没有安排</view>
+
+    <!-- 快速入口：日历 → 核心功能新增/编辑（自动带入当天日期） -->
+    <view class="quick-row">
+      <view class="quick-btn" bindtap="onShowForm">＋ 事项</view>
+      <view class="quick-btn" bindtap="onShowPeriodForm">🌸 生理期</view>
+      <view class="quick-btn" bindtap="onQuickMeal">🍚 菜单</view>
+      <view class="quick-btn" bindtap="onQuickRestaurant">🍴 行程</view>
+      <view class="quick-btn" bindtap="onQuickTravel">✈️ 旅游</view>
+      <view class="quick-btn" bindtap="onQuickAnniversary">❤️ 纪念日</view>
     </view>
-    <view class="status-line rest" wx:if="{{dayPeriod && dayPeriod.kind === 'rest'}}">🔵 休息</view>
-    <view class="day-empty" wx:if="{{!dayTodos.length && !dayEvents.length && !dayPeriod && !dayHoliday}}">🌷 这一天还没有安排</view>
 
     <view
       class="todo-item {{item.status === 'completed' ? 'done' : ''}}"
@@ -71,8 +107,16 @@
       <view class="event-meta">{{item.timeLabel}}</view>
     </view>
 
-    <button class="btn-secondary add-btn" bindtap="onShowForm">🌷 添加事项</button>
-    <button class="btn-secondary add-btn" bindtap="onShowPeriodForm">🌸 记录生理期</button>
+  </view>
+
+  <!-- 昵称编辑 -->
+  <view class="name-edit" wx:if="{{showNameEdit}}">
+    <view class="name-edit-title">改我的昵称</view>
+    <input class="input" placeholder="输入昵称（最多 16 字）" value="{{nameInput}}" bindinput="onNameInput" maxlength="16" />
+    <view class="name-edit-actions">
+      <button class="btn-secondary name-edit-btn" bindtap="onHideNameEdit">取消</button>
+      <button class="btn-primary name-edit-btn" bindtap="onSaveName" loading="{{savingName}}" disabled="{{savingName}}">保存</button>
+    </view>
   </view>
 
   <view class="form" wx:if="{{showForm}}">

@@ -1,6 +1,0 @@
-{
-  "navigationBarTitleText": "我们的生活",
-  "usingComponents": {
-    "month-calendar": "/components/month-calendar/index"
-  }
-}

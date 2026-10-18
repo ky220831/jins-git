@@ -39,11 +39,16 @@ Page({
     saving: false,
   },
 
-  onLoad() {
+  onLoad(options?: Record<string, string>) {
     const now = new Date();
+    const today = dateKey(now.getFullYear(), now.getMonth() + 1, now.getDate());
+    const date =
+      options?.date && /^\d{4}-\d{2}-\d{2}$/.test(options.date) ? options.date : today;
     this.setData({
-      todayDate: dateKey(now.getFullYear(), now.getMonth() + 1, now.getDate()),
-      planDate: dateKey(now.getFullYear(), now.getMonth() + 1, now.getDate()),
+      todayDate: today,
+      planDate: date,
+      // 从日历跳转：自动打开“添加菜单”并带入当天日期
+      showPlanForm: options?.date ? true : false,
     });
   },
 

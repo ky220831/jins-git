@@ -66,12 +66,19 @@ Page({
     visitRestaurantId: '',
     visitRestaurantName: '',
     vDate: '',
+    pendingVisitDate: '',
     vTime: '',
     vNote: '',
   },
 
   onShow() {
     this.refresh();
+  },
+
+  onLoad(options?: Record<string, string>) {
+    if (options?.date && /^\d{4}-\d{2}-\d{2}$/.test(options.date)) {
+      this.setData({ pendingVisitDate: options.date });
+    }
   },
 
   async refresh() {
@@ -386,7 +393,7 @@ Page({
       showVisitForm: true,
       visitRestaurantId: r.id,
       visitRestaurantName: r.name,
-      vDate: todayKey(),
+      vDate: this.data.pendingVisitDate || todayKey(),
       vTime: '',
       vNote: '',
     });

@@ -96,11 +96,18 @@ Page({
     pEnd: '',
     pTime: '',
     pNote: '',
+    pendingPlanDate: '',
     savingPlan: false,
   },
 
   onShow() {
     this.refresh();
+  },
+
+  onLoad(options?: Record<string, string>) {
+    if (options?.date && /^\d{4}-\d{2}-\d{2}$/.test(options.date)) {
+      this.setData({ pendingPlanDate: options.date });
+    }
   },
 
   async refresh() {
@@ -279,7 +286,7 @@ Page({
       editingPlanId: planId,
       pTripIndex: tripIndex,
       pName: plan?.name || (tripId ? this.data.trips.find((t) => t.id === tripId)?.name || '' : ''),
-      pStart: plan?.startDate || '',
+      pStart: plan?.startDate || this.data.pendingPlanDate || '',
       pEnd: plan?.endDate || '',
       pTime: plan?.time || '',
       pNote: plan?.note || '',

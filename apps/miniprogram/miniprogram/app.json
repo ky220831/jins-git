@@ -4,8 +4,8 @@
     "pages/space/index",
     "pages/space-create/index",
     "pages/space-join/index",
-    "pages/home/index",
     "pages/calendar/index",
+    "pages/features/index",
     "pages/meal/index",
     "pages/restaurant/index",
     "pages/anniversary/index",
@@ -20,5 +20,21 @@
     "backgroundTextStyle": "light"
   },
   "style": "v2",
-  "sitemapLocation": "sitemap.json"
+  "sitemapLocation": "sitemap.json",
+  "tabBar": {
+    "color": "#9B9B9B",
+    "selectedColor": "#C0564F",
+    "backgroundColor": "#FFFDF9",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/calendar/index",
+        "text": "日历"
+      },
+      {
+        "pagePath": "pages/features/index",
+        "text": "功能"
+      }
+    ]
+  }
 }
