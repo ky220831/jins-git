@@ -773,3 +773,21 @@ export interface ExportDataResult {
 export interface TrashBatchInput {
   trashIds: string[];
 }
+
+// ---- 订阅消息提醒（1.1.0）----
+export const REMINDER_TOPICS = ['anniversary', 'period', 'meal', 'visit'] as const;
+export type ReminderTopic = (typeof REMINDER_TOPICS)[number];
+
+export interface ReminderTopicConfig {
+  topic: ReminderTopic;
+  configured: boolean;
+  templateId: string;
+}
+
+export interface ReminderConfigResult {
+  topics: ReminderTopicConfig[];
+}
+
+export interface GrantReminderInput {
+  topic: ReminderTopic;
+}

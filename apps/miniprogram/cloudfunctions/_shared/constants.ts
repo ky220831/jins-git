@@ -18,6 +18,7 @@ export const COLLECTIONS = {
   trips: 'trips',
   tripPlans: 'trip_plans',
   rateLimits: 'rate_limits',
+  subscribeGrants: 'subscribe_grants',
 } as const;
 
 /** 频控：每用户每分钟最大调用次数（仅对“烧钱”的外部资源接口启用） */
@@ -26,6 +27,19 @@ export const RATE_LIMIT_PER_MINUTE = {
   restaurantOcr: 10,
   exportData: 5,
 } as const;
+
+/**
+ * 订阅消息模板（1.1.0）：templateId 需在 小程序后台 → 订阅消息 选用模板后填入，
+ * 为空时提醒功能自动禁用（客户端不显示开启按钮）。字段名需匹配所选模板。
+ */
+export const REMINDER_TEMPLATES = {
+  anniversary: { templateId: '', page: 'pages/anniversary/index' },
+  period: { templateId: '', page: 'pages/period/index' },
+  meal: { templateId: '', page: 'pages/meal/index' },
+  visit: { templateId: '', page: 'pages/restaurant/index' },
+} as const;
+
+export type ReminderTopic = keyof typeof REMINDER_TEMPLATES;
 
 /** 邀请码有效期：7 天（可调整） */
 export const INVITE_CODE_TTL_MS = 7 * 24 * 60 * 60 * 1000;

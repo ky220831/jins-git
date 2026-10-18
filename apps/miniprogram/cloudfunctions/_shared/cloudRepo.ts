@@ -15,6 +15,7 @@ import type {
   SpaceMemberRecord,
   SpaceRecord,
   SpaceSettingRecord,
+  SubscribeGrantRecord,
   TodoRecord,
   TripPlanRecord,
   TripRecord,
@@ -31,6 +32,7 @@ const _ = db.command;
 
 /** 频控集合只需在进程内创建一次（云函数实例级缓存） */
 let rateCollectionEnsured = false;
+let grantCollectionEnsured = false;
 
 function mapDoc<T>(doc: Record<string, unknown>): T {
   const { _id, ...rest } = doc;
@@ -191,6 +193,11 @@ export class CloudRepo implements Repo {
     return res.data.map((d) => mapDoc<PeriodRecordRecord>(d));
   }
 
+  async listAllPeriodRecords(): Promise<PeriodRecordRecord[]> {
+    const res = await this.col(COLLECTIONS.periodRecords).limit(1000).get();
+    return res.data.map((d) => mapDoc<PeriodRecordRecord>(d));
+  }
+
   async createPeriodRecord(record: PeriodRecordRecord): Promise<void> {
     await this.col(COLLECTIONS.periodRecords).doc(record.id).set({ data: record });
   }
@@ -300,6 +307,11 @@ export class CloudRepo implements Repo {
       .where({ spaceId, date: _.gte(startDate).and(_.lte(endDate)) })
       .limit(100)
       .get();
+    return res.data.map((d) => mapDoc<MealPlanRecord>(d));
+  }
+
+  async listAllMealPlans(): Promise<MealPlanRecord[]> {
+    const res = await this.col(COLLECTIONS.mealPlans).limit(1000).get();
     return res.data.map((d) => mapDoc<MealPlanRecord>(d));
   }
 
@@ -433,6 +445,11 @@ export class CloudRepo implements Repo {
     return res.data.map((d) => mapDoc<RestaurantVisitRecord>(d));
   }
 
+  async listAllRestaurantVisits(): Promise<RestaurantVisitRecord[]> {
+    const res = await this.col(COLLECTIONS.restaurantVisits).limit(1000).get();
+    return res.data.map((d) => mapDoc<RestaurantVisitRecord>(d));
+  }
+
   async listExpiredRestaurantVisits(now: Date): Promise<RestaurantVisitRecord[]> {
     const res = await this.col(COLLECTIONS.restaurantVisits)
       .where({ expireAt: _.lte(now) })
@@ -466,6 +483,11 @@ export class CloudRepo implements Repo {
       .where({ spaceId })
       .limit(200)
       .get();
+    return res.data.map((d) => mapDoc<AnniversaryRecord>(d));
+  }
+
+  async listAllAnniversaries(): Promise<AnniversaryRecord[]> {
+    const res = await this.col(COLLECTIONS.anniversaries).limit(1000).get();
     return res.data.map((d) => mapDoc<AnniversaryRecord>(d));
   }
 
@@ -620,6 +642,36 @@ export class CloudRepo implements Repo {
       });
       return 1;
     }
+  }
+
+  // ---- 订阅消息提醒（1.1.0）----
+  async listGrantsBySpaceTopic(
+    spaceId: string,
+    topic: string,
+  ): Promise<SubscribeGrantRecord[]> {
+    const res = await this.col(COLLECTIONS.subscribeGrants)
+      .where({ spaceId, topic })
+      .limit(100)
+      .get();
+    return res.data.map((d) => mapDoc<SubscribeGrantRecord>(d));
+  }
+
+  async createGrant(grant: SubscribeGrantRecord): Promise<void> {
+    if (!grantCollectionEnsured) {
+      try {
+        await db.createCollection(COLLECTIONS.subscribeGrants);
+      } catch {
+        // 集合已存在时忽略
+      }
+      grantCollectionEnsured = true;
+    }
+    await this.col(COLLECTIONS.subscribeGrants).doc(grant.id).set({ data: grant });
+  }
+
+  async deleteGrant(spaceId: string, grantId: string): Promise<void> {
+    await this.col(COLLECTIONS.subscribeGrants)
+      .where({ _id: grantId, spaceId })
+      .remove();
   }
 }
 

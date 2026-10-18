@@ -168,6 +168,7 @@
       </view>
       <view class="field-label">备注（可选）</view>
       <textarea class="input textarea auto-grow" placeholder="备注" value="{{vNote}}" data-field="vNote" bindinput="onFieldInput" maxlength="200" auto-height />
+      <view class="reminder-link" bindtap="onRemind">🔔 开启餐厅行程提醒</view>
       <view class="form-actions">
         <button class="btn-secondary form-btn" bindtap="onHideVisitForm">取消</button>
         <button class="btn-primary form-btn" bindtap="onSaveVisit">保存</button>

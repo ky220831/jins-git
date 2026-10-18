@@ -1,13 +1,15 @@
 {
   "name": "our-life",
-  "version": "1.0.18",
+  "version": "1.1.0",
   "private": true,
   "description": "“我们的生活”——双人私密生活系统 V1.0（微信小程序 + CloudBase）",
   "scripts": {
     "sync": "node scripts/sync-shared.mjs",
     "typecheck": "tsc -p tsconfig.json",
     "build": "node scripts/build-functions.mjs",
-    "test": "tsx --test tests/**/*.test.ts"
+    "test": "tsx --test tests/**/*.test.ts",
+    "holidays:import": "node scripts/import-holidays.cjs",
+    "backup": "node scripts/backup-cloud.cjs"
   },
   "devDependencies": {
     "@cloudbase/manager-node": "^5.7.0",

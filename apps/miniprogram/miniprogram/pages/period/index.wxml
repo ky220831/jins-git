@@ -7,6 +7,7 @@
   <view class="error-text" wx:if="{{error}}">{{error}}</view>
 
   <button class="btn-primary period-trigger" bindtap="onOpenForm">{{mode === 'edit' ? '✏️ 修改本次记录' : '🌸 记录开始日期'}}</button>
+  <view class="reminder-link" bindtap="onRemind">🔔 开启生理期提醒</view>
 
   <view class="card">
     <view class="card-title">日历显示</view>

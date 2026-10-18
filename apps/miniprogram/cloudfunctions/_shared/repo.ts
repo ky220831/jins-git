@@ -68,6 +68,15 @@ export interface AuditLogRecord {
   createdAt: Date;
 }
 
+export interface SubscribeGrantRecord {
+  id: string;
+  openid: string;
+  spaceId: string;
+  topic: string;
+  templateId: string;
+  createdAt: Date;
+}
+
 export interface TodoRecord {
   id: string;
   spaceId: string;
@@ -323,6 +332,7 @@ export interface Repo {
 
   // ---- 第三阶段：生理期与节假日 ----
   listPeriodRecords(spaceId: string): Promise<PeriodRecordRecord[]>;
+  listAllPeriodRecords(): Promise<PeriodRecordRecord[]>;
   findPeriodRecordById(spaceId: string, recordId: string): Promise<PeriodRecordRecord | null>;
   createPeriodRecord(record: PeriodRecordRecord): Promise<void>;
   updatePeriodRecord(spaceId: string, recordId: string, patch: Partial<PeriodRecordRecord>): Promise<void>;
@@ -340,6 +350,7 @@ export interface Repo {
   deleteMealTemplate(spaceId: string, templateId: string): Promise<void>;
   findMealPlanById(spaceId: string, planId: string): Promise<MealPlanRecord | null>;
   listMealPlansByDateRange(spaceId: string, startDate: string, endDate: string): Promise<MealPlanRecord[]>;
+  listAllMealPlans(): Promise<MealPlanRecord[]>;
   listExpiredMealPlans(now: Date): Promise<MealPlanRecord[]>;
   createMealPlan(plan: MealPlanRecord): Promise<void>;
   updateMealPlan(spaceId: string, planId: string, patch: Partial<MealPlanRecord>): Promise<void>;
@@ -360,6 +371,7 @@ export interface Repo {
   deleteRestaurant(spaceId: string, restaurantId: string): Promise<void>;
   findRestaurantVisitById(spaceId: string, visitId: string): Promise<RestaurantVisitRecord | null>;
   listRestaurantVisitsByDateRange(spaceId: string, startDate: string, endDate: string): Promise<RestaurantVisitRecord[]>;
+  listAllRestaurantVisits(): Promise<RestaurantVisitRecord[]>;
   listExpiredRestaurantVisits(now: Date): Promise<RestaurantVisitRecord[]>;
   createRestaurantVisit(visit: RestaurantVisitRecord): Promise<void>;
   updateRestaurantVisit(spaceId: string, visitId: string, patch: Partial<RestaurantVisitRecord>): Promise<void>;
@@ -367,6 +379,7 @@ export interface Repo {
 
   // ---- 第六阶段：纪念日与旅游计划 ----
   listAnniversaries(spaceId: string): Promise<AnniversaryRecord[]>;
+  listAllAnniversaries(): Promise<AnniversaryRecord[]>;
   findAnniversaryById(spaceId: string, anniversaryId: string): Promise<AnniversaryRecord | null>;
   createAnniversary(record: AnniversaryRecord): Promise<void>;
   updateAnniversary(spaceId: string, anniversaryId: string, patch: Partial<AnniversaryRecord>): Promise<void>;
@@ -390,4 +403,9 @@ export interface Repo {
   listAuditLogs(spaceId: string, limit: number): Promise<AuditLogRecord[]>;
   /** 频控计数：对 (user+action+分钟桶) 递增并返回当前次数 */
   incRateHit(key: string): Promise<number>;
+
+  // ---- 订阅消息提醒（1.1.0）----
+  listGrantsBySpaceTopic(spaceId: string, topic: string): Promise<SubscribeGrantRecord[]>;
+  createGrant(grant: SubscribeGrantRecord): Promise<void>;
+  deleteGrant(spaceId: string, grantId: string): Promise<void>;
 }

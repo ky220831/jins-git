@@ -76,6 +76,10 @@
     "rate_limits": {
       "read": false,
       "write": false
+    },
+    "subscribe_grants": {
+      "read": false,
+      "write": false
     }
   },
   "indexes": {

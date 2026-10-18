@@ -84,6 +84,7 @@
       </view>
       <view class="field-label">备注（可选）</view>
       <textarea class="input textarea auto-grow" placeholder="备注" value="{{planNote}}" bindinput="onPlanNoteInput" maxlength="200" auto-height />
+      <view class="reminder-link" bindtap="onRemind">🔔 开启今日菜单提醒</view>
       <view class="form-actions">
         <button class="btn-secondary form-btn" bindtap="onHidePlanForm">取消</button>
         <button class="btn-primary form-btn" bindtap="onAddPlan" loading="{{saving}}" disabled="{{saving}}">保存</button>

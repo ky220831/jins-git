@@ -13,6 +13,7 @@ import type {
   SpaceMemberRecord,
   SpaceRecord,
   SpaceSettingRecord,
+  SubscribeGrantRecord,
   TodoRecord,
   TrashRecord,
   TripPlanRecord,
@@ -46,6 +47,8 @@ export class MemoryRepo implements Repo {
   tripPlans = new Map<string, TripPlanRecord>();
   /** 频控计数（key = user+action+分钟桶） */
   rateHits = new Map<string, number>();
+  /** 订阅消息授权（openid + topic，一次性） */
+  grants = new Map<string, SubscribeGrantRecord>();
 
   async findUserIdentity(provider: string, providerUserId: string): Promise<UserIdentityRecord | null> {
     for (const item of this.userIdentities.values()) {
@@ -196,6 +199,10 @@ export class MemoryRepo implements Repo {
       .map((record) => ({ ...record }));
   }
 
+  async listAllPeriodRecords(): Promise<PeriodRecordRecord[]> {
+    return [...this.periodRecords.values()].map((record) => ({ ...record }));
+  }
+
   async createPeriodRecord(record: PeriodRecordRecord): Promise<void> {
     this.periodRecords.set(record.id, { ...record });
   }
@@ -296,6 +303,10 @@ export class MemoryRepo implements Repo {
     return [...this.mealPlans.values()]
       .filter((p) => p.spaceId === spaceId && p.date >= startDate && p.date <= endDate)
       .map((p) => ({ ...p }));
+  }
+
+  async listAllMealPlans(): Promise<MealPlanRecord[]> {
+    return [...this.mealPlans.values()].map((p) => ({ ...p }));
   }
 
   async listExpiredMealPlans(now: Date): Promise<MealPlanRecord[]> {
@@ -433,6 +444,10 @@ export class MemoryRepo implements Repo {
       .map((v) => ({ ...v }));
   }
 
+  async listAllRestaurantVisits(): Promise<RestaurantVisitRecord[]> {
+    return [...this.restaurantVisits.values()].map((v) => ({ ...v }));
+  }
+
   async listExpiredRestaurantVisits(now: Date): Promise<RestaurantVisitRecord[]> {
     return [...this.restaurantVisits.values()]
       .filter((v) => v.expireAt.getTime() <= now.getTime())
@@ -464,6 +479,10 @@ export class MemoryRepo implements Repo {
     return [...this.anniversaries.values()]
       .filter((a) => a.spaceId === spaceId)
       .map((a) => ({ ...a }));
+  }
+
+  async listAllAnniversaries(): Promise<AnniversaryRecord[]> {
+    return [...this.anniversaries.values()].map((a) => ({ ...a }));
   }
 
   async findAnniversaryById(
@@ -584,5 +603,26 @@ export class MemoryRepo implements Repo {
     const next = (this.rateHits.get(key) ?? 0) + 1;
     this.rateHits.set(key, next);
     return next;
+  }
+
+  // ---- 订阅消息提醒（1.1.0）----
+  async listGrantsBySpaceTopic(
+    spaceId: string,
+    topic: string,
+  ): Promise<SubscribeGrantRecord[]> {
+    return [...this.grants.values()]
+      .filter((g) => g.spaceId === spaceId && g.topic === topic)
+      .map((g) => ({ ...g }));
+  }
+
+  async createGrant(grant: SubscribeGrantRecord): Promise<void> {
+    this.grants.set(grant.id, { ...grant });
+  }
+
+  async deleteGrant(spaceId: string, grantId: string): Promise<void> {
+    const g = this.grants.get(grantId);
+    if (g && g.spaceId === spaceId) {
+      this.grants.delete(grantId);
+    }
   }
 }

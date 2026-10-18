@@ -253,6 +253,15 @@ button::after {
   background: #FFF9F4;
 }
 
+/* 订阅消息提醒入口 */
+.reminder-link {
+  margin-top: 20rpx;
+  text-align: center;
+  font-size: 24rpx;
+  color: var(--color-primary-deep);
+  padding: 12rpx;
+}
+
 /* ---- 交互规范：所有新增/编辑表单统一用底部弹窗 + 遮罩（1.0.9） ---- */
 .modal {
   position: fixed;

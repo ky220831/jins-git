@@ -1,0 +1,10 @@
+{
+  "name": "reminder",
+  "version": "1.0.0",
+  "private": true,
+  "description": "订阅消息提醒：授权记录与今日到期发送（由 daily-maintenance 触发发送）",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "^4.0.2"
+  }
+}

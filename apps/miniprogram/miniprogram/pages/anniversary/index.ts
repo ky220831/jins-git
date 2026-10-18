@@ -3,6 +3,7 @@ import { ROLE_OWNER, type AnniversaryView } from '../../lib/shared/types/index';
 import { AnniversaryService } from '../../services/anniversary';
 import { SpaceService } from '../../services/space';
 import { currentThemeClass } from '../../utils/theme';
+import { enableReminder } from '../../utils/reminder';
 
 interface AnniversaryRow extends AnniversaryView {
   countLabel: string;
@@ -168,6 +169,12 @@ Page({
           wx.showToast({ title: err instanceof ApiError ? err.message : '删除失败', icon: 'none' });
         }
       },
+    });
+  },
+
+  onRemind() {
+    enableReminder('anniversary').catch((err) => {
+      wx.showToast({ title: err instanceof ApiError ? err.message : '开启失败', icon: 'none' });
     });
   },
 });

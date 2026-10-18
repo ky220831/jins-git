@@ -5,6 +5,7 @@ import { MealService } from '../../_shared/mealService';
 import { RestaurantService } from '../../_shared/restaurantService';
 import { TravelService } from '../../_shared/travelService';
 import { TrashService } from '../../_shared/trashService';
+import { ReminderService } from '../../_shared/reminderService';
 
 /**
  * 每日维护任务（建议配置定时触发器：每天 04:00 Asia/Shanghai）：
@@ -13,7 +14,13 @@ import { TrashService } from '../../_shared/trashService';
  */
 export const main = createHandler<
   { silent?: boolean },
-  { expiredMealPlans: number; expiredVisits: number; expiredTripPlans: number; purgedTrash: number }
+  {
+    expiredMealPlans: number;
+    expiredVisits: number;
+    expiredTripPlans: number;
+    purgedTrash: number;
+    remindersSent: number;
+  }
 >(
   async () => {
     const repo = new CloudRepo();
@@ -21,6 +28,7 @@ export const main = createHandler<
     const expiredVisits = await new RestaurantService(repo).autoExpireVisits();
     const expiredTripPlans = await new TravelService(repo).autoExpirePlans();
     const purgedTrash = await new TrashService(repo).autoPurge();
-    return { expiredMealPlans, expiredVisits, expiredTripPlans, purgedTrash };
+    const remindersSent = await new ReminderService(repo).sendDue();
+    return { expiredMealPlans, expiredVisits, expiredTripPlans, purgedTrash, remindersSent };
   },
 );

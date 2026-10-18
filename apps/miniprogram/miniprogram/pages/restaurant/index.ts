@@ -8,6 +8,7 @@ import {
 } from '../../services/restaurant';
 import { SpaceService } from '../../services/space';
 import { currentThemeClass } from '../../utils/theme';
+import { enableReminder } from '../../utils/reminder';
 
 interface RestaurantRow extends RestaurantView {
   coverUrl: string;
@@ -473,6 +474,12 @@ Page({
       longitude: r.lng as number,
       name: r.name,
       address: r.address || '',
+    });
+  },
+
+  onRemind() {
+    enableReminder('visit').catch((err) => {
+      wx.showToast({ title: err instanceof ApiError ? err.message : '开启失败', icon: 'none' });
     });
   },
 });

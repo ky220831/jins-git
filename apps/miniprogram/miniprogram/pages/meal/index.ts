@@ -4,6 +4,7 @@ import { MealService } from '../../services/meal';
 import { SpaceService } from '../../services/space';
 import { TrashService } from '../../services/trash';
 import { currentThemeClass } from '../../utils/theme';
+import { enableReminder } from '../../utils/reminder';
 
 interface PlanRow extends MealPlanView {
   timeLabel: string;
@@ -323,6 +324,12 @@ Page({
           wx.showToast({ title: err instanceof ApiError ? err.message : '删除失败', icon: 'none' });
         }
       },
+    });
+  },
+
+  onRemind() {
+    enableReminder('meal').catch((err) => {
+      wx.showToast({ title: err instanceof ApiError ? err.message : '开启失败', icon: 'none' });
     });
   },
 });
