@@ -121,13 +121,13 @@
       <view class="sheet-handle"></view>
       <view class="form-title">添加事项（{{selectedDate}}）</view>
       <view class="field-label">事项标题</view>
-      <input class="input" placeholder="事项标题" value="{{formTitle}}" bindinput="onTitleInput" maxlength="100" />
+      <textarea class="input textarea auto-grow" placeholder="事项标题" value="{{formTitle}}" bindinput="onTitleInput" maxlength="100" auto-height />
       <view class="field-label">时间（可选）</view>
       <picker mode="time" value="{{formTime}}" bindchange="onTimeChange">
         <view class="picker-value {{formTime ? '' : 'placeholder'}}">{{formTime || '时间（可选，点这里选）'}}</view>
       </picker>
       <view class="field-label">备注（可选）</view>
-      <input class="input" placeholder="备注（可选）" value="{{formNote}}" bindinput="onNoteInput" maxlength="200" />
+      <textarea class="input textarea auto-grow" placeholder="备注（可选）" value="{{formNote}}" bindinput="onNoteInput" maxlength="200" auto-height />
       <view class="form-actions">
         <button class="btn-secondary form-btn" bindtap="onHideForm">取消</button>
         <button class="btn-primary form-btn" bindtap="onAddTodo" loading="{{saving}}" disabled="{{saving}}">保存</button>

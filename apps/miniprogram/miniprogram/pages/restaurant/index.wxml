@@ -89,9 +89,9 @@
       <view class="form-title">{{editingId ? '编辑餐厅' : '添加餐厅'}}</view>
       <view class="ocr-hint" wx:if="{{ocrHint}}">{{ocrHint}}</view>
       <view class="field-label">餐厅名称 *</view>
-      <textarea class="input textarea name-field" placeholder="餐厅名称 *" value="{{fName}}" data-field="fName" bindinput="onFieldInput" maxlength="60" auto-height />
+      <textarea class="input textarea auto-grow" placeholder="餐厅名称 *" value="{{fName}}" data-field="fName" bindinput="onFieldInput" maxlength="60" auto-height />
       <view class="field-label">地址</view>
-      <input class="input" placeholder="地址" value="{{fAddress}}" data-field="fAddress" bindinput="onFieldInput" maxlength="200" />
+      <textarea class="input textarea auto-grow" placeholder="地址" value="{{fAddress}}" data-field="fAddress" bindinput="onFieldInput" maxlength="200" auto-height />
       <view class="form-row">
         <view class="form-col">
           <view class="field-label">城市</view>
@@ -125,11 +125,11 @@
           </view>
         </view>
         <view class="field-label">标签</view>
-        <input class="input" placeholder="如：约会,安静" value="{{fTags}}" data-field="fTags" bindinput="onFieldInput" maxlength="100" />
+        <textarea class="input textarea auto-grow" placeholder="如：约会,安静" value="{{fTags}}" data-field="fTags" bindinput="onFieldInput" maxlength="100" auto-height />
         <view class="field-label">推荐菜</view>
-        <input class="input" placeholder="推荐菜，逗号分隔" value="{{fDishes}}" data-field="fDishes" bindinput="onFieldInput" maxlength="200" />
+        <textarea class="input textarea auto-grow" placeholder="推荐菜，逗号分隔" value="{{fDishes}}" data-field="fDishes" bindinput="onFieldInput" maxlength="200" auto-height />
         <view class="field-label">营业时间（可选）</view>
-        <input class="input" placeholder="营业时间（可选）" value="{{fHours}}" data-field="fHours" bindinput="onFieldInput" maxlength="50" />
+        <textarea class="input textarea auto-grow" placeholder="营业时间（可选）" value="{{fHours}}" data-field="fHours" bindinput="onFieldInput" maxlength="50" auto-height />
         <view class="field-label">备注（可选）</view>
         <textarea class="input textarea" placeholder="备注（可选）" value="{{fNote}}" data-field="fNote" bindinput="onFieldInput" maxlength="500" />
         <view class="switch-row">
@@ -167,7 +167,7 @@
         </view>
       </view>
       <view class="field-label">备注（可选）</view>
-      <input class="input" placeholder="备注" value="{{vNote}}" data-field="vNote" bindinput="onFieldInput" maxlength="200" />
+      <textarea class="input textarea auto-grow" placeholder="备注" value="{{vNote}}" data-field="vNote" bindinput="onFieldInput" maxlength="200" auto-height />
       <view class="form-actions">
         <button class="btn-secondary form-btn" bindtap="onHideVisitForm">取消</button>
         <button class="btn-primary form-btn" bindtap="onSaveVisit">保存</button>

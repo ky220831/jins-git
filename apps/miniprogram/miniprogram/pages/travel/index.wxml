@@ -59,7 +59,7 @@
       <view class="sheet-handle"></view>
       <view class="form-title">{{editingTripId ? '编辑旅行资料' : '添加旅行资料'}}（永久保存）</view>
       <view class="field-label">旅行名称 *</view>
-      <textarea class="input textarea name-field" placeholder="如：北海道之旅" value="{{tName}}" data-field="tName" bindinput="onFieldInput" maxlength="60" auto-height />
+      <textarea class="input textarea auto-grow" placeholder="如：北海道之旅" value="{{tName}}" data-field="tName" bindinput="onFieldInput" maxlength="60" auto-height />
       <view class="form-row">
         <view class="form-col">
           <view class="field-label">国家/地区</view>
@@ -71,9 +71,9 @@
         </view>
       </view>
       <view class="field-label">交通</view>
-      <input class="input" placeholder="如：飞机 + JR" value="{{tTransport}}" data-field="tTransport" bindinput="onFieldInput" maxlength="100" />
+      <textarea class="input textarea auto-grow" placeholder="如：飞机 + JR" value="{{tTransport}}" data-field="tTransport" bindinput="onFieldInput" maxlength="100" auto-height />
       <view class="field-label">酒店（可选）</view>
-      <input class="input" placeholder="酒店（可选）" value="{{tHotel}}" data-field="tHotel" bindinput="onFieldInput" maxlength="100" />
+      <textarea class="input textarea auto-grow" placeholder="酒店（可选）" value="{{tHotel}}" data-field="tHotel" bindinput="onFieldInput" maxlength="100" auto-height />
       <view class="form-row">
         <view class="form-col">
           <view class="field-label">纬度（可选）</view>
@@ -110,7 +110,7 @@
         <view class="picker-value {{pTripIndex > 0 ? '' : 'placeholder'}}">{{pTripIndex > 0 ? '关联：' + trips[pTripIndex - 1].name : '不关联（自定义名称）'}}</view>
       </picker>
       <view class="field-label">行程名称</view>
-      <textarea class="input textarea name-field" placeholder="默认用关联资料名" value="{{pName}}" data-field="pName" bindinput="onFieldInput" maxlength="60" auto-height />
+      <textarea class="input textarea auto-grow" placeholder="默认用关联资料名" value="{{pName}}" data-field="pName" bindinput="onFieldInput" maxlength="60" auto-height />
       <view class="form-row">
         <view class="form-col">
           <view class="field-label">开始日期 *</view>
@@ -138,7 +138,7 @@
         </view>
       </view>
       <view class="field-label">备注（可选）</view>
-      <input class="input" placeholder="备注（可选）" value="{{pNote}}" data-field="pNote" bindinput="onFieldInput" maxlength="200" />
+      <textarea class="input textarea auto-grow" placeholder="备注（可选）" value="{{pNote}}" data-field="pNote" bindinput="onFieldInput" maxlength="200" auto-height />
       <view class="form-actions">
         <button class="btn-secondary form-btn" bindtap="onHidePlanForm">取消</button>
         <button class="btn-primary form-btn" bindtap="onSavePlan" loading="{{savingPlan}}" disabled="{{savingPlan}}">保存</button>
