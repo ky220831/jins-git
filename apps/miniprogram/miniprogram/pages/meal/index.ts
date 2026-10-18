@@ -108,11 +108,11 @@ Page({
     this.setData({ planName: e.detail.value });
   },
 
-  onPlanDateInput(e: WechatMiniprogram.Input) {
+  onPlanDateChange(e: WechatMiniprogram.PickerChange) {
     this.setData({ planDate: e.detail.value });
   },
 
-  onPlanTimeInput(e: WechatMiniprogram.Input) {
+  onPlanTimeChange(e: WechatMiniprogram.PickerChange) {
     this.setData({ planTime: e.detail.value });
   },
 

@@ -4,7 +4,6 @@ import {
   type CalendarEventView,
   type HolidayDayView,
   type PeriodDayView,
-  type PeriodRecordView,
   type TodoView,
 } from '../../lib/shared/types/index';
 import { CalendarService } from '../../services/calendar';
@@ -39,10 +38,6 @@ interface TodoRow extends TodoView {
 
 interface EventRow extends CalendarEventView {
   timeLabel: string;
-}
-
-interface PeriodRow extends PeriodRecordView {
-  rangeLabel: string;
 }
 
 function pad(n: number): string {
@@ -113,7 +108,6 @@ Page({
     dayMarks: [] as { label: string; kind: string }[],
     dayHoliday: null as HolidayDayView | null,
     periodVisible: true,
-    periodRecords: [] as PeriodRow[],
     isOwner: false,
     loading: false,
     error: '',
@@ -122,10 +116,6 @@ Page({
     formTime: '',
     formNote: '',
     saving: false,
-    showPeriodForm: false,
-    periodStart: '',
-    periodEnd: '',
-    savingPeriod: false,
   },
 
   onLoad() {
@@ -204,15 +194,7 @@ Page({
         monthRes.holidays,
         periodInfo.calendarVisible,
       );
-      this.setData({
-        periodVisible: periodInfo.calendarVisible,
-        periodRecords: periodInfo.records
-          .map((r) => ({
-            ...r,
-            rangeLabel: `${r.startDate} ~ ${r.endDate}`,
-          }))
-          .sort((a, b) => (a.startDate < b.startDate ? -1 : 1)),
-      });
+      this.setData({ periodVisible: periodInfo.calendarVisible });
     } catch (err) {
       const message = err instanceof ApiError ? err.message : '日历加载失败，请重试';
       if (!silent) {
@@ -390,19 +372,6 @@ Page({
     }
   },
 
-  async onTogglePeriodVisible(e: WechatMiniprogram.SwitchChange) {
-    const visible = !!e.detail.value;
-    this.setData({ periodVisible: visible });
-    try {
-      await PeriodService.setVisible(visible);
-      this.refresh();
-    } catch (err) {
-      const message = err instanceof ApiError ? err.message : '设置失败，请重试';
-      wx.showToast({ title: message, icon: 'none' });
-      this.refresh();
-    }
-  },
-
   // ---- 顶部双人头部：邀请码 + 昵称 ----
   onCopyInvite() {
     const code = this.data.inviteCode;
@@ -456,6 +425,10 @@ Page({
     wx.navigateTo({ url: `/pages/restaurant/index?date=${this.data.selectedDate}` });
   },
 
+  onQuickPeriod() {
+    wx.navigateTo({ url: '/pages/period/index' });
+  },
+
   onQuickTravel() {
     wx.navigateTo({ url: `/pages/travel/index?date=${this.data.selectedDate}` });
   },
@@ -476,7 +449,7 @@ Page({
     this.setData({ formTitle: e.detail.value });
   },
 
-  onTimeInput(e: WechatMiniprogram.Input) {
+  onTimeChange(e: WechatMiniprogram.PickerChange) {
     this.setData({ formTime: e.detail.value });
   },
 
@@ -528,64 +501,4 @@ Page({
     }
   },
 
-  onShowPeriodForm() {
-    const date = this.data.selectedDate;
-    this.setData({
-      showPeriodForm: true,
-      periodStart: date,
-      periodEnd: date,
-    });
-  },
-
-  onHidePeriodForm() {
-    this.setData({ showPeriodForm: false });
-  },
-
-  onPeriodStartInput(e: WechatMiniprogram.Input) {
-    this.setData({ periodStart: e.detail.value });
-  },
-
-  onPeriodEndInput(e: WechatMiniprogram.Input) {
-    this.setData({ periodEnd: e.detail.value });
-  },
-
-  async onAddPeriod() {
-    const start = this.data.periodStart.trim();
-    const end = this.data.periodEnd.trim();
-    if (!start || !end) {
-      wx.showToast({ title: '请填写开始和结束日期', icon: 'none' });
-      return;
-    }
-    if (this.data.savingPeriod) return;
-    this.setData({ savingPeriod: true });
-    try {
-      await PeriodService.record({ startDate: start, endDate: end });
-      this.setData({ showPeriodForm: false });
-      this.refresh();
-    } catch (err) {
-      const message = err instanceof ApiError ? err.message : '保存失败，请重试';
-      wx.showToast({ title: message, icon: 'none' });
-    } finally {
-      this.setData({ savingPeriod: false });
-    }
-  },
-
-  onDeletePeriod(e: WechatMiniprogram.TouchEvent) {
-    const id = e.currentTarget.dataset.id as string;
-    if (!id) return;
-    wx.showModal({
-      title: '删除生理期记录',
-      content: '删除后将重新计算预测，确定删除吗？',
-      success: async (res) => {
-        if (!res.confirm) return;
-        try {
-          await PeriodService.remove(id);
-          this.refresh();
-        } catch (err) {
-          const message = err instanceof ApiError ? err.message : '删除失败，请重试';
-          wx.showToast({ title: message, icon: 'none' });
-        }
-      },
-    });
-  },
 });

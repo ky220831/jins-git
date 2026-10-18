@@ -30,8 +30,12 @@
   <view class="form" wx:if="{{showForm}}">
     <view class="form-title">{{editingId ? '编辑纪念日' : '添加纪念日'}}</view>
     <input class="input" placeholder="名称，如：在一起 / 结婚纪念日 *" value="{{fName}}" data-field="fName" bindinput="onFieldInput" maxlength="50" />
-    <input class="input" placeholder="日期 YYYY-MM-DD *" value="{{fDate}}" data-field="fDate" bindinput="onFieldInput" maxlength="10" />
-    <input class="input" placeholder="时间（可选，如 18:30）" value="{{fTime}}" data-field="fTime" bindinput="onFieldInput" maxlength="5" />
+    <picker mode="date" value="{{fDate}}" bindchange="onFieldChange" data-field="fDate">
+      <view class="picker-value {{fDate ? '' : 'placeholder'}}">{{fDate || '选择日期 *'}}</view>
+    </picker>
+    <picker mode="time" value="{{fTime}}" bindchange="onFieldChange" data-field="fTime">
+      <view class="picker-value {{fTime ? '' : 'placeholder'}}">{{fTime || '时间（可选）'}}</view>
+    </picker>
     <textarea class="input textarea" placeholder="备注（可选）" value="{{fNote}}" data-field="fNote" bindinput="onFieldInput" maxlength="200" />
     <view class="switch-row">
       <text>每年重复</text>

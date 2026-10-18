@@ -185,3 +185,18 @@ button::after {
   font-size: 24rpx;
   color: var(--color-text-secondary);
 }
+
+/* ---- 日期/时间表盘选择框（1.0.4 统一样式） ---- */
+.picker-value {
+  background: #FFF9F4;
+  border: 2rpx solid #FBE9DC;
+  border-radius: var(--radius-md);
+  padding: 20rpx 24rpx;
+  font-size: 28rpx;
+  color: var(--color-text);
+  margin-bottom: 16rpx;
+}
+
+.picker-value.placeholder {
+  color: var(--color-text-secondary);
+}

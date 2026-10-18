@@ -1,0 +1,46 @@
+<view class="container period-page">
+  <view class="page-head">
+    <view class="page-title">🌸 生理期</view>
+    <view class="page-sub">只保留最近 2 次实际记录 + 1 次预测（+22 天）</view>
+  </view>
+
+  <view class="error-text" wx:if="{{error}}">{{error}}</view>
+
+  <view class="card">
+    <view class="card-title">记录本次生理期</view>
+    <view class="field-label">开始日期</view>
+    <picker mode="date" value="{{periodStart}}" bindchange="onStartChange">
+      <view class="picker-value">{{periodStart}}</view>
+    </picker>
+    <view class="field-label">结束日期</view>
+    <picker mode="date" value="{{periodEnd}}" bindchange="onEndChange">
+      <view class="picker-value">{{periodEnd}}</view>
+    </picker>
+    <view class="form-tip">系统自动保留最近 2 次实际记录，并按“结束日 + 22 天”预测下次（持续 7 天）</view>
+    <button class="btn-primary save-btn" bindtap="onSave" loading="{{saving}}" disabled="{{saving}}">保存记录</button>
+  </view>
+
+  <view class="card">
+    <view class="card-title">日历显示</view>
+    <view class="toggle-row">
+      <view class="toggle-label">日历中显示生理期标记</view>
+      <switch checked="{{periodVisible}}" bindchange="onToggleVisible" color="#C96F6F" />
+    </view>
+    <view class="form-tip">关闭只隐藏日历标记，不会删除数据</view>
+  </view>
+
+  <view class="card">
+    <view class="card-title">记录列表</view>
+    <view class="period-row" wx:for="{{periodRecords}}" wx:key="id">
+      <view class="period-info">
+        <view class="period-range">{{item.rangeLabel}}</view>
+        <view class="period-meta">
+          {{item.type === 'actual' ? (item.isEstimated ? '实际(估)' : '实际') : '预测'}}
+          · 周期 {{item.cycleLength}} 天
+        </view>
+      </view>
+      <view class="period-delete" wx:if="{{isOwner && item.type === 'actual'}}" data-id="{{item.id}}" bindtap="onDelete">删除</view>
+    </view>
+    <view class="period-empty" wx:if="{{!periodRecords.length}}">还没有记录，选择日期保存第一条吧</view>
+  </view>
+</view>

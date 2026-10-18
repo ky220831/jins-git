@@ -39,6 +39,14 @@
       </view>
       <text class="fe-arrow">›</text>
     </view>
+    <view class="feature-row" bindtap="onOpenPeriod">
+      <text class="fe-emoji">🌸</text>
+      <view class="fe-body">
+        <view class="fe-label">生理期</view>
+        <view class="fe-sub">记录与预测 · 日历显示开关</view>
+      </view>
+      <text class="fe-arrow">›</text>
+    </view>
     <view class="feature-row" bindtap="onOpenManage">
       <text class="fe-emoji">🛠️</text>
       <view class="fe-body">

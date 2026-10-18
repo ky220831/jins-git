@@ -185,6 +185,11 @@ Page({
     this.setData({ [field]: e.detail.value } as Record<string, string>);
   },
 
+  onFieldChange(e: WechatMiniprogram.PickerChange) {
+    const field = e.currentTarget.dataset.field as string;
+    this.setData({ [field]: e.detail.value } as Record<string, string>);
+  },
+
   async onSaveTrip() {
     const name = this.data.tName.trim();
     if (!name) {

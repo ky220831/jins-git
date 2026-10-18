@@ -42,6 +42,10 @@ Page({
     wx.navigateTo({ url: '/pages/travel/index' });
   },
 
+  onOpenPeriod() {
+    wx.navigateTo({ url: '/pages/period/index' });
+  },
+
   onOpenManage() {
     wx.navigateTo({ url: '/pages/manage/index' });
   },

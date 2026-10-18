@@ -10,6 +10,7 @@
     "pages/restaurant/index",
     "pages/anniversary/index",
     "pages/travel/index",
+    "pages/period/index",
     "pages/manage/index"
   ],
   "window": {
@@ -29,11 +30,15 @@
     "list": [
       {
         "pagePath": "pages/calendar/index",
-        "text": "日历"
+        "text": "日历",
+        "iconPath": "images/tab/calendar.png",
+        "selectedIconPath": "images/tab/calendar-active.png"
       },
       {
         "pagePath": "pages/features/index",
-        "text": "功能"
+        "text": "功能",
+        "iconPath": "images/tab/features.png",
+        "selectedIconPath": "images/tab/features-active.png"
       }
     ]
   }

@@ -586,3 +586,18 @@
   flex: 1;
   font-size: 28rpx;
 }
+
+/* ---- 日期/时间表盘选择 ---- */
+.picker-value {
+  background: #FFF9F4;
+  border: 2rpx solid #FBE9DC;
+  border-radius: var(--radius-md);
+  padding: 20rpx 24rpx;
+  font-size: 28rpx;
+  color: var(--color-text);
+  margin-bottom: 16rpx;
+}
+
+.picker-value.placeholder {
+  color: var(--color-text-secondary);
+}

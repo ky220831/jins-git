@@ -23,13 +23,6 @@
     <view class="cal-today" bindtap="onToday">今天</view>
   </view>
 
-  <view class="cal-options">
-    <view class="period-toggle">
-      <text class="toggle-label">日历显示生理期</text>
-      <switch checked="{{periodVisible}}" bindchange="onTogglePeriodVisible" color="#C96F6F" />
-    </view>
-  </view>
-
   <view class="week-row">
     <view class="week-cell" wx:for="{{weekdays}}" wx:key="*this">{{item}}</view>
   </view>
@@ -83,7 +76,7 @@
     <!-- 快速入口：日历 → 核心功能新增/编辑（自动带入当天日期） -->
     <view class="quick-row">
       <view class="quick-btn" bindtap="onShowForm">＋ 事项</view>
-      <view class="quick-btn" bindtap="onShowPeriodForm">🌸 生理期</view>
+      <view class="quick-btn" bindtap="onQuickPeriod">🌸 生理期</view>
       <view class="quick-btn" bindtap="onQuickMeal">🍚 菜单</view>
       <view class="quick-btn" bindtap="onQuickRestaurant">🍴 行程</view>
       <view class="quick-btn" bindtap="onQuickTravel">✈️ 旅游</view>
@@ -122,7 +115,9 @@
   <view class="form" wx:if="{{showForm}}">
     <view class="form-title">添加事项（{{selectedDate}}）</view>
     <input class="input" placeholder="事项标题" value="{{formTitle}}" bindinput="onTitleInput" maxlength="100" />
-    <input class="input" placeholder="时间（可选，如 18:30）" value="{{formTime}}" bindinput="onTimeInput" maxlength="5" />
+    <picker mode="time" value="{{formTime}}" bindchange="onTimeChange">
+      <view class="picker-value {{formTime ? '' : 'placeholder'}}">{{formTime || '时间（可选，点这里选）'}}</view>
+    </picker>
     <input class="input" placeholder="备注（可选）" value="{{formNote}}" bindinput="onNoteInput" maxlength="200" />
     <view class="form-actions">
       <button class="btn-secondary form-btn" bindtap="onHideForm">取消</button>
@@ -130,29 +125,4 @@
     </view>
   </view>
 
-  <view class="form" wx:if="{{showPeriodForm}}">
-    <view class="form-title">记录生理期（{{selectedDate}}）</view>
-    <input class="input" placeholder="开始日期 YYYY-MM-DD" value="{{periodStart}}" bindinput="onPeriodStartInput" maxlength="10" />
-    <input class="input" placeholder="结束日期 YYYY-MM-DD" value="{{periodEnd}}" bindinput="onPeriodEndInput" maxlength="10" />
-    <view class="form-tip">系统自动保留最近 2 次实际记录，并预测下次（+22 天）</view>
-    <view class="form-actions">
-      <button class="btn-secondary form-btn" bindtap="onHidePeriodForm">取消</button>
-      <button class="btn-primary form-btn" bindtap="onAddPeriod" loading="{{savingPeriod}}" disabled="{{savingPeriod}}">保存</button>
-    </view>
-  </view>
-
-  <view class="period-card" wx:if="{{periodRecords.length || isOwner}}">
-    <view class="period-card-title">生理期记录（最近 2 次实际 + 1 次预测）</view>
-    <view class="period-row" wx:for="{{periodRecords}}" wx:key="id">
-      <view class="period-info">
-        <view class="period-range">{{item.rangeLabel}}</view>
-        <view class="period-meta">
-          {{item.type === 'actual' ? (item.isEstimated ? '实际(估)' : '实际') : '预测'}}
-          · 周期 {{item.cycleLength}} 天
-        </view>
-      </view>
-      <view class="period-delete" wx:if="{{isOwner && item.type === 'actual'}}" data-id="{{item.id}}" bindtap="onDeletePeriod">删除</view>
-    </view>
-    <view class="period-empty" wx:if="{{!periodRecords.length}}">还没有记录，点击上面“记录生理期”开始</view>
-  </view>
 </view>

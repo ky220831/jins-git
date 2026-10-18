@@ -64,8 +64,12 @@
       <view class="picker-value">{{templatePickerIndex >= 0 ? enabledTemplates[templatePickerIndex].name : '从素材库选择（可选）'}}</view>
     </picker>
     <input class="input" placeholder="或直接填名称" value="{{planName}}" bindinput="onPlanNameInput" maxlength="50" />
-    <input class="input" placeholder="日期 YYYY-MM-DD" value="{{planDate}}" bindinput="onPlanDateInput" maxlength="10" />
-    <input class="input" placeholder="时间（可选，如 18:30，填了会进日历）" value="{{planTime}}" bindinput="onPlanTimeInput" maxlength="5" />
+    <picker mode="date" value="{{planDate}}" bindchange="onPlanDateChange">
+      <view class="picker-value">{{planDate}}</view>
+    </picker>
+    <picker mode="time" value="{{planTime}}" bindchange="onPlanTimeChange">
+      <view class="picker-value {{planTime ? '' : 'placeholder'}}">{{planTime || '时间（可选，点这里选，填了会进日历）'}}</view>
+    </picker>
     <input class="input" placeholder="备注（可选）" value="{{planNote}}" bindinput="onPlanNoteInput" maxlength="200" />
     <view class="form-actions">
       <button class="btn-secondary form-btn" bindtap="onHidePlanForm">取消</button>
