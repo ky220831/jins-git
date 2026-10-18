@@ -75,7 +75,7 @@
     </view>
     <view class="week-grid">
       <view
-        class="day-cell {{item.isToday ? 'today' : ''}} {{item.key === selectedDate ? 'selected' : ''}} {{item.isWeekend ? 'weekend' : ''}} {{item.periodState === 'ongoing' ? 'period-ongoing' : ''}} {{item.periodState === 'past' ? 'period-past' : ''}} {{item.periodState === 'predicted' ? 'period-predicted' : ''}} {{item.periodState === 'rest' ? 'rest' : ''}}"
+        class="day-cell {{item.inMonth ? '' : 'dim'}} {{item.isToday ? 'today' : ''}} {{item.key === selectedDate ? 'selected' : ''}} {{item.isWeekend ? 'weekend' : ''}} {{item.periodState === 'ongoing' ? 'period-ongoing' : ''}} {{item.periodState === 'past' ? 'period-past' : ''}} {{item.periodState === 'predicted' ? 'period-predicted' : ''}} {{item.periodState === 'rest' ? 'rest' : ''}}"
         wx:for="{{weekDays}}"
         wx:key="key"
         data-key="{{item.key}}"
@@ -118,9 +118,6 @@
       <view class="legend-chip"><view class="legend-dot period-ongoing"></view><text>生理期进行中</text></view>
       <view class="legend-chip"><view class="legend-dot period-predicted"></view><text>生理期预计</text></view>
       <view class="legend-chip"><view class="legend-dot period-past"></view><text>生理期已过</text></view>
-      <view class="legend-chip"><view class="legend-dot rest"></view><text>休息</text></view>
-      <view class="legend-chip"><view class="legend-dot weekend"></view><text>周末</text></view>
-      <view class="legend-chip"><view class="legend-dot makeup"></view><text>调休</text></view>
       <view class="legend-chip"><view class="legend-dot todo"></view><text>待办</text></view>
       <view class="legend-chip"><view class="legend-dot meal"></view><text>菜单</text></view>
       <view class="legend-chip"><view class="legend-dot restaurant"></view><text>餐厅</text></view>
@@ -142,7 +139,10 @@
     <view class="status-line rest" wx:if="{{dayPeriodState === 'rest'}}">🔵 休息日</view>
     <view class="day-empty" wx:if="{{guestMode}}">创建空间后，这里会记录你们的一天</view>
     <view class="day-empty" wx:elif="{{loading}}">正在加载这一天…</view>
-    <view class="day-empty" wx:elif="{{!dayTodos.length && !dayEvents.length && !dayPeriodState && !dayMarks.length}}">🌷 这一天还没有安排</view>
+    <view class="day-empty" wx:elif="{{!dayTodos.length && !dayEvents.length && !dayPeriodState && !dayMarks.length}}">
+      <view class="empty-icon">🌷</view>
+      <view>这一天还没有安排，点下方按钮快速添加</view>
+    </view>
 
     <!-- 快速入口：日历 → 核心功能新增/编辑（自动带入当天日期） -->
     <view class="quick-row">

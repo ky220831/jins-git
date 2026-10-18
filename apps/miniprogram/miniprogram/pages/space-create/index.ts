@@ -1,5 +1,6 @@
 import { ApiError } from '../../api/cloud';
 import { SpaceService } from '../../services/space';
+import { currentThemeClass } from '../../utils/theme';
 import { formatDateTime } from '../../utils/time';
 
 interface InviteResult {
@@ -9,9 +10,14 @@ interface InviteResult {
 
 Page({
   data: {
+    themeClass: currentThemeClass(),
     name: '',
     submitting: false,
     result: null as InviteResult | null,
+  },
+
+  onShow() {
+    this.setData({ themeClass: currentThemeClass() });
   },
 
   onNameInput(e: WechatMiniprogram.Input) {

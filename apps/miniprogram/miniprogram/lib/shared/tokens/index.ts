@@ -120,6 +120,26 @@ export const festivals = {
 } as const;
 
 /**
+ * 月度专属主题（v1.1.14）：每个月一套低饱和渐变背景。
+ * 与 style/theme.wxss 中 .theme-m1..m12 保持一致；换年度/换设计只需改这里 + theme.wxss。
+ * 季节基调：1-2 冬(冷调) / 3-5 春(嫩绿) / 6-8 夏(冰蓝青) / 9-11 秋(暖杏) / 12 冬(淡紫灰)
+ */
+export const monthlyThemes = [
+  { month: 1, name: '一月', mood: '清冷灰', bg: '#F4F4F4', surface: '#FBFBFB', gradA: '#F4F4F4', gradB: '#E8E8EC' },
+  { month: 2, name: '二月', mood: '淡薰衣草紫', bg: '#F3EFF8', surface: '#FAF8FC', gradA: '#F3EFF8', gradB: '#E7E0F0' },
+  { month: 3, name: '三月', mood: '淡樱粉青', bg: '#FDF2F3', surface: '#FEF9F8', gradA: '#FDF2F3', gradB: '#EAF2EC' },
+  { month: 4, name: '四月', mood: '清新薄荷绿', bg: '#ECF7F3', surface: '#F8FCFA', gradA: '#ECF7F3', gradB: '#DFF0E9' },
+  { month: 5, name: '五月', mood: '暖调草绿', bg: '#F2F8EA', surface: '#FAFCF6', gradA: '#F2F8EA', gradB: '#E3EFD8' },
+  { month: 6, name: '六月', mood: '晴空浅蓝', bg: '#EDF4FB', surface: '#F8FBFD', gradA: '#EDF4FB', gradB: '#DCECF6' },
+  { month: 7, name: '七月', mood: '冰水薄荷', bg: '#EAF6F5', surface: '#F7FCFB', gradA: '#EAF6F5', gradB: '#D9EFED' },
+  { month: 8, name: '八月', mood: '柔和海沫青', bg: '#EAF5F2', surface: '#F7FCFA', gradA: '#EAF5F2', gradB: '#D9EBE7' },
+  { month: 9, name: '九月', mood: '浅麦米黄', bg: '#F9F4E9', surface: '#FDFBF5', gradA: '#F9F4E9', gradB: '#EFE6D3' },
+  { month: 10, name: '十月', mood: '淡柿杏色', bg: '#FBF2E5', surface: '#FEFAF4', gradA: '#FBF2E5', gradB: '#F2E0CB' },
+  { month: 11, name: '十一月', mood: '灰调暖棕奶', bg: '#F5F0EA', surface: '#FCF9F5', gradA: '#F5F0EA', gradB: '#E9DFD4' },
+  { month: 12, name: '十二月', mood: '薄雾藕紫', bg: '#F4EFF3', surface: '#FBF8FA', gradA: '#F4EFF3', gradB: '#E6DEE8' },
+] as const;
+
+/**
  * 业务模块统一显示名（v1.1.9 命名规范，单一事实源）。
  * 全局（功能页 / 日历日程 / TabBar / 订阅消息 / 管理页）都从这里取，
  * 改模块名只需改这一处，禁止在各页面散落硬编码模块名。

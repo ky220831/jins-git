@@ -1,4 +1,4 @@
-<view class="container">
+<view class="container {{themeClass}}">
   <view class="headline">创建你们的空间</view>
   <view class="hint">空间只能有两位成员：主账号创建空间，副账号通过邀请码加入。</view>
 

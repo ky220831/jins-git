@@ -1,4 +1,4 @@
-<view class="container">
+<view class="container {{themeClass}}">
   <view class="tip">给你们的空间起个名字吧</view>
   <input
     class="input"

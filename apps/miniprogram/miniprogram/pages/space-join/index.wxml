@@ -1,4 +1,4 @@
-<view class="container">
+<view class="container {{themeClass}}">
   <view class="tip">输入对方给你的 8 位邀请码</view>
   <input
     class="input"

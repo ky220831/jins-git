@@ -1,0 +1,10 @@
+<view class="tab-bar {{themeClass}}">
+  <view class="tab-item {{selected === 0 ? 'active' : ''}}" data-index="0" bindtap="onTap">
+    <image class="tab-icon" src="{{selected === 0 ? '/images/tab/calendar-active.png' : '/images/tab/calendar.png'}}"></image>
+    <text class="tab-text">日历</text>
+  </view>
+  <view class="tab-item {{selected === 1 ? 'active' : ''}}" data-index="1" bindtap="onTap">
+    <image class="tab-icon" src="{{selected === 1 ? '/images/tab/features-active.png' : '/images/tab/features.png'}}"></image>
+    <text class="tab-text">更多</text>
+  </view>
+</view>

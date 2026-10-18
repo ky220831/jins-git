@@ -42,6 +42,10 @@ Page({
 
   onShow() {
     this.setData({ themeClass: currentThemeClass() });
+    const tabBar = (this as unknown as { getTabBar?: () => { setData(d: Record<string, unknown>): void } }).getTabBar?.();
+    if (tabBar) {
+      tabBar.setData({ selected: 1, themeClass: currentThemeClass() });
+    }
     SpaceService.mySpace()
       .then((res) => {
         this.buildFeatureList(res.space.myRole === ROLE_OWNER);

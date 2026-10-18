@@ -210,6 +210,10 @@ Page({
 
   onShow() {
     this.setData({ themeClass: currentThemeClass() });
+    const tabBar = (this as unknown as { getTabBar?: () => { setData(d: Record<string, unknown>): void } }).getTabBar?.();
+    if (tabBar) {
+      tabBar.setData({ selected: 0, themeClass: currentThemeClass() });
+    }
     if (this.data.year && !this.data.guestMode) {
       this.refresh();
     } else if (this.data.guestMode) {
@@ -534,10 +538,16 @@ Page({
     for (let i = 0; i < 7; i += 1) {
       const date = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + i);
       const key = dateKey(date.getFullYear(), date.getMonth() + 1, date.getDate());
-      week.push(
-        byKey.get(key) ||
-          publicDayCell(date.getFullYear(), date.getMonth() + 1, date.getDate(), todayKey),
-      );
+      // 跨月判定以“当前显示的年月”为准：本月的格子保留完整 UI，次月/上月弱化
+      const inCurrentMonth = date.getFullYear() === this.data.year && date.getMonth() + 1 === this.data.month;
+      const existing = byKey.get(key);
+      if (existing) {
+        week.push({ ...existing, inMonth: inCurrentMonth });
+      } else {
+        const cell = publicDayCell(date.getFullYear(), date.getMonth() + 1, date.getDate(), todayKey);
+        cell.inMonth = inCurrentMonth;
+        week.push(cell);
+      }
     }
     this.setData({ weekDays: week });
   },

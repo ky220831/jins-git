@@ -32,7 +32,8 @@ export function currentThemeClass(): string {
   if (!themeAutoEnabled()) return 'theme-base';
   const ctx = themeDayContext();
   const parts: string[] = [];
-  if (ctx.termIndex >= 0) parts.push(`theme-jq-${ctx.termIndex + 1}`);
+  // 每月专属主题（theme-m1..m12，配色集中配置在 design-tokens monthlyThemes）
+  parts.push(`theme-m${ctx.month}`);
   if (ctx.festivalKey) parts.push(`theme-festival-${ctx.festivalKey}`);
   const pref = periodPreference();
   parts.push(`theme-period-${pref === 'auto' ? ctx.period : pref}`);
