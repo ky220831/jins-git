@@ -1,4 +1,5 @@
 <view class="container {{themeClass}} calendar-page">
+  <custom-nav title="日历" />
   <!-- 顶部：双人爱心连接 + 右上角小邀请码 -->
   <view class="top-bar" wx:if="{{guestMode}}">
     <view class="guest-badge">🌿 体验模式</view>

@@ -584,13 +584,16 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20rpx;
+  gap: 16rpx;
+  margin: 12rpx 0 20rpx;
 }
 
 .couple {
   display: flex;
   align-items: center;
-  gap: 14rpx;
+  gap: 10rpx;
+  flex: 1;
+  min-width: 0;
 }
 
 .mini-avatar {
@@ -598,10 +601,11 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 10rpx 18rpx;
+  padding: 8rpx 14rpx;
   background: var(--color-surface);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-soft);
+  min-width: 0;
 }
 
 .mini-avatar.me {
@@ -630,7 +634,7 @@
   font-size: 20rpx;
   font-weight: 600;
   color: var(--color-text);
-  max-width: 130rpx;
+  max-width: 170rpx;
   overflow: hidden;
   white-space: nowrap;
 }
@@ -656,13 +660,15 @@
 }
 
 .invite-badge {
+  flex-shrink: 0;
   padding: 8rpx 16rpx;
   background: var(--color-surface);
   border-radius: 999rpx;
-  font-size: 20rpx;
+  font-size: 22rpx;
   color: var(--color-primary-deep);
   font-weight: 600;
   box-shadow: var(--shadow-soft);
+  border: 2rpx solid var(--color-border);
 }
 
 .invite-badge.bound {

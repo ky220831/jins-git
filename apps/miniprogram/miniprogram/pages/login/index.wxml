@@ -1,4 +1,5 @@
 <view class="container {{themeClass}} login-page">
+  <custom-nav title="我们的生活" />
   <view class="hero">
     <view class="logo">🌿</view>
     <view class="title">我们的生活</view>

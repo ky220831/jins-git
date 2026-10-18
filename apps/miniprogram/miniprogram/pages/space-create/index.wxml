@@ -1,4 +1,5 @@
 <view class="container {{themeClass}}">
+  <custom-nav title="创建空间" showBack="{{true}}" />
   <view class="tip">给你们的空间起个名字吧</view>
   <input
     class="input"

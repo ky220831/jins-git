@@ -1,4 +1,5 @@
 <view class="container {{themeClass}} features-page">
+  <custom-nav title="更多" />
   <view class="page-head">
     <view class="page-title">更多</view>
     <view class="page-sub">日历在左侧 Tab · 点这里进入各模块</view>

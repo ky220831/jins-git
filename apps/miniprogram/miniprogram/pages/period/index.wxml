@@ -1,4 +1,5 @@
 <view class="container {{themeClass}} period-page">
+  <custom-nav title="生理期" showBack="{{true}}" />
   <view class="page-head">
     <view class="page-title">🌸 生理期</view>
     <view class="page-sub">只保留最近 2 次实际记录 + 1 次预测（开始日 + 28 天）</view>

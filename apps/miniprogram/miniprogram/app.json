@@ -13,11 +13,12 @@
     "pages/manage/index"
   ],
   "window": {
-    "navigationBarBackgroundColor": "#FAF8F4",
-    "navigationBarTitleText": "我们的生活",
-    "navigationBarTextStyle": "black",
+    "navigationStyle": "custom",
     "backgroundColor": "#FAF8F4",
     "backgroundTextStyle": "light"
+  },
+  "usingComponents": {
+    "custom-nav": "/components/custom-nav/index"
   },
   "style": "v2",
   "sitemapLocation": "sitemap.json",
