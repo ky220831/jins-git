@@ -32,10 +32,20 @@ export const RATE_LIMIT_PER_MINUTE = {
  * 订阅消息模板（1.1.0）：templateId 需在 小程序后台 → 订阅消息 选用模板后填入，
  * 为空时提醒功能自动禁用（客户端不显示开启按钮）。字段名需匹配所选模板。
  */
+/** 已选用模板（2026-08-15 在后台选用）：纪念日提醒 + 日程提醒（菜单/行程共用） */
 export const REMINDER_TEMPLATES = {
-  anniversary: { templateId: '', page: 'pages/anniversary/index' },
-  meal: { templateId: '', page: 'pages/meal/index' },
-  visit: { templateId: '', page: 'pages/restaurant/index' },
+  anniversary: {
+    templateId: '1ng1-0er5XGCXPwvoBOllnRJmQxDqN1mk-Sy4gSWWJk',
+    page: 'pages/anniversary/index',
+  },
+  meal: {
+    templateId: 'N5jv5qGBh-rBB3qeKvC1Tr7Q2KBD9p0lMlb81Z5W1TY',
+    page: 'pages/meal/index',
+  },
+  visit: {
+    templateId: 'N5jv5qGBh-rBB3qeKvC1Tr7Q2KBD9p0lMlb81Z5W1TY',
+    page: 'pages/restaurant/index',
+  },
 } as const;
 
 export type ReminderTopic = keyof typeof REMINDER_TEMPLATES;

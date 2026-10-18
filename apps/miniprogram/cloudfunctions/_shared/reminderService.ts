@@ -9,6 +9,8 @@ export interface ReminderItem {
   title: string;
   date: string;
   time?: string;
+  /** 纪念日原始日期（用于“纪念日期”字段） */
+  originalDate?: string;
 }
 
 type Sender = (params: {
@@ -24,7 +26,7 @@ const defaultSender: Sender = async ({ openid, templateId, page, data }) => {
     templateId,
     page,
     data,
-    miniprogramState: 'formal',
+    miniprogramState: 'trial',
   });
 };
 
@@ -59,7 +61,13 @@ export class ReminderService {
     const items: ReminderItem[] = [];
     for (const a of await this.repo.listAllAnniversaries()) {
       if (nextAnniversaryOccurrence(a.date, a.yearly, today) === today) {
-        items.push({ spaceId: a.spaceId, topic: 'anniversary', title: `纪念日：${a.name}`, date: today });
+        items.push({
+          spaceId: a.spaceId,
+          topic: 'anniversary',
+          title: `纪念日：${a.name}`,
+          date: today,
+          originalDate: a.date,
+        });
       }
     }
     for (const m of await this.repo.listAllMealPlans()) {
@@ -103,15 +111,23 @@ export class ReminderService {
       const grants = await this.repo.listGrantsBySpaceTopic(item.spaceId, item.topic);
       for (const grant of grants) {
         try {
+          const data: Record<string, { value: string }> =
+            item.topic === 'anniversary'
+              ? {
+                  thing1: { value: item.title.slice(0, 20) },
+                  date2: { value: item.date },
+                  date3: { value: item.originalDate || item.date },
+                }
+              : {
+                  thing1: { value: item.title.slice(0, 20) },
+                  date2: { value: item.date },
+                  time3: { value: item.time ? item.time : '全天' },
+                };
           await this.send({
             openid: grant.openid,
             templateId: grant.templateId || cfg.templateId,
             page: cfg.page,
-            data: {
-              thing1: { value: item.title.slice(0, 20) },
-              date2: { value: item.date },
-              time3: { value: item.time ? item.time : '全天' },
-            },
+            data,
           });
           sent += 1;
         } catch {
