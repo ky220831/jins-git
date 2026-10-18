@@ -6,30 +6,7 @@
 
   <view class="error-text" wx:if="{{error}}">{{error}}</view>
 
-  <view class="card">
-    <view class="card-title">{{mode === 'edit' ? '修改本次记录' : '记录开始日期'}}</view>
-    <block wx:if="{{mode === 'edit'}}">
-      <view class="ongoing-line" wx:if="{{ongoingRecord}}">🌸 本次生理期已从 {{ongoingRecord.startDate}} 开始</view>
-      <view class="field-label">开始日期</view>
-      <picker mode="date" value="{{startDate}}" bindchange="onStartChange">
-        <view class="picker-value">{{startDate}}</view>
-      </picker>
-      <view class="field-label">结束日期</view>
-      <picker mode="date" value="{{endDate}}" start="{{startDate}}" end="{{ongoingEndMax}}" bindchange="onEndChange">
-        <view class="picker-value">{{endDate}}</view>
-      </picker>
-      <view class="form-tip">改错日期直接修改后保存即可，不会再生成重复记录</view>
-      <button class="btn-primary save-btn" bindtap="onSave" loading="{{saving}}" disabled="{{saving}}">保存修改</button>
-    </block>
-    <block wx:else>
-      <view class="field-label">开始日期</view>
-      <picker mode="date" value="{{startDate}}" bindchange="onStartChange">
-        <view class="picker-value">{{startDate}}</view>
-      </picker>
-      <view class="form-tip">记录后，可在生理期期间再补录结束日期；系统按“开始日 + 28 天”预测下一次开始日</view>
-      <button class="btn-primary save-btn" bindtap="onSave" loading="{{saving}}" disabled="{{saving}}">记录开始日期</button>
-    </block>
-  </view>
+  <button class="btn-primary period-trigger" bindtap="onOpenForm">{{mode === 'edit' ? '✏️ 修改本次记录' : '🌸 记录开始日期'}}</button>
 
   <view class="card">
     <view class="card-title">日历显示</view>
@@ -53,5 +30,34 @@
       </view>
     </view>
     <view class="period-empty" wx:if="{{!periodRecords.length}}">还没有记录，选择日期保存第一条吧</view>
+  </view>
+
+  <view class="modal" wx:if="{{showFormModal}}">
+    <view class="mask" bindtap="onHideFormModal"></view>
+    <view class="sheet">
+      <view class="sheet-handle"></view>
+      <view class="form-title">{{mode === 'edit' ? '修改本次记录' : '记录开始日期'}}</view>
+      <block wx:if="{{mode === 'edit'}}">
+        <view class="ongoing-line" wx:if="{{ongoingRecord}}">🌸 本次生理期已从 {{ongoingRecord.startDate}} 开始</view>
+        <view class="field-label">开始日期</view>
+        <picker mode="date" value="{{startDate}}" bindchange="onStartChange">
+          <view class="picker-value">{{startDate}}</view>
+        </picker>
+        <view class="field-label">结束日期</view>
+        <picker mode="date" value="{{endDate}}" start="{{startDate}}" end="{{ongoingEndMax}}" bindchange="onEndChange">
+          <view class="picker-value">{{endDate}}</view>
+        </picker>
+        <view class="form-tip">改错日期直接修改后保存即可，不会再生成重复记录</view>
+        <button class="btn-primary save-btn" bindtap="onSave" loading="{{saving}}" disabled="{{saving}}">保存修改</button>
+      </block>
+      <block wx:else>
+        <view class="field-label">开始日期</view>
+        <picker mode="date" value="{{startDate}}" bindchange="onStartChange">
+          <view class="picker-value">{{startDate}}</view>
+        </picker>
+        <view class="form-tip">记录后，可在生理期期间再补录结束日期；系统按“开始日 + 28 天”预测下一次开始日</view>
+        <button class="btn-primary save-btn" bindtap="onSave" loading="{{saving}}" disabled="{{saving}}">记录开始日期</button>
+      </block>
+    </view>
   </view>
 </view>

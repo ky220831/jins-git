@@ -34,6 +34,7 @@ Page({
     endDate: '',
     ongoingRecord: null as { id: string; startDate: string } | null,
     ongoingEndMax: '',
+    showFormModal: false,
   },
 
   onLoad() {
@@ -110,6 +111,14 @@ Page({
     });
   },
 
+  onOpenForm() {
+    this.setData({ showFormModal: true });
+  },
+
+  onHideFormModal() {
+    this.setData({ showFormModal: false });
+  },
+
   onEndChange(e: WechatMiniprogram.PickerChange) {
     this.setData({ endDate: e.detail.value });
   },
@@ -132,6 +141,7 @@ Page({
           endDate: end,
         });
         this.setData({ editingId: '' });
+        this.setData({ showFormModal: false });
         wx.showToast({ title: '已保存修改', icon: 'success' });
       } else {
         const start = this.data.startDate;
@@ -140,6 +150,7 @@ Page({
           return;
         }
         await PeriodService.record({ startDate: start, endDate: start });
+        this.setData({ showFormModal: false });
         wx.showToast({ title: '已记录开始日期', icon: 'success' });
       }
       this.setData({ startDate: today, endDate: today });

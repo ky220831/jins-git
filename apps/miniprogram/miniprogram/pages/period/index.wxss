@@ -2,6 +2,10 @@
   padding-bottom: 80rpx;
 }
 
+.period-trigger {
+  margin-top: 8rpx;
+}
+
 .page-head {
   margin-bottom: 24rpx;
 }

@@ -61,81 +61,117 @@
   </view>
 
   <!-- 搜索 -->
-  <view class="form" wx:if="{{showSearch}}">
-    <view class="form-title">搜索餐厅（腾讯位置服务）</view>
-    <input class="input" placeholder="关键词，如：日料 / 店名" value="{{searchKeyword}}" bindinput="onSearchKeyword" maxlength="30" />
-    <input class="input" placeholder="城市（可选，默认全国）" value="{{searchRegion}}" bindinput="onSearchRegion" maxlength="20" />
-    <view class="form-actions">
-      <button class="btn-secondary form-btn" bindtap="onHideSearch">取消</button>
-      <button class="btn-primary form-btn" bindtap="onSearch" loading="{{searching}}" disabled="{{searching}}">搜索</button>
-    </view>
-    <view class="search-result" wx:for="{{searchResults}}" wx:key="id" data-index="{{index}}" bindtap="onImportSearch">
-      <view class="search-name">{{item.name}}</view>
-      <view class="search-meta">{{item.address}}{{item.district ? ' · ' + item.district : ''}}{{item.category ? ' · ' + item.category : ''}}</view>
+  <view class="modal" wx:if="{{showSearch}}">
+    <view class="mask" bindtap="onHideSearch"></view>
+    <view class="sheet">
+      <view class="sheet-handle"></view>
+      <view class="form-title">搜索餐厅（腾讯位置服务）</view>
+      <view class="field-label">关键词</view>
+      <input class="input" placeholder="关键词，如：日料 / 店名" value="{{searchKeyword}}" bindinput="onSearchKeyword" maxlength="30" />
+      <view class="field-label">城市（可选）</view>
+      <input class="input" placeholder="城市（可选，默认全国）" value="{{searchRegion}}" bindinput="onSearchRegion" maxlength="20" />
+      <view class="form-actions">
+        <button class="btn-secondary form-btn" bindtap="onHideSearch">取消</button>
+        <button class="btn-primary form-btn" bindtap="onSearch" loading="{{searching}}" disabled="{{searching}}">搜索</button>
+      </view>
+      <view class="search-result" wx:for="{{searchResults}}" wx:key="id" data-index="{{index}}" bindtap="onImportSearch">
+        <view class="search-name">{{item.name}}</view>
+        <view class="search-meta">{{item.address}}{{item.district ? ' · ' + item.district : ''}}{{item.category ? ' · ' + item.category : ''}}</view>
+      </view>
     </view>
   </view>
 
   <!-- 餐厅表单 -->
-  <view class="form" wx:if="{{showForm}}">
-    <view class="form-title">{{editingId ? '编辑餐厅' : '添加餐厅'}}</view>
-    <view class="ocr-hint" wx:if="{{ocrHint}}">{{ocrHint}}</view>
-    <view class="field-label">餐厅名称 *</view>
-    <input class="input" placeholder="餐厅名称 *" value="{{fName}}" data-field="fName" bindinput="onFieldInput" maxlength="60" />
-    <view class="field-label">地址</view>
-    <input class="input" placeholder="地址" value="{{fAddress}}" data-field="fAddress" bindinput="onFieldInput" maxlength="200" />
-    <view class="two-col">
-      <input class="input" placeholder="城市" value="{{fCity}}" data-field="fCity" bindinput="onFieldInput" maxlength="20" />
-      <input class="input" placeholder="分类（日料/火锅…）" value="{{fCategory}}" data-field="fCategory" bindinput="onFieldInput" maxlength="20" />
-    </view>
-    <!-- 高级信息：仅编辑已有餐厅时显示 -->
-    <block wx:if="{{editingId}}">
-    <view class="two-col">
-      <input class="input" placeholder="人均 ¥" type="digit" value="{{fPrice}}" data-field="fPrice" bindinput="onFieldInput" maxlength="6" />
-      <input class="input" placeholder="评分 0-5" type="digit" value="{{fRating}}" data-field="fRating" bindinput="onFieldInput" maxlength="4" />
-    </view>
-    <view class="two-col">
-      <input class="input" placeholder="纬度（可选）" type="digit" value="{{fLat}}" data-field="fLat" bindinput="onFieldInput" maxlength="12" />
-      <input class="input" placeholder="经度（可选）" type="digit" value="{{fLng}}" data-field="fLng" bindinput="onFieldInput" maxlength="12" />
-    </view>
-    <input class="input" placeholder="标签，逗号分隔（如：约会,安静）" value="{{fTags}}" data-field="fTags" bindinput="onFieldInput" maxlength="100" />
-    <input class="input" placeholder="推荐菜，逗号分隔" value="{{fDishes}}" data-field="fDishes" bindinput="onFieldInput" maxlength="200" />
-    <input class="input" placeholder="营业时间（可选）" value="{{fHours}}" data-field="fHours" bindinput="onFieldInput" maxlength="50" />
-    <textarea class="input textarea" placeholder="备注（可选）" value="{{fNote}}" data-field="fNote" bindinput="onFieldInput" maxlength="500" />
-    <view class="switch-row">
-      <text>收藏</text>
-      <switch checked="{{fFavorite}}" data-field="fFavorite" bindchange="onToggleFormField" color="#D98E8E" />
-      <text>已去过</text>
-      <switch checked="{{fVisited}}" data-field="fVisited" bindchange="onToggleFormField" color="#7FA3B8" />
-    </view>
-    </block>
-    <view class="form-actions">
-      <button class="btn-secondary form-btn" bindtap="onHideForm">取消</button>
-      <button class="btn-primary form-btn" bindtap="onSaveRestaurant" loading="{{saving}}" disabled="{{saving}}">保存</button>
+  <view class="modal" wx:if="{{showForm}}">
+    <view class="mask" bindtap="onHideForm"></view>
+    <view class="sheet">
+      <view class="sheet-handle"></view>
+      <view class="form-title">{{editingId ? '编辑餐厅' : '添加餐厅'}}</view>
+      <view class="ocr-hint" wx:if="{{ocrHint}}">{{ocrHint}}</view>
+      <view class="field-label">餐厅名称 *</view>
+      <input class="input" placeholder="餐厅名称 *" value="{{fName}}" data-field="fName" bindinput="onFieldInput" maxlength="60" />
+      <view class="field-label">地址</view>
+      <input class="input" placeholder="地址" value="{{fAddress}}" data-field="fAddress" bindinput="onFieldInput" maxlength="200" />
+      <view class="form-row">
+        <view class="form-col">
+          <view class="field-label">城市</view>
+          <input class="input" placeholder="城市" value="{{fCity}}" data-field="fCity" bindinput="onFieldInput" maxlength="20" />
+        </view>
+        <view class="form-col">
+          <view class="field-label">分类</view>
+          <input class="input" placeholder="分类（日料/火锅…）" value="{{fCategory}}" data-field="fCategory" bindinput="onFieldInput" maxlength="20" />
+        </view>
+      </view>
+      <!-- 高级信息：仅编辑已有餐厅时显示 -->
+      <block wx:if="{{editingId}}">
+        <view class="form-row">
+          <view class="form-col">
+            <view class="field-label">人均 ¥</view>
+            <input class="input" placeholder="人均 ¥" type="digit" value="{{fPrice}}" data-field="fPrice" bindinput="onFieldInput" maxlength="6" />
+          </view>
+          <view class="form-col">
+            <view class="field-label">评分 0-5</view>
+            <input class="input" placeholder="评分 0-5" type="digit" value="{{fRating}}" data-field="fRating" bindinput="onFieldInput" maxlength="4" />
+          </view>
+        </view>
+        <view class="form-row">
+          <view class="form-col">
+            <view class="field-label">纬度（可选）</view>
+            <input class="input" placeholder="纬度（可选）" type="digit" value="{{fLat}}" data-field="fLat" bindinput="onFieldInput" maxlength="12" />
+          </view>
+          <view class="form-col">
+            <view class="field-label">经度（可选）</view>
+            <input class="input" placeholder="经度（可选）" type="digit" value="{{fLng}}" data-field="fLng" bindinput="onFieldInput" maxlength="12" />
+          </view>
+        </view>
+        <view class="field-label">标签</view>
+        <input class="input" placeholder="标签，逗号分隔（如：约会,安静）" value="{{fTags}}" data-field="fTags" bindinput="onFieldInput" maxlength="100" />
+        <view class="field-label">推荐菜</view>
+        <input class="input" placeholder="推荐菜，逗号分隔" value="{{fDishes}}" data-field="fDishes" bindinput="onFieldInput" maxlength="200" />
+        <view class="field-label">营业时间（可选）</view>
+        <input class="input" placeholder="营业时间（可选）" value="{{fHours}}" data-field="fHours" bindinput="onFieldInput" maxlength="50" />
+        <view class="field-label">备注（可选）</view>
+        <textarea class="input textarea" placeholder="备注（可选）" value="{{fNote}}" data-field="fNote" bindinput="onFieldInput" maxlength="500" />
+        <view class="switch-row">
+          <text>收藏</text>
+          <switch checked="{{fFavorite}}" data-field="fFavorite" bindchange="onToggleFormField" color="#D98E8E" />
+          <text>已去过</text>
+          <switch checked="{{fVisited}}" data-field="fVisited" bindchange="onToggleFormField" color="#7FA3B8" />
+        </view>
+      </block>
+      <view class="form-actions">
+        <button class="btn-secondary form-btn" bindtap="onHideForm">取消</button>
+        <button class="btn-primary form-btn" bindtap="onSaveRestaurant" loading="{{saving}}" disabled="{{saving}}">保存</button>
+      </view>
     </view>
   </view>
 
   <!-- 行程表单 -->
-  <view class="form" wx:if="{{showVisitForm}}">
-    <view class="form-title">安排去：{{visitRestaurantName}}</view>
-    <view class="form-row">
-      <view class="form-col">
-        <view class="field-label">日期</view>
-        <picker mode="date" value="{{vDate}}" bindchange="onFieldChange" data-field="vDate">
-          <view class="picker-value">{{vDate}}</view>
-        </picker>
+  <view class="modal" wx:if="{{showVisitForm}}">
+    <view class="mask" bindtap="onHideVisitForm"></view>
+    <view class="sheet">
+      <view class="sheet-handle"></view>
+      <view class="form-title">安排去：{{visitRestaurantName}}</view>
+      <view class="form-row">
+        <view class="form-col">
+          <view class="field-label">日期</view>
+          <picker mode="date" value="{{vDate}}" bindchange="onFieldChange" data-field="vDate">
+            <view class="picker-value">{{vDate}}</view>
+          </picker>
+        </view>
+        <view class="form-col">
+          <view class="field-label">时间（可选）</view>
+          <picker mode="time" value="{{vTime}}" bindchange="onFieldChange" data-field="vTime">
+            <view class="picker-value {{vTime ? '' : 'placeholder'}}">{{vTime || '选时间'}}</view>
+          </picker>
+        </view>
       </view>
-      <view class="form-col">
-        <view class="field-label">时间（可选）</view>
-        <picker mode="time" value="{{vTime}}" bindchange="onFieldChange" data-field="vTime">
-          <view class="picker-value {{vTime ? '' : 'placeholder'}}">{{vTime || '选时间'}}</view>
-        </picker>
+      <view class="field-label">备注（可选）</view>
+      <input class="input" placeholder="备注" value="{{vNote}}" data-field="vNote" bindinput="onFieldInput" maxlength="200" />
+      <view class="form-actions">
+        <button class="btn-secondary form-btn" bindtap="onHideVisitForm">取消</button>
+        <button class="btn-primary form-btn" bindtap="onSaveVisit">保存</button>
       </view>
-    </view>
-    <view class="field-label">备注（可选）</view>
-    <input class="input" placeholder="备注" value="{{vNote}}" data-field="vNote" bindinput="onFieldInput" maxlength="200" />
-    <view class="form-actions">
-      <button class="btn-secondary form-btn" bindtap="onHideVisitForm">取消</button>
-      <button class="btn-primary form-btn" bindtap="onSaveVisit">保存</button>
     </view>
   </view>
 </view>

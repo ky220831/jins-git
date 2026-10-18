@@ -27,33 +27,37 @@
     <button class="btn-primary flex-btn" bindtap="onShowForm">＋ 添加纪念日</button>
   </view>
 
-  <view class="form" wx:if="{{showForm}}">
-    <view class="form-title">{{editingId ? '编辑纪念日' : '添加纪念日'}}</view>
-    <view class="field-label">名称 *</view>
-    <input class="input" placeholder="名称，如：在一起 / 结婚纪念日 *" value="{{fName}}" data-field="fName" bindinput="onFieldInput" maxlength="50" />
-    <view class="form-row">
-      <view class="form-col">
-        <view class="field-label">日期 *</view>
-        <picker mode="date" value="{{fDate}}" bindchange="onFieldChange" data-field="fDate">
-          <view class="picker-value {{fDate ? '' : 'placeholder'}}">{{fDate || '选择日期'}}</view>
-        </picker>
+  <view class="modal" wx:if="{{showForm}}">
+    <view class="mask" bindtap="onHideForm"></view>
+    <view class="sheet">
+      <view class="sheet-handle"></view>
+      <view class="form-title">{{editingId ? '编辑纪念日' : '添加纪念日'}}</view>
+      <view class="field-label">名称 *</view>
+      <input class="input" placeholder="名称，如：在一起 / 结婚纪念日 *" value="{{fName}}" data-field="fName" bindinput="onFieldInput" maxlength="50" />
+      <view class="form-row">
+        <view class="form-col">
+          <view class="field-label">日期 *</view>
+          <picker mode="date" value="{{fDate}}" bindchange="onFieldChange" data-field="fDate">
+            <view class="picker-value {{fDate ? '' : 'placeholder'}}">{{fDate || '选择日期'}}</view>
+          </picker>
+        </view>
+        <view class="form-col">
+          <view class="field-label">时间（可选）</view>
+          <picker mode="time" value="{{fTime}}" bindchange="onFieldChange" data-field="fTime">
+            <view class="picker-value {{fTime ? '' : 'placeholder'}}">{{fTime || '选时间'}}</view>
+          </picker>
+        </view>
       </view>
-      <view class="form-col">
-        <view class="field-label">时间（可选）</view>
-        <picker mode="time" value="{{fTime}}" bindchange="onFieldChange" data-field="fTime">
-          <view class="picker-value {{fTime ? '' : 'placeholder'}}">{{fTime || '选时间'}}</view>
-        </picker>
+      <view class="field-label">备注（可选）</view>
+      <textarea class="input textarea" placeholder="备注（可选）" value="{{fNote}}" data-field="fNote" bindinput="onFieldInput" maxlength="200" />
+      <view class="switch-row">
+        <text>每年重复</text>
+        <switch checked="{{fYearly}}" bindchange="onToggleYearly" color="#C96F6F" />
       </view>
-    </view>
-    <view class="field-label">备注（可选）</view>
-    <textarea class="input textarea" placeholder="备注（可选）" value="{{fNote}}" data-field="fNote" bindinput="onFieldInput" maxlength="200" />
-    <view class="switch-row">
-      <text>每年重复</text>
-      <switch checked="{{fYearly}}" bindchange="onToggleYearly" color="#C96F6F" />
-    </view>
-    <view class="form-actions">
-      <button class="btn-secondary form-btn" bindtap="onHideForm">取消</button>
-      <button class="btn-primary form-btn" bindtap="onSave" loading="{{saving}}" disabled="{{saving}}">保存</button>
+      <view class="form-actions">
+        <button class="btn-secondary form-btn" bindtap="onHideForm">取消</button>
+        <button class="btn-primary form-btn" bindtap="onSave" loading="{{saving}}" disabled="{{saving}}">保存</button>
+      </view>
     </view>
   </view>
 </view>

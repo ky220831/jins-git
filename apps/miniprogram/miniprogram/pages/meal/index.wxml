@@ -58,41 +58,52 @@
     </view>
   </view>
 
-  <view class="form" wx:if="{{showPlanForm}}">
-    <view class="form-title">上架菜单（{{planDate}}）</view>
-    <picker class="picker" range="{{enabledTemplates}}" range-key="name" value="{{templatePickerIndex}}" bindchange="onTemplatePick">
-      <view class="picker-value">{{templatePickerIndex >= 0 ? enabledTemplates[templatePickerIndex].name : '从素材库选择（可选）'}}</view>
-    </picker>
-    <input class="input" placeholder="或直接填名称（如：番茄炒蛋）" value="{{planName}}" bindinput="onPlanNameInput" maxlength="50" />
-    <view class="form-row">
-      <view class="form-col">
-        <view class="field-label">日期</view>
-        <picker mode="date" value="{{planDate}}" bindchange="onPlanDateChange">
-          <view class="picker-value">{{planDate}}</view>
-        </picker>
+  <view class="modal" wx:if="{{showPlanForm}}">
+    <view class="mask" bindtap="onHidePlanForm"></view>
+    <view class="sheet">
+      <view class="sheet-handle"></view>
+      <view class="form-title">上架菜单（{{planDate}}）</view>
+      <picker class="picker" range="{{enabledTemplates}}" range-key="name" value="{{templatePickerIndex}}" bindchange="onTemplatePick">
+        <view class="picker-value">{{templatePickerIndex >= 0 ? enabledTemplates[templatePickerIndex].name : '从素材库选择（可选）'}}</view>
+      </picker>
+      <view class="field-label">名称</view>
+      <input class="input" placeholder="或直接填名称（如：番茄炒蛋）" value="{{planName}}" bindinput="onPlanNameInput" maxlength="50" />
+      <view class="form-row">
+        <view class="form-col">
+          <view class="field-label">日期</view>
+          <picker mode="date" value="{{planDate}}" bindchange="onPlanDateChange">
+            <view class="picker-value">{{planDate}}</view>
+          </picker>
+        </view>
+        <view class="form-col">
+          <view class="field-label">时间（可选）</view>
+          <picker mode="time" value="{{planTime}}" bindchange="onPlanTimeChange">
+            <view class="picker-value {{planTime ? '' : 'placeholder'}}">{{planTime || '选时间'}}</view>
+          </picker>
+        </view>
       </view>
-      <view class="form-col">
-        <view class="field-label">时间（可选）</view>
-        <picker mode="time" value="{{planTime}}" bindchange="onPlanTimeChange">
-          <view class="picker-value {{planTime ? '' : 'placeholder'}}">{{planTime || '选时间'}}</view>
-        </picker>
+      <view class="field-label">备注（可选）</view>
+      <input class="input" placeholder="备注" value="{{planNote}}" bindinput="onPlanNoteInput" maxlength="200" />
+      <view class="form-actions">
+        <button class="btn-secondary form-btn" bindtap="onHidePlanForm">取消</button>
+        <button class="btn-primary form-btn" bindtap="onAddPlan" loading="{{saving}}" disabled="{{saving}}">保存</button>
       </view>
-    </view>
-    <view class="field-label">备注（可选）</view>
-    <input class="input" placeholder="备注" value="{{planNote}}" bindinput="onPlanNoteInput" maxlength="200" />
-    <view class="form-actions">
-      <button class="btn-secondary form-btn" bindtap="onHidePlanForm">取消</button>
-      <button class="btn-primary form-btn" bindtap="onAddPlan" loading="{{saving}}" disabled="{{saving}}">保存</button>
     </view>
   </view>
 
-  <view class="form" wx:if="{{showTemplateForm}}">
-    <view class="form-title">{{editingTemplateId ? '编辑素材' : '添加素材'}}</view>
-    <input class="input" placeholder="菜谱名称" value="{{templateName}}" bindinput="onTemplateNameInput" maxlength="50" />
-    <input class="input" placeholder="分类（可选，如 家常菜/早餐）" value="{{templateCategory}}" bindinput="onTemplateCategoryInput" maxlength="20" />
-    <view class="form-actions">
-      <button class="btn-secondary form-btn" bindtap="onHideTemplateForm">取消</button>
-      <button class="btn-primary form-btn" bindtap="onSaveTemplate" loading="{{saving}}" disabled="{{saving}}">保存</button>
+  <view class="modal" wx:if="{{showTemplateForm}}">
+    <view class="mask" bindtap="onHideTemplateForm"></view>
+    <view class="sheet">
+      <view class="sheet-handle"></view>
+      <view class="form-title">{{editingTemplateId ? '编辑素材' : '添加素材'}}</view>
+      <view class="field-label">菜谱名称</view>
+      <input class="input" placeholder="菜谱名称" value="{{templateName}}" bindinput="onTemplateNameInput" maxlength="50" />
+      <view class="field-label">分类（可选）</view>
+      <input class="input" placeholder="分类（可选，如 家常菜/早餐）" value="{{templateCategory}}" bindinput="onTemplateCategoryInput" maxlength="20" />
+      <view class="form-actions">
+        <button class="btn-secondary form-btn" bindtap="onHideTemplateForm">取消</button>
+        <button class="btn-primary form-btn" bindtap="onSaveTemplate" loading="{{saving}}" disabled="{{saving}}">保存</button>
+      </view>
     </view>
   </view>
 </view>
