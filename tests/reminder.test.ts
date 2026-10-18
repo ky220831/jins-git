@@ -14,7 +14,6 @@ const BASE = new Date('2026-08-15T00:00:00+08:00');
 
 const FAKE_TEMPLATES: Record<ReminderTopic, { templateId: string; page: string }> = {
   anniversary: { templateId: 'tid_ann', page: 'pages/anniversary/index' },
-  period: { templateId: 'tid_period', page: 'pages/period/index' },
   meal: { templateId: 'tid_meal', page: 'pages/meal/index' },
   visit: { templateId: 'tid_visit', page: 'pages/restaurant/index' },
 };
@@ -40,10 +39,9 @@ async function fresh() {
   };
 }
 
-test('提醒收集：纪念日/生理期预测/今日菜单/餐厅行程 到期均被收集', async () => {
+test('提醒收集：纪念日/今日菜单/餐厅行程 到期均被收集', async () => {
   const { repo, anniversaryService, periodService, mealService, restaurantService } = await fresh();
   await anniversaryService.create('openid-A', { name: '在一起', date: '2025-08-15', yearly: true });
-  await periodService.recordActual('openid-A', { startDate: '2026-07-18', endDate: '2026-07-18' });
   await mealService.createPlan('openid-A', { date: '2026-08-15', time: '18:30', name: '晚餐' });
   const r = await restaurantService.createRestaurant('openid-A', { name: 'XX日料' });
   await restaurantService.createVisit('openid-A', { restaurantId: r.id, date: '2026-08-15', time: '19:00' });
@@ -56,7 +54,7 @@ test('提醒收集：纪念日/生理期预测/今日菜单/餐厅行程 到期�
   );
   const items = await service.collectDue();
   const topics = items.map((i) => i.topic).sort();
-  assert.deepEqual(topics, ['anniversary', 'meal', 'period', 'visit']);
+  assert.deepEqual(topics, ['anniversary', 'meal', 'visit']);
 });
 
 test('发送提醒：一次性授权发送后删除授权', async () => {

@@ -775,7 +775,7 @@ export interface TrashBatchInput {
 }
 
 // ---- 订阅消息提醒（1.1.0）----
-export const REMINDER_TOPICS = ['anniversary', 'period', 'meal', 'visit'] as const;
+export const REMINDER_TOPICS = ['anniversary', 'meal', 'visit'] as const;
 export type ReminderTopic = (typeof REMINDER_TOPICS)[number];
 
 export interface ReminderTopicConfig {

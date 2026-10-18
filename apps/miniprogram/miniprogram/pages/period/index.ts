@@ -3,7 +3,6 @@ import { ROLE_OWNER, type PeriodRecordView } from '../../lib/shared/types/index'
 import { PeriodService } from '../../services/period';
 import { SpaceService } from '../../services/space';
 import { currentThemeClass } from '../../utils/theme';
-import { enableReminder } from '../../utils/reminder';
 
 interface PeriodRow extends PeriodRecordView {
   rangeLabel: string;
@@ -208,9 +207,4 @@ Page({
     });
   },
 
-  onRemind() {
-    enableReminder('period').catch((err) => {
-      wx.showToast({ title: err instanceof ApiError ? err.message : '开启失败', icon: 'none' });
-    });
-  },
 });

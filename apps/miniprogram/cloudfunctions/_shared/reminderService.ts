@@ -62,11 +62,6 @@ export class ReminderService {
         items.push({ spaceId: a.spaceId, topic: 'anniversary', title: `纪念日：${a.name}`, date: today });
       }
     }
-    for (const p of await this.repo.listAllPeriodRecords()) {
-      if (p.type === 'predicted' && p.startDate === today) {
-        items.push({ spaceId: p.spaceId, topic: 'period', title: '生理期预计今天开始', date: today });
-      }
-    }
     for (const m of await this.repo.listAllMealPlans()) {
       if (m.status === 'published' && m.date === today && m.time) {
         items.push({ spaceId: m.spaceId, topic: 'meal', title: `今日菜单：${m.name}`, date: today, time: m.time });

@@ -34,7 +34,6 @@ export const RATE_LIMIT_PER_MINUTE = {
  */
 export const REMINDER_TEMPLATES = {
   anniversary: { templateId: '', page: 'pages/anniversary/index' },
-  period: { templateId: '', page: 'pages/period/index' },
   meal: { templateId: '', page: 'pages/meal/index' },
   visit: { templateId: '', page: 'pages/restaurant/index' },
 } as const;
