@@ -115,6 +115,7 @@
   <view class="form" wx:if="{{showForm}}">
     <view class="form-title">添加事项（{{selectedDate}}）</view>
     <input class="input" placeholder="事项标题" value="{{formTitle}}" bindinput="onTitleInput" maxlength="100" />
+    <view class="field-label">时间（可选）</view>
     <picker mode="time" value="{{formTime}}" bindchange="onTimeChange">
       <view class="picker-value {{formTime ? '' : 'placeholder'}}">{{formTime || '时间（可选，点这里选）'}}</view>
     </picker>

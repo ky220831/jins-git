@@ -3,6 +3,7 @@ import type {
   PeriodInfoResult,
   PeriodRecordView,
   RecordPeriodInput,
+  UpdatePeriodEndInput,
 } from '../lib/shared/types/index';
 
 export const PeriodService = {
@@ -17,6 +18,10 @@ export const PeriodService = {
 
   record(input: RecordPeriodInput): Promise<PeriodRecordView[]> {
     return callFunction<PeriodRecordView[]>('period-record', { action: 'add', ...input });
+  },
+
+  updateEnd(input: UpdatePeriodEndInput): Promise<PeriodRecordView[]> {
+    return callFunction<PeriodRecordView[]>('period-record', { action: 'update-end', ...input });
   },
 
   list(): Promise<PeriodRecordView[]> {

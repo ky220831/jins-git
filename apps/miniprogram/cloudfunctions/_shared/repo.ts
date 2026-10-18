@@ -322,7 +322,9 @@ export interface Repo {
 
   // ---- 第三阶段：生理期与节假日 ----
   listPeriodRecords(spaceId: string): Promise<PeriodRecordRecord[]>;
+  findPeriodRecordById(spaceId: string, recordId: string): Promise<PeriodRecordRecord | null>;
   createPeriodRecord(record: PeriodRecordRecord): Promise<void>;
+  updatePeriodRecord(spaceId: string, recordId: string, patch: Partial<PeriodRecordRecord>): Promise<void>;
   deletePeriodRecord(spaceId: string, recordId: string): Promise<void>;
   listHolidaysByRange(startDate: string, endDate: string): Promise<HolidayRecord[]>;
   upsertHoliday(record: HolidayRecord): Promise<void>;

@@ -60,17 +60,28 @@
 
   <view class="form" wx:if="{{showPlanForm}}">
     <view class="form-title">上架菜单（{{planDate}}）</view>
+    <view class="field-label">从素材库选择（可选）</view>
     <picker class="picker" range="{{enabledTemplates}}" range-key="name" value="{{templatePickerIndex}}" bindchange="onTemplatePick">
       <view class="picker-value">{{templatePickerIndex >= 0 ? enabledTemplates[templatePickerIndex].name : '从素材库选择（可选）'}}</view>
     </picker>
-    <input class="input" placeholder="或直接填名称" value="{{planName}}" bindinput="onPlanNameInput" maxlength="50" />
-    <picker mode="date" value="{{planDate}}" bindchange="onPlanDateChange">
-      <view class="picker-value">{{planDate}}</view>
-    </picker>
-    <picker mode="time" value="{{planTime}}" bindchange="onPlanTimeChange">
-      <view class="picker-value {{planTime ? '' : 'placeholder'}}">{{planTime || '时间（可选，点这里选，填了会进日历）'}}</view>
-    </picker>
-    <input class="input" placeholder="备注（可选）" value="{{planNote}}" bindinput="onPlanNoteInput" maxlength="200" />
+    <view class="field-label">或直接填名称</view>
+    <input class="input" placeholder="菜名" value="{{planName}}" bindinput="onPlanNameInput" maxlength="50" />
+    <view class="form-row">
+      <view class="form-col">
+        <view class="field-label">日期</view>
+        <picker mode="date" value="{{planDate}}" bindchange="onPlanDateChange">
+          <view class="picker-value">{{planDate}}</view>
+        </picker>
+      </view>
+      <view class="form-col">
+        <view class="field-label">时间（可选）</view>
+        <picker mode="time" value="{{planTime}}" bindchange="onPlanTimeChange">
+          <view class="picker-value {{planTime ? '' : 'placeholder'}}">{{planTime || '选时间'}}</view>
+        </picker>
+      </view>
+    </view>
+    <view class="field-label">备注（可选）</view>
+    <input class="input" placeholder="备注" value="{{planNote}}" bindinput="onPlanNoteInput" maxlength="200" />
     <view class="form-actions">
       <button class="btn-secondary form-btn" bindtap="onHidePlanForm">取消</button>
       <button class="btn-primary form-btn" bindtap="onAddPlan" loading="{{saving}}" disabled="{{saving}}">保存</button>

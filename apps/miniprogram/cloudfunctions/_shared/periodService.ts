@@ -8,6 +8,7 @@ import {
   type PeriodRecordView,
   type RecordPeriodInput,
   type SetPeriodVisibilityInput,
+  type UpdatePeriodEndInput,
 } from '../../../../packages/types/src';
 import { requireSpaceMember } from './access';
 import {
@@ -102,6 +103,53 @@ export class PeriodService {
       action: 'period.record',
       targetType: 'period_record',
       targetId: record.id,
+      result: 'success',
+      createdAt: now,
+    });
+    return this.listViews(spaceId);
+  }
+
+  /**
+   * 补录结束日期：先记开始日期（结束=开始日），期间内再补结束日期。
+   * 双人平等可操作；仅允许修改 actual 记录。
+   */
+  async updateEnd(
+    providerUserId: string,
+    input: UpdatePeriodEndInput,
+  ): Promise<PeriodRecordView[]> {
+    const { spaceId, userId } = await requireSpaceMember(this.repo, providerUserId);
+    const recordId = input?.recordId?.trim();
+    if (!recordId) {
+      throw new AppError(ErrorCodes.VALIDATION, '缺少生理期记录 ID');
+    }
+    const endDate = (input?.endDate ?? '').trim();
+    if (!isDateString(endDate)) {
+      throw new AppError(ErrorCodes.VALIDATION, '结束日期格式不正确');
+    }
+    const record = await this.repo.findPeriodRecordById(spaceId, recordId);
+    if (!record) {
+      throw new AppError(ErrorCodes.NOT_FOUND, '生理期记录不存在');
+    }
+    if (record.type !== PERIOD_TYPE_ACTUAL) {
+      throw new AppError(ErrorCodes.VALIDATION, '预测记录不能修改结束日期');
+    }
+    if (endDate < record.startDate) {
+      throw new AppError(ErrorCodes.VALIDATION, '结束日期不能早于开始日期');
+    }
+    // 合理范围：一个周期最长约 31 天
+    if (endDate > addDays(record.startDate, 31)) {
+      throw new AppError(ErrorCodes.VALIDATION, '结束日期超出合理范围，请检查');
+    }
+    const now = this.clock();
+    await this.repo.updatePeriodRecord(spaceId, recordId, { endDate, updatedAt: now });
+    await this.recomputePrediction(spaceId, now);
+    await this.repo.writeAudit({
+      id: newId('al'),
+      spaceId,
+      actorUserId: userId,
+      action: 'period.record.update_end',
+      targetType: 'period_record',
+      targetId: recordId,
       result: 'success',
       createdAt: now,
     });

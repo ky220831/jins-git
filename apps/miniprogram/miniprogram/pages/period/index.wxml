@@ -7,17 +7,24 @@
   <view class="error-text" wx:if="{{error}}">{{error}}</view>
 
   <view class="card">
-    <view class="card-title">记录本次生理期</view>
-    <view class="field-label">开始日期</view>
-    <picker mode="date" value="{{periodStart}}" bindchange="onStartChange">
-      <view class="picker-value">{{periodStart}}</view>
-    </picker>
-    <view class="field-label">结束日期</view>
-    <picker mode="date" value="{{periodEnd}}" bindchange="onEndChange">
-      <view class="picker-value">{{periodEnd}}</view>
-    </picker>
-    <view class="form-tip">系统自动保留最近 2 次实际记录，并按“结束日 + 22 天”预测下次（持续 7 天）</view>
-    <button class="btn-primary save-btn" bindtap="onSave" loading="{{saving}}" disabled="{{saving}}">保存记录</button>
+    <view class="card-title">{{mode === 'end' ? '补录结束日期' : '记录开始日期'}}</view>
+    <block wx:if="{{mode === 'end' && ongoingRecord}}">
+      <view class="ongoing-line">🌸 本次生理期已从 {{ongoingRecord.startDate}} 开始</view>
+      <view class="field-label">结束日期（可在生理期期间随时补录）</view>
+      <picker mode="date" value="{{endDate}}" start="{{ongoingRecord.startDate}}" end="{{ongoingEndMax}}" bindchange="onEndChange">
+        <view class="picker-value">{{endDate}}</view>
+      </picker>
+      <view class="form-tip">例如 8.14 开始，8.21 结束，就在 8.14~8.21 期间补录结束日期</view>
+      <button class="btn-primary save-btn" bindtap="onSave" loading="{{saving}}" disabled="{{saving}}">补录结束日期</button>
+    </block>
+    <block wx:else>
+      <view class="field-label">开始日期</view>
+      <picker mode="date" value="{{startDate}}" bindchange="onStartChange">
+        <view class="picker-value">{{startDate}}</view>
+      </picker>
+      <view class="form-tip">记录后，可在生理期期间再补录结束日期；系统按“结束日 + 22 天”预测下次（持续 7 天）</view>
+      <button class="btn-primary save-btn" bindtap="onSave" loading="{{saving}}" disabled="{{saving}}">记录开始日期</button>
+    </block>
   </view>
 
   <view class="card">
@@ -34,10 +41,7 @@
     <view class="period-row" wx:for="{{periodRecords}}" wx:key="id">
       <view class="period-info">
         <view class="period-range">{{item.rangeLabel}}</view>
-        <view class="period-meta">
-          {{item.type === 'actual' ? (item.isEstimated ? '实际(估)' : '实际') : '预测'}}
-          · 周期 {{item.cycleLength}} 天
-        </view>
+        <view class="period-meta">{{item.metaLabel}}</view>
       </view>
       <view class="period-delete" wx:if="{{isOwner && item.type === 'actual'}}" data-id="{{item.id}}" bindtap="onDelete">删除</view>
     </view>

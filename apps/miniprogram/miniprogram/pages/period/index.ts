@@ -5,11 +5,19 @@ import { SpaceService } from '../../services/space';
 
 interface PeriodRow extends PeriodRecordView {
   rangeLabel: string;
+  metaLabel: string;
 }
 
 function dateKey(d: Date): string {
   const pad = (n: number) => String(n).padStart(2, '0');
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
+function addDays(date: string, n: number): string {
+  const [y, m, d] = date.split('-').map(Number);
+  const t = new Date(Date.UTC(y, m - 1, d + n));
+  const pad = (x: number) => String(x).padStart(2, '0');
+  return `${t.getUTCFullYear()}-${pad(t.getUTCMonth() + 1)}-${pad(t.getUTCDate())}`;
 }
 
 Page({
@@ -20,13 +28,16 @@ Page({
     periodVisible: true,
     isOwner: false,
     saving: false,
-    periodStart: '',
-    periodEnd: '',
+    mode: 'start' as 'start' | 'end',
+    startDate: '',
+    endDate: '',
+    ongoingRecord: null as { id: string; startDate: string } | null,
+    ongoingEndMax: '',
   },
 
   onLoad() {
     const today = dateKey(new Date());
-    this.setData({ periodStart: today, periodEnd: today });
+    this.setData({ startDate: today, endDate: today });
   },
 
   onShow() {
@@ -40,16 +51,40 @@ Page({
         PeriodService.info(),
         SpaceService.mySpace(),
       ]);
+      const today = dateKey(new Date());
+      const actuals = info.records
+        .filter((r) => r.type === 'actual')
+        .sort((a, b) => (a.startDate < b.startDate ? -1 : 1));
+      const latest = actuals[actuals.length - 1];
+      const ongoing =
+        latest &&
+        latest.endDate === latest.startDate &&
+        today >= latest.startDate &&
+        today <= addDays(latest.startDate, 21)
+          ? { id: latest.id, startDate: latest.startDate }
+          : null;
       this.setData({
         loading: false,
         periodVisible: info.calendarVisible,
         periodRecords: info.records
           .map((r) => ({
             ...r,
-            rangeLabel: `${r.startDate} ~ ${r.endDate}`,
+            rangeLabel:
+              r.endDate === r.startDate
+                ? `${r.startDate} 起`
+                : `${r.startDate} ~ ${r.endDate}`,
+            metaLabel:
+              r.endDate === r.startDate
+                ? '实际 · 进行中，待补结束日期'
+                : `${r.type === 'actual' ? '实际' : '预测'} · 周期 ${r.cycleLength} 天`,
           }))
           .sort((a, b) => (a.startDate < b.startDate ? -1 : 1)),
         isOwner: space.space.myRole === ROLE_OWNER,
+        mode: ongoing ? 'end' : 'start',
+        ongoingRecord: ongoing,
+        ongoingEndMax: ongoing ? addDays(ongoing.startDate, 30) : '',
+        endDate: ongoing ? today : this.data.endDate,
+        startDate: ongoing ? ongoing.startDate : this.data.startDate,
         error: '',
       });
     } catch (err) {
@@ -61,32 +96,40 @@ Page({
   },
 
   onStartChange(e: WechatMiniprogram.PickerChange) {
-    this.setData({ periodStart: e.detail.value });
+    this.setData({ startDate: e.detail.value });
   },
 
   onEndChange(e: WechatMiniprogram.PickerChange) {
-    this.setData({ periodEnd: e.detail.value });
+    this.setData({ endDate: e.detail.value });
   },
 
   async onSave() {
-    const start = this.data.periodStart;
-    const end = this.data.periodEnd;
-    if (!start || !end) {
-      wx.showToast({ title: '请选择开始和结束日期', icon: 'none' });
-      return;
-    }
-    if (end < start) {
-      wx.showToast({ title: '结束日期不能早于开始日期', icon: 'none' });
-      return;
-    }
     if (this.data.saving) return;
     this.setData({ saving: true });
     try {
-      await PeriodService.record({ startDate: start, endDate: end });
       const today = dateKey(new Date());
-      this.setData({ periodStart: today, periodEnd: today });
+      if (this.data.mode === 'end' && this.data.ongoingRecord) {
+        const end = this.data.endDate;
+        if (end < this.data.ongoingRecord.startDate) {
+          wx.showToast({ title: '结束日期不能早于开始日期', icon: 'none' });
+          return;
+        }
+        await PeriodService.updateEnd({
+          recordId: this.data.ongoingRecord.id,
+          endDate: end,
+        });
+        wx.showToast({ title: '已补录结束日期', icon: 'success' });
+      } else {
+        const start = this.data.startDate;
+        if (!start) {
+          wx.showToast({ title: '请选择开始日期', icon: 'none' });
+          return;
+        }
+        await PeriodService.record({ startDate: start, endDate: start });
+        wx.showToast({ title: '已记录开始日期', icon: 'success' });
+      }
+      this.setData({ startDate: today, endDate: today });
       this.refresh();
-      wx.showToast({ title: '已保存', icon: 'success' });
     } catch (err) {
       wx.showToast({ title: err instanceof ApiError ? err.message : '保存失败', icon: 'none' });
     } finally {

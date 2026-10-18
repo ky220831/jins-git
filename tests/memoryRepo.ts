@@ -200,6 +200,24 @@ export class MemoryRepo implements Repo {
     this.periodRecords.set(record.id, { ...record });
   }
 
+  async findPeriodRecordById(
+    spaceId: string,
+    recordId: string,
+  ): Promise<PeriodRecordRecord | null> {
+    const record = this.periodRecords.get(recordId);
+    return record && record.spaceId === spaceId ? { ...record } : null;
+  }
+
+  async updatePeriodRecord(
+    spaceId: string,
+    recordId: string,
+    patch: Partial<PeriodRecordRecord>,
+  ): Promise<void> {
+    const current = this.periodRecords.get(recordId);
+    if (!current || current.spaceId !== spaceId) return;
+    this.periodRecords.set(recordId, { ...current, ...patch });
+  }
+
   async deletePeriodRecord(spaceId: string, recordId: string): Promise<void> {
     const current = this.periodRecords.get(recordId);
     if (current && current.spaceId === spaceId) {

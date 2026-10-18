@@ -112,13 +112,22 @@
   <!-- 行程表单 -->
   <view class="form" wx:if="{{showVisitForm}}">
     <view class="form-title">安排去：{{visitRestaurantName}}</view>
-    <picker mode="date" value="{{vDate}}" bindchange="onFieldChange" data-field="vDate">
-      <view class="picker-value">{{vDate}}</view>
-    </picker>
-    <picker mode="time" value="{{vTime}}" bindchange="onFieldChange" data-field="vTime">
-      <view class="picker-value {{vTime ? '' : 'placeholder'}}">{{vTime || '时间（可选，填了会进日历）'}}</view>
-    </picker>
-    <input class="input" placeholder="备注（可选）" value="{{vNote}}" data-field="vNote" bindinput="onFieldInput" maxlength="200" />
+    <view class="form-row">
+      <view class="form-col">
+        <view class="field-label">日期</view>
+        <picker mode="date" value="{{vDate}}" bindchange="onFieldChange" data-field="vDate">
+          <view class="picker-value">{{vDate}}</view>
+        </picker>
+      </view>
+      <view class="form-col">
+        <view class="field-label">时间（可选）</view>
+        <picker mode="time" value="{{vTime}}" bindchange="onFieldChange" data-field="vTime">
+          <view class="picker-value {{vTime ? '' : 'placeholder'}}">{{vTime || '选时间'}}</view>
+        </picker>
+      </view>
+    </view>
+    <view class="field-label">备注（可选）</view>
+    <input class="input" placeholder="备注" value="{{vNote}}" data-field="vNote" bindinput="onFieldInput" maxlength="200" />
     <view class="form-actions">
       <button class="btn-secondary form-btn" bindtap="onHideVisitForm">取消</button>
       <button class="btn-primary form-btn" bindtap="onSaveVisit">保存</button>

@@ -45,6 +45,15 @@
   margin: 16rpx 0 8rpx;
 }
 
+.ongoing-line {
+  font-size: 26rpx;
+  color: #D9534F;
+  background: rgba(217, 83, 79, 0.08);
+  border-radius: var(--radius-md);
+  padding: 16rpx 20rpx;
+  margin-bottom: 8rpx;
+}
+
 .picker-value {
   background: #FFF9F4;
   border: 2rpx solid #FBE9DC;

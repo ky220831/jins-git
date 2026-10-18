@@ -242,6 +242,12 @@ export interface DeletePeriodInput {
   recordId: string;
 }
 
+/** 补录结束日期：先记开始日期，期间内再补结束日期（用户流程） */
+export interface UpdatePeriodEndInput {
+  recordId: string;
+  endDate: string;
+}
+
 // ---- 今日菜单 ----
 export const MEAL_PLAN_STATUS_PUBLISHED = 'published';
 export const MEAL_PLAN_STATUS_OFFLINE = 'offline';

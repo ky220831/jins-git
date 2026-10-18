@@ -195,6 +195,27 @@ export class CloudRepo implements Repo {
     await this.col(COLLECTIONS.periodRecords).doc(record.id).set({ data: record });
   }
 
+  async findPeriodRecordById(
+    spaceId: string,
+    recordId: string,
+  ): Promise<PeriodRecordRecord | null> {
+    const res = await this.col(COLLECTIONS.periodRecords)
+      .where({ _id: recordId, spaceId })
+      .limit(1)
+      .get();
+    return res.data.length > 0 ? mapDoc<PeriodRecordRecord>(res.data[0]) : null;
+  }
+
+  async updatePeriodRecord(
+    spaceId: string,
+    recordId: string,
+    patch: Partial<PeriodRecordRecord>,
+  ): Promise<void> {
+    await this.col(COLLECTIONS.periodRecords)
+      .where({ _id: recordId, spaceId })
+      .update({ data: patch });
+  }
+
   async deletePeriodRecord(spaceId: string, recordId: string): Promise<void> {
     await this.col(COLLECTIONS.periodRecords).where({ _id: recordId, spaceId }).remove();
   }

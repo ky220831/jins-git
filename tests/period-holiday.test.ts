@@ -199,6 +199,63 @@ test('显示开关：关闭后 info.calendarVisible=false，但数据不删除',
   assert.equal(info.records.length, 2);
 });
 
+test('两步记录：先记开始日期，期间内补录结束日期（双人平等）', async () => {
+  const clock = () => new Date('2026-08-16T10:00:00+08:00');
+  const { periodService } = await fresh(clock);
+  // 8.14 生理期来了，先只记开始日期（结束=开始）
+  const views = await periodService.recordActual('openid-A', {
+    startDate: '2026-08-14',
+    endDate: '2026-08-14',
+  });
+  const actual = views.find((v) => v.type === 'actual');
+  assert.ok(actual);
+  assert.equal(actual.endDate, '2026-08-14');
+
+  // 副账号 B 在生理期期间（8.14~8.21）补录结束日期
+  const updated = await periodService.updateEnd('openid-B', {
+    recordId: actual.id,
+    endDate: '2026-08-21',
+  });
+  const updatedActual = updated.find((v) => v.id === actual.id);
+  assert.equal(updatedActual?.endDate, '2026-08-21');
+  // 预测改为基于新的结束日 +22 天
+  const predicted = updated.find((v) => v.type === 'predicted');
+  assert.equal(predicted?.startDate, '2026-09-12');
+});
+
+test('补录结束日期：非法输入 / 预测记录 / 跨空间被拒绝', async () => {
+  const clock = () => new Date('2026-08-16T10:00:00+08:00');
+  const { periodService, spaceService } = await fresh(clock);
+  const views = await periodService.recordActual('openid-A', {
+    startDate: '2026-08-14',
+    endDate: '2026-08-14',
+  });
+  const actual = views.find((v) => v.type === 'actual');
+  const predicted = views.find((v) => v.type === 'predicted');
+  assert.ok(actual && predicted);
+  // 结束早于开始
+  await expectError(
+    periodService.updateEnd('openid-A', { recordId: actual.id, endDate: '2026-08-13' }),
+    ErrorCodes.VALIDATION,
+  );
+  // 超出合理范围（>31 天）
+  await expectError(
+    periodService.updateEnd('openid-A', { recordId: actual.id, endDate: '2026-09-30' }),
+    ErrorCodes.VALIDATION,
+  );
+  // 预测记录不能修改结束日期
+  await expectError(
+    periodService.updateEnd('openid-A', { recordId: predicted.id, endDate: '2026-08-20' }),
+    ErrorCodes.VALIDATION,
+  );
+  // 跨空间无法补录
+  await spaceService.createSpace('openid-C', { name: 'C 的空间' });
+  await expectError(
+    periodService.updateEnd('openid-C', { recordId: actual.id, endDate: '2026-08-21' }),
+    ErrorCodes.NOT_FOUND,
+  );
+});
+
 test('节假日：国庆 10-01 放假、10-10 调休上班，以 HolidayCalendar 为准', async () => {
   const { holidayService, repo } = await fresh();
   seedHoliday(repo, '2026-10-01', '国庆节', 'holiday');

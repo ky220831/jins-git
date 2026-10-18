@@ -191,6 +191,10 @@
   margin-bottom: 16rpx;
 }
 
+.today-col .today-btn {
+  width: 100%;
+}
+
 .photo-strip {
   display: flex;
   flex-wrap: wrap;
