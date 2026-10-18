@@ -194,6 +194,19 @@
   border-radius: var(--radius-sm);
 }
 
+.restore-tip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+  margin: 0 0 12rpx;
+  padding: 14rpx 20rpx;
+  font-size: 24rpx;
+  color: var(--color-text-secondary);
+  background: rgba(224, 162, 107, 0.10);
+  border-radius: var(--radius-sm);
+}
+
 .input {
   background: var(--color-bg);
   border-radius: var(--radius-sm);

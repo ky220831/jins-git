@@ -204,7 +204,7 @@ Page({
     } = this.data;
     const template = templatePickerIndex >= 0 ? enabledTemplates[templatePickerIndex] : undefined;
     if (!template && !planName.trim()) {
-      wx.showToast({ title: '请选择素材或填写名称', icon: 'none' });
+      wx.showToast({ title: '请选择菜品或填写名称', icon: 'none' });
       return;
     }
     if (this.data.saving) return;
@@ -271,7 +271,7 @@ Page({
       await MealService.offlinePlan({ planId: id, version: plan.version });
       this.refresh();
     } catch (err) {
-      wx.showToast({ title: err instanceof ApiError ? err.message : '下架失败', icon: 'none' });
+      wx.showToast({ title: err instanceof ApiError ? err.message : '收起失败', icon: 'none' });
     }
   },
 
@@ -279,8 +279,8 @@ Page({
     const id = e.currentTarget.dataset.id as string;
     if (!id) return;
     wx.showModal({
-      title: '删除菜单',
-      content: '删除后进入回收站，72 小时内可恢复。确定删除吗？',
+      title: '移出今天的安排',
+      content: '移出后进入回收站，72 小时内可恢复。确定移出吗？',
       success: async (res) => {
         if (!res.confirm) return;
         try {
@@ -300,6 +300,13 @@ Page({
 
   onHideTemplateForm() {
     this.setData({ showTemplateForm: false });
+  },
+
+  /** 点击家庭小菜单图片放大预览 */
+  onPreviewTemplateImage(e: WechatMiniprogram.TouchEvent) {
+    const src = e.currentTarget.dataset.src as string;
+    if (!src) return;
+    wx.previewImage({ urls: [src], current: src });
   },
 
   onEditTemplate(e: WechatMiniprogram.TouchEvent) {
@@ -325,7 +332,7 @@ Page({
   async onSaveTemplate() {
     const { editingTemplateId, templateName, templateCategory } = this.data;
     if (!templateName.trim()) {
-      wx.showToast({ title: '请填写菜谱名称', icon: 'none' });
+      wx.showToast({ title: '请填写菜名', icon: 'none' });
       return;
     }
     if (this.data.saving) return;
@@ -334,7 +341,7 @@ Page({
       if (editingTemplateId) {
         const template = this.data.templates.find((t) => t.id === editingTemplateId);
         if (!template) {
-          wx.showToast({ title: '素材不存在，请刷新后重试', icon: 'none' });
+          wx.showToast({ title: '菜品不存在，请刷新后重试', icon: 'none' });
           return;
         }
         await MealService.updateTemplate({
@@ -375,8 +382,8 @@ Page({
     const id = e.currentTarget.dataset.id as string;
     if (!id) return;
     wx.showModal({
-      title: '删除素材',
-      content: '素材会进入回收站，72 小时内可恢复。确定删除吗？',
+      title: '移出家庭小菜单',
+      content: '移出后会进入回收站，72 小时内可恢复。确定移出吗？',
       success: async (res) => {
         if (!res.confirm) return;
         try {

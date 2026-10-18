@@ -102,29 +102,29 @@
   <!-- 副管理 -->
   <block wx:else>
     <view class="card">
-      <view class="card-title">今天吃什么下架</view>
-      <view class="empty" wx:if="{{!mealPlans.length}}">今天没有已上架的菜单</view>
+      <view class="card-title">收起今天的菜单</view>
+      <view class="empty" wx:if="{{!mealPlans.length}}">今天没有已加上的菜单</view>
       <view class="plan-row" wx:for="{{mealPlans}}" wx:key="id">
         <view class="plan-left">
           <view class="plan-name">🍚 {{item.name}}</view>
           <view class="plan-meta">{{item.date}}{{item.time ? ' ' + item.time : ''}}</view>
         </view>
         <view class="plan-actions">
-          <view class="link-btn" data-id="{{item.id}}" bindtap="onOfflineMeal">下架</view>
+          <view class="link-btn" data-id="{{item.id}}" bindtap="onOfflineMeal">收起</view>
         </view>
       </view>
     </view>
 
     <view class="card">
-      <view class="card-title">下馆子下架</view>
-      <view class="empty" wx:if="{{!restaurants.length}}">没有已上架的餐厅</view>
+      <view class="card-title">收起下馆子的餐厅</view>
+      <view class="empty" wx:if="{{!restaurants.length}}">还没有收藏的餐厅</view>
       <view class="plan-row" wx:for="{{restaurants}}" wx:key="id">
         <view class="plan-left">
           <view class="plan-name">🍴 {{item.name}}</view>
           <view class="plan-meta">{{item.category || '未分类'}}</view>
         </view>
         <view class="plan-actions">
-          <view class="link-btn" data-id="{{item.id}}" bindtap="onOfflineRestaurant">下架</view>
+          <view class="link-btn" data-id="{{item.id}}" bindtap="onOfflineRestaurant">收起</view>
         </view>
       </view>
     </view>

@@ -8,7 +8,7 @@
 
   <view class="card">
     <view class="card-title">今天的安排</view>
-    <view class="empty" wx:if="{{!todayPlans.length}}">今天还没有菜单，随机选一个或手动上架</view>
+    <view class="empty" wx:if="{{!todayPlans.length}}">今天还没有安排，随机选一个或手动加一道菜</view>
     <view class="plan-row" wx:for="{{todayPlans}}" wx:key="id">
       <image class="plan-image" wx:if="{{item.image}}" src="{{item.image}}" mode="aspectFill"></image>
       <view class="plan-left">
@@ -18,20 +18,21 @@
       </view>
       <view class="plan-actions">
         <view class="link-btn" data-id="{{item.id}}" bindtap="onEditPlan">编辑</view>
-        <view class="link-btn" data-id="{{item.id}}" bindtap="onOfflinePlan">下架</view>
-        <view class="link-btn danger" wx:if="{{isOwner}}" data-id="{{item.id}}" bindtap="onDeletePlan">删除</view>
+        <view class="link-btn" data-id="{{item.id}}" bindtap="onOfflinePlan">收起</view>
+        <view class="link-btn danger" wx:if="{{isOwner}}" data-id="{{item.id}}" bindtap="onDeletePlan">移出</view>
       </view>
     </view>
     <view class="btn-row">
       <button class="btn-primary flex-btn" bindtap="onRandom">随机选一个</button>
-      <button class="btn-secondary flex-btn" bindtap="onShowPlanForm">上架菜单</button>
+      <button class="btn-secondary flex-btn" bindtap="onShowPlanForm">加到今天</button>
     </view>
   </view>
 
   <view class="card">
-    <view class="card-title">预选素材库（永久保存，随机从这里选）</view>
-    <view class="empty" wx:if="{{!templates.length}}">还没有素材，先添加几个常做的菜吧</view>
+    <view class="card-title">家庭小菜单（永久保存，随机从这里选）</view>
+    <view class="empty" wx:if="{{!templates.length}}">还没有菜，先添加几道常做的菜吧</view>
     <view class="template-row" wx:for="{{templates}}" wx:key="id">
+      <image class="template-image" wx:if="{{item.image}}" src="{{item.image}}" mode="aspectFill" data-src="{{item.image}}" bindtap="onPreviewTemplateImage"></image>
       <view class="template-left">
         <view class="template-name">{{item.name}}</view>
         <view class="template-meta">{{item.category || '未分类'}} · {{item.enabled ? '参与随机' : '已停用'}}</view>
@@ -39,10 +40,10 @@
       <view class="template-actions">
         <switch checked="{{item.enabled}}" data-id="{{item.id}}" bindchange="onToggleTemplate" color="#D98E8E" />
         <view class="link-btn" data-id="{{item.id}}" bindtap="onEditTemplate">编辑</view>
-        <view class="link-btn danger" wx:if="{{isOwner}}" data-id="{{item.id}}" bindtap="onDeleteTemplate">删除</view>
+        <view class="link-btn danger" wx:if="{{isOwner}}" data-id="{{item.id}}" bindtap="onDeleteTemplate">移出</view>
       </view>
     </view>
-    <button class="btn-secondary add-btn" bindtap="onShowTemplateForm">＋ 添加素材</button>
+    <button class="btn-secondary add-btn" bindtap="onShowTemplateForm">＋ 添加菜品</button>
   </view>
 
   <view class="card" wx:if="{{isOwner}}">
@@ -64,9 +65,9 @@
     <view class="mask" bindtap="onHidePlanForm"></view>
     <view class="sheet">
       <view class="sheet-handle"></view>
-      <view class="form-title">{{editingPlanId ? '编辑菜单' : '上架菜单'}}</view>
+      <view class="form-title">{{editingPlanId ? '编辑菜品' : '加到今天'}}</view>
       <picker class="picker" range="{{enabledTemplates}}" range-key="name" value="{{templatePickerIndex}}" bindchange="onTemplatePick">
-        <view class="picker-value {{templatePickerIndex < 0 ? 'placeholder' : ''}}">{{templatePickerIndex >= 0 ? enabledTemplates[templatePickerIndex].name : '从素材库选择（可选）'}}</view>
+        <view class="picker-value {{templatePickerIndex < 0 ? 'placeholder' : ''}}">{{templatePickerIndex >= 0 ? enabledTemplates[templatePickerIndex].name : '从家庭小菜单选择（可选）'}}</view>
       </picker>
       <view class="field-label">名称</view>
       <textarea class="input textarea auto-grow" placeholder="如：番茄炒蛋" value="{{planName}}" bindinput="onPlanNameInput" maxlength="50" auto-height />
@@ -94,7 +95,7 @@
       <textarea class="input textarea auto-grow" placeholder="备注" value="{{planNote}}" bindinput="onPlanNoteInput" maxlength="200" auto-height />
       <view class="switch-row" wx:if="{{templatePickerIndex < 0}}">
         <switch checked="{{planSaveAsTemplate}}" bindchange="onToggleSaveTemplate" color="#F08A9B" />
-        <text>同时加入预选素材库（以后可随机选）</text>
+        <text>同时加入家庭小菜单（以后可随机选）</text>
       </view>
       <view class="reminder-link" bindtap="onRemind">🔔 开启菜单提醒</view>
       <view class="form-actions">
@@ -108,9 +109,9 @@
     <view class="mask" bindtap="onHideTemplateForm"></view>
     <view class="sheet">
       <view class="sheet-handle"></view>
-      <view class="form-title">{{editingTemplateId ? '编辑素材' : '添加素材'}}</view>
-      <view class="field-label">菜谱名称</view>
-      <textarea class="input textarea auto-grow" placeholder="菜谱名称" value="{{templateName}}" bindinput="onTemplateNameInput" maxlength="50" auto-height />
+      <view class="form-title">{{editingTemplateId ? '编辑菜品' : '添加菜品'}}</view>
+      <view class="field-label">菜名</view>
+      <textarea class="input textarea auto-grow" placeholder="菜名" value="{{templateName}}" bindinput="onTemplateNameInput" maxlength="50" auto-height />
       <view class="field-label">分类（可选）</view>
       <textarea class="input textarea auto-grow" placeholder="如：家常菜/早餐" value="{{templateCategory}}" bindinput="onTemplateCategoryInput" maxlength="20" auto-height />
       <view class="form-actions">

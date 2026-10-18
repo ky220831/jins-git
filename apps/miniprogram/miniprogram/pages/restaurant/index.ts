@@ -61,19 +61,11 @@ Page({
     fAddress: '',
     fCity: '',
     fCategory: '',
-    fPrice: '',
-    fRating: '',
-    fTags: '',
     fDishes: '',
     fNote: '',
-    fHours: '',
-    fFavorite: false,
-    fVisited: false,
     fEnabled: true,
     showAdvanced: false,
     categoryOptions: ['火锅', '炒菜', '自助', '烧烤', '日料', '西餐', '甜品', '咖啡', '小吃', '面食'],
-    fLat: '',
-    fLng: '',
     saving: false,
     showSearch: false,
     searchKeyword: '',
@@ -152,18 +144,9 @@ Page({
       fAddress: '',
       fCity: '',
       fCategory: '',
-      fPrice: '',
-      fRating: '',
-      fTags: '',
       fDishes: '',
       fNote: '',
-      fHours: '',
-      fFavorite: false,
-      fVisited: false,
-      fEnabled: true,
       showAdvanced: false,
-      fLat: '',
-      fLng: '',
       ocrHint: '',
     });
   },
@@ -179,18 +162,10 @@ Page({
       fAddress: r.address || '',
       fCity: r.city || '',
       fCategory: r.category || '',
-      fPrice: typeof r.pricePerPerson === 'number' ? String(r.pricePerPerson) : '',
-      fRating: typeof r.rating === 'number' ? String(r.rating) : '',
-      fTags: r.tags.join(', '),
       fDishes: r.recommendedDishes.join(', '),
       fNote: r.note || '',
-      fHours: r.businessHours || '',
-      fFavorite: r.favorite,
-      fVisited: r.visited,
       fEnabled: r.enabled,
       showAdvanced: false,
-      fLat: typeof r.lat === 'number' ? String(r.lat) : '',
-      fLng: typeof r.lng === 'number' ? String(r.lng) : '',
       ocrHint: '',
     });
   },
@@ -224,6 +199,25 @@ Page({
     this.setData({ showAdvanced: !this.data.showAdvanced });
   },
 
+  /** 被“收起”的餐厅重新展示（恢复上架状态） */
+  async onRestoreEnabled() {
+    const id = this.data.editingId;
+    const editing = this.data.restaurants.find((x) => x.id === id);
+    if (!editing) return;
+    try {
+      await RestaurantService.update({
+        restaurantId: id,
+        version: editing.version,
+        enabled: true,
+      });
+      this.setData({ fEnabled: true });
+      this.refresh();
+      wx.showToast({ title: '已重新展示', icon: 'success' });
+    } catch (err) {
+      wx.showToast({ title: err instanceof ApiError ? err.message : '操作失败', icon: 'none' });
+    }
+  },
+
   async onSaveRestaurant() {
     const name = this.data.fName.trim();
     if (!name) {
@@ -244,17 +238,9 @@ Page({
         address: this.data.fAddress.trim() || null,
         city: this.data.fCity.trim() || null,
         category: category || null,
-        pricePerPerson: this.data.fPrice.trim() ? Number(this.data.fPrice) : null,
-        rating: this.data.fRating.trim() ? Number(this.data.fRating) : null,
-        tags: splitList(this.data.fTags),
         recommendedDishes: splitList(this.data.fDishes),
         note: this.data.fNote.trim() || null,
-        businessHours: this.data.fHours.trim() || null,
-        favorite: this.data.fFavorite,
-        visited: this.data.fVisited,
         enabled: this.data.fEnabled,
-        lat: this.data.fLat.trim() ? Number(this.data.fLat) : null,
-        lng: this.data.fLng.trim() ? Number(this.data.fLng) : null,
       };
       if (this.data.editingId) {
         const editing = this.data.restaurants.find((x) => x.id === this.data.editingId);
@@ -356,8 +342,6 @@ Page({
       fAddress: item.address || '',
       fCity: item.city || '',
       fCategory: normalizeCategory(item.category || ''),
-      fLat: typeof item.lat === 'number' ? String(item.lat) : '',
-      fLng: typeof item.lng === 'number' ? String(item.lng) : '',
     });
     wx.showToast({ title: '已导入，请核对后保存', icon: 'none' });
   },
@@ -379,8 +363,6 @@ Page({
         fName: draft.name || '',
         fAddress: draft.address || '',
         fCategory: normalizeCategory(draft.category || ''),
-        fPrice: typeof draft.pricePerPerson === 'number' ? String(draft.pricePerPerson) : '',
-        fHours: draft.businessHours || '',
         fDishes: (draft.dishes || []).join(', '),
         ocrHint: 'OCR 识别结果仅供参考（支持菜单照片和团购截图），请核对后保存',
       });

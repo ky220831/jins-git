@@ -34,7 +34,7 @@
         <text wx:if="{{item.priceLabel}}"> · {{item.priceLabel}}</text>
         <text wx:if="{{item.ratingLabel}}"> · {{item.ratingLabel}}</text>
         <text wx:if="{{item.visited}}"> · 已去过</text>
-        <text wx:if="{{!item.enabled}}"> · 已下架</text>
+        <text wx:if="{{!item.enabled}}"> · 已收起</text>
       </view>
       <view class="restaurant-meta" wx:if="{{item.address}}">{{item.address}}</view>
       <view class="restaurant-meta" wx:if="{{item.tagsLabel}}">{{item.tagsLabel}}</view>
@@ -103,47 +103,19 @@
       <view class="category-chips">
         <view class="cat-chip {{fCategory === cat ? 'active' : ''}}" wx:for="{{categoryOptions}}" wx:key="*this" data-cat="{{item}}" bindtap="onPickCategory">{{item}}</view>
       </view>
-      <!-- 更多信息：默认折叠，收纳人均/评分/坐标/标签/推荐菜/营业时间/备注/收藏/已去过/上架 -->
+      <!-- 更多信息：默认折叠，只保留 推荐菜 / 备注 -->
       <view class="advanced-toggle" bindtap="onToggleAdvanced">
         <text>{{showAdvanced ? '收起更多信息 ▴' : '更多信息 ▾'}}</text>
       </view>
+      <view class="restore-tip" wx:if="{{editingId && !fEnabled}}">
+        <text>这家餐厅已被收起</text>
+        <view class="link-btn" bindtap="onRestoreEnabled">重新展示</view>
+      </view>
       <block wx:if="{{showAdvanced}}">
-        <view class="form-row">
-          <view class="form-col">
-            <view class="field-label">人均 ¥</view>
-            <input class="input" placeholder="人均 ¥" type="digit" value="{{fPrice}}" data-field="fPrice" bindinput="onFieldInput" maxlength="6" />
-          </view>
-          <view class="form-col">
-            <view class="field-label">评分 0-5</view>
-            <input class="input" placeholder="评分 0-5" type="digit" value="{{fRating}}" data-field="fRating" bindinput="onFieldInput" maxlength="4" />
-          </view>
-        </view>
-        <view class="form-row">
-          <view class="form-col">
-            <view class="field-label">纬度（可选）</view>
-            <input class="input" placeholder="纬度（可选）" type="digit" value="{{fLat}}" data-field="fLat" bindinput="onFieldInput" maxlength="12" />
-          </view>
-          <view class="form-col">
-            <view class="field-label">经度（可选）</view>
-            <input class="input" placeholder="经度（可选）" type="digit" value="{{fLng}}" data-field="fLng" bindinput="onFieldInput" maxlength="12" />
-          </view>
-        </view>
-        <view class="field-label">标签</view>
-        <textarea class="input textarea auto-grow" placeholder="如：约会,安静" value="{{fTags}}" data-field="fTags" bindinput="onFieldInput" maxlength="100" auto-height />
         <view class="field-label">推荐菜</view>
         <textarea class="input textarea auto-grow" placeholder="推荐菜，逗号分隔" value="{{fDishes}}" data-field="fDishes" bindinput="onFieldInput" maxlength="200" auto-height />
-        <view class="field-label">营业时间（可选）</view>
-        <textarea class="input textarea auto-grow" placeholder="营业时间（可选）" value="{{fHours}}" data-field="fHours" bindinput="onFieldInput" maxlength="50" auto-height />
         <view class="field-label">备注（可选）</view>
         <textarea class="input textarea" placeholder="备注（可选）" value="{{fNote}}" data-field="fNote" bindinput="onFieldInput" maxlength="500" />
-        <view class="switch-row">
-          <text>收藏</text>
-          <switch checked="{{fFavorite}}" data-field="fFavorite" bindchange="onToggleFormField" color="#D98E8E" />
-          <text>已去过</text>
-          <switch checked="{{fVisited}}" data-field="fVisited" bindchange="onToggleFormField" color="#7FA3B8" />
-          <text>上架</text>
-          <switch checked="{{fEnabled}}" data-field="fEnabled" bindchange="onToggleFormField" color="#7FA3B8" />
-        </view>
       </block>
       <view class="form-actions">
         <button class="btn-secondary form-btn" bindtap="onHideForm">取消</button>
