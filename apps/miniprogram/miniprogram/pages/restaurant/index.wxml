@@ -67,9 +67,9 @@
       <view class="sheet-handle"></view>
       <view class="form-title">搜索餐厅（腾讯位置服务）</view>
       <view class="field-label">关键词</view>
-      <input class="input" placeholder="关键词，如：日料 / 店名" value="{{searchKeyword}}" bindinput="onSearchKeyword" maxlength="30" />
+      <input class="input" placeholder="如：日料 / 店名" value="{{searchKeyword}}" bindinput="onSearchKeyword" maxlength="30" />
       <view class="field-label">城市（可选）</view>
-      <input class="input" placeholder="城市（可选，默认全国）" value="{{searchRegion}}" bindinput="onSearchRegion" maxlength="20" />
+      <input class="input" placeholder="默认全国" value="{{searchRegion}}" bindinput="onSearchRegion" maxlength="20" />
       <view class="form-actions">
         <button class="btn-secondary form-btn" bindtap="onHideSearch">取消</button>
         <button class="btn-primary form-btn" bindtap="onSearch" loading="{{searching}}" disabled="{{searching}}">搜索</button>
@@ -99,7 +99,7 @@
         </view>
         <view class="form-col">
           <view class="field-label">分类</view>
-          <input class="input" placeholder="分类（日料/火锅…）" value="{{fCategory}}" data-field="fCategory" bindinput="onFieldInput" maxlength="20" />
+          <input class="input" placeholder="如：日料/火锅" value="{{fCategory}}" data-field="fCategory" bindinput="onFieldInput" maxlength="20" />
         </view>
       </view>
       <!-- 高级信息：仅编辑已有餐厅时显示 -->
@@ -125,7 +125,7 @@
           </view>
         </view>
         <view class="field-label">标签</view>
-        <input class="input" placeholder="标签，逗号分隔（如：约会,安静）" value="{{fTags}}" data-field="fTags" bindinput="onFieldInput" maxlength="100" />
+        <input class="input" placeholder="如：约会,安静" value="{{fTags}}" data-field="fTags" bindinput="onFieldInput" maxlength="100" />
         <view class="field-label">推荐菜</view>
         <input class="input" placeholder="推荐菜，逗号分隔" value="{{fDishes}}" data-field="fDishes" bindinput="onFieldInput" maxlength="200" />
         <view class="field-label">营业时间（可选）</view>

@@ -59,7 +59,7 @@
       <view class="sheet-handle"></view>
       <view class="form-title">{{editingTripId ? '编辑旅行资料' : '添加旅行资料'}}（永久保存）</view>
       <view class="field-label">旅行名称 *</view>
-      <input class="input" placeholder="旅行名称，如：北海道之旅 *" value="{{tName}}" data-field="tName" bindinput="onFieldInput" maxlength="60" />
+      <input class="input" placeholder="如：北海道之旅" value="{{tName}}" data-field="tName" bindinput="onFieldInput" maxlength="60" />
       <view class="form-row">
         <view class="form-col">
           <view class="field-label">国家/地区</view>
@@ -71,7 +71,7 @@
         </view>
       </view>
       <view class="field-label">交通</view>
-      <input class="input" placeholder="交通（如：飞机 + JR）" value="{{tTransport}}" data-field="tTransport" bindinput="onFieldInput" maxlength="100" />
+      <input class="input" placeholder="如：飞机 + JR" value="{{tTransport}}" data-field="tTransport" bindinput="onFieldInput" maxlength="100" />
       <view class="field-label">酒店（可选）</view>
       <input class="input" placeholder="酒店（可选）" value="{{tHotel}}" data-field="tHotel" bindinput="onFieldInput" maxlength="100" />
       <view class="form-row">
@@ -85,7 +85,7 @@
         </view>
       </view>
       <view class="field-label">行程安排</view>
-      <textarea class="input textarea tall" placeholder="行程安排：每行一个，格式：日期 标题 | 备注&#10;例如：&#10;2026-08-20 小樽运河 | 拍照" value="{{tItinerary}}" data-field="tItinerary" bindinput="onFieldInput" />
+      <textarea class="input textarea tall" placeholder="每行一个：日期 标题 | 备注&#10;如：2026-08-20 小樽运河 | 拍照" value="{{tItinerary}}" data-field="tItinerary" bindinput="onFieldInput" />
       <view class="field-label">备注（可选）</view>
       <textarea class="input textarea" placeholder="备注（可选）" value="{{tNote}}" data-field="tNote" bindinput="onFieldInput" maxlength="500" />
       <view class="photo-strip" wx:if="{{tImageUrls.length}}">
@@ -107,10 +107,10 @@
       <view class="form-title">{{editingPlanId ? '编辑行程' : '安排行程'}}（14 天后自动进回收站）</view>
       <view class="field-label">关联旅行资料</view>
       <picker range="{{trips}}" range-key="name" value="{{pTripIndex}}" bindchange="onTripPickerChange">
-        <view class="picker-value">{{pTripIndex > 0 ? '关联：' + trips[pTripIndex - 1].name : '不关联旅行资料（自定义名称）'}}</view>
+        <view class="picker-value {{pTripIndex > 0 ? '' : 'placeholder'}}">{{pTripIndex > 0 ? '关联：' + trips[pTripIndex - 1].name : '不关联（自定义名称）'}}</view>
       </picker>
       <view class="field-label">行程名称</view>
-      <input class="input" placeholder="行程名称（可选，默认用关联资料名）" value="{{pName}}" data-field="pName" bindinput="onFieldInput" maxlength="60" />
+      <input class="input" placeholder="默认用关联资料名" value="{{pName}}" data-field="pName" bindinput="onFieldInput" maxlength="60" />
       <view class="form-row">
         <view class="form-col">
           <view class="field-label">开始日期 *</view>

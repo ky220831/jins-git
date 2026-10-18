@@ -108,7 +108,7 @@
   <!-- 昵称编辑 -->
   <view class="name-edit" wx:if="{{showNameEdit}}">
     <view class="name-edit-title">改我的昵称</view>
-    <input class="input" placeholder="输入昵称（最多 16 字）" value="{{nameInput}}" bindinput="onNameInput" maxlength="16" />
+    <input class="input" placeholder="最多 16 字" value="{{nameInput}}" bindinput="onNameInput" maxlength="16" />
     <view class="name-edit-actions">
       <button class="btn-secondary name-edit-btn" bindtap="onHideNameEdit">取消</button>
       <button class="btn-primary name-edit-btn" bindtap="onSaveName" loading="{{savingName}}" disabled="{{savingName}}">保存</button>

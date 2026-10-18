@@ -198,7 +198,7 @@ button::after {
 }
 
 .picker-value.placeholder {
-  color: var(--color-text-secondary);
+  color: #B9AEA6;
 }
 
 /* ---- 表单布局（1.0.5 优化：日期时间并排 + 字段标签） ---- */
