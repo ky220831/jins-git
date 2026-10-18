@@ -63,8 +63,7 @@
     <picker class="picker" range="{{enabledTemplates}}" range-key="name" value="{{templatePickerIndex}}" bindchange="onTemplatePick">
       <view class="picker-value">{{templatePickerIndex >= 0 ? enabledTemplates[templatePickerIndex].name : '从素材库选择（可选）'}}</view>
     </picker>
-    <view class="field-label">或直接填名称</view>
-    <input class="input" placeholder="如：番茄炒蛋" value="{{planName}}" bindinput="onPlanNameInput" maxlength="50" />
+    <input class="input" placeholder="或直接填名称（如：番茄炒蛋）" value="{{planName}}" bindinput="onPlanNameInput" maxlength="50" />
     <view class="form-row">
       <view class="form-col">
         <view class="field-label">日期</view>

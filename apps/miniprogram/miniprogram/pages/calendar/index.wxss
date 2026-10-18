@@ -55,7 +55,7 @@
 
 .week-row {
   display: flex;
-  margin-top: 24rpx;
+  margin-top: 14rpx;
 }
 
 .week-cell {
@@ -73,7 +73,7 @@
 
 .day-cell {
   width: 14.28%;
-  height: 96rpx;
+  height: 82rpx;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -156,35 +156,35 @@
 }
 
 .legend-card {
-  margin-top: 20rpx;
+  margin-top: 14rpx;
   background: var(--color-surface);
   border-radius: var(--radius-lg);
-  padding: 24rpx 28rpx;
+  padding: 16rpx 24rpx;
   box-shadow: var(--shadow-soft);
 }
 
 .legend-title {
-  font-size: 24rpx;
+  font-size: 22rpx;
   font-weight: 600;
   color: var(--color-text-secondary);
-  margin-bottom: 16rpx;
+  margin-bottom: 12rpx;
 }
 
 .legend-grid {
   display: flex;
   flex-wrap: wrap;
-  gap: 16rpx;
+  gap: 12rpx;
 }
 
 .legend-chip {
   display: flex;
   align-items: center;
-  gap: 10rpx;
-  padding: 8rpx 18rpx;
+  gap: 8rpx;
+  padding: 6rpx 14rpx;
   background: #FFF9F4;
   border: 2rpx solid #FBE9DC;
   border-radius: 999rpx;
-  font-size: 22rpx;
+  font-size: 20rpx;
   color: var(--color-text-secondary);
 }
 
@@ -218,7 +218,7 @@
 }
 
 .day-panel {
-  margin-top: 32rpx;
+  margin-top: 20rpx;
   background: var(--color-surface);
   border-radius: var(--radius-lg);
   padding: 32rpx;

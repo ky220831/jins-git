@@ -1,6 +1,6 @@
 {
   "name": "our-life",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "private": true,
   "description": "“我们的生活”——双人私密生活系统 V1.0（微信小程序 + CloudBase）",
   "scripts": {
