@@ -5,35 +5,47 @@
 .cal-header {
   display: flex;
   align-items: center;
-  gap: 16rpx;
+  justify-content: center;
+  gap: 20rpx;
+  margin-top: 8rpx;
+}
+
+.cal-pill {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+  background: var(--color-surface);
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-soft);
+  padding: 6rpx 12rpx;
 }
 
 .cal-nav {
-  width: 64rpx;
-  height: 64rpx;
-  line-height: 62rpx;
+  width: 56rpx;
+  height: 56rpx;
+  line-height: 54rpx;
   text-align: center;
-  font-size: 44rpx;
+  font-size: 40rpx;
   color: var(--color-text-secondary);
-  background: var(--color-surface);
-  border-radius: 50%;
-  box-shadow: var(--shadow-soft);
 }
 
 .cal-title {
-  flex: 1;
-  font-size: 34rpx;
+  font-size: 32rpx;
   font-weight: 600;
   text-align: center;
+  color: var(--color-text);
+  min-width: 160rpx;
 }
 
 .cal-today {
-  padding: 10rpx 20rpx;
+  padding: 10rpx 26rpx;
   font-size: 24rpx;
   color: var(--color-primary-deep);
-  background: var(--color-surface);
-  border-radius: 999rpx;
-  box-shadow: var(--shadow-soft);
+  background: rgba(240, 138, 155, 0.10);
+  border-radius: var(--radius-pill);
+  font-weight: 600;
 }
 
 .cal-options {
@@ -68,40 +80,46 @@
 .grid {
   display: flex;
   flex-wrap: wrap;
-  gap: 8rpx;
-  margin-top: 8rpx;
+  gap: 12rpx;
+  margin-top: 16rpx;
 }
 
 .day-cell {
-  width: calc((100% - 48rpx) / 7);
-  height: 78rpx;
+  width: calc((100% - 72rpx) / 7);
+  height: 112rpx;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  border-radius: 20rpx;
+  justify-content: flex-start;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-soft);
+  padding-top: 10rpx;
+  box-sizing: border-box;
+  position: relative;
 }
 
 .day-cell.today {
-  background: rgba(255, 180, 190, 0.14);
+  background: var(--color-surface);
+  box-shadow: inset 0 0 0 2rpx rgba(240, 138, 155, 0.55), var(--shadow-soft);
 }
 
 .day-cell.period {
-  background: rgba(245, 106, 106, 0.06);
+  background: var(--tag-period);
 }
 
 .day-cell.rest {
-  background: rgba(155, 199, 222, 0.08);
+  background: var(--tag-rest);
 }
 
 .day-cell.selected {
-  background: rgba(255, 150, 161, 0.14);
-  box-shadow: inset 0 0 0 3rpx rgba(244, 119, 138, 0.45);
+  background: rgba(240, 138, 155, 0.10);
+  box-shadow: inset 0 0 0 2rpx rgba(240, 138, 155, 0.75), var(--shadow-soft);
 }
 
 .day-cell.selected .day-num {
   color: var(--color-primary-deep);
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .day-cell.dim .day-num {
@@ -109,50 +127,92 @@
 }
 
 .day-num {
-  font-size: 28rpx;
+  font-size: 30rpx;
+  font-weight: 500;
   color: var(--color-text);
+  line-height: 1.2;
 }
 
-.holiday-label {
-  font-size: 18rpx;
-  line-height: 1.2;
-  color: var(--color-red);
-  max-width: 96rpx;
+.day-cell.dim {
+  background: transparent;
+  box-shadow: none;
+}
+
+.day-cell.weekend .day-num {
+  color: #A79FC4;
+}
+
+/* 次级标签：法定节假日/调休/周末 > 节气 > 农历（≤20rpx，克制显示） */
+.cell-label {
+  font-size: 20rpx;
+  line-height: 1.3;
+  max-width: 100%;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+  padding: 1rpx 8rpx;
+  border-radius: 999rpx;
+  margin-top: 4rpx;
+  color: var(--color-text-secondary);
+  font-weight: 400;
 }
 
-.holiday-label.makeup {
-  color: var(--color-blue);
+.label-holiday {
+  background: rgba(217, 110, 128, 0.12);
+  color: var(--color-period);
+  font-weight: 500;
+}
+
+.label-makeup {
+  background: rgba(224, 162, 107, 0.16);
+  color: #C97F3E;
+  font-weight: 500;
+}
+
+.label-weekend {
+  background: rgba(167, 159, 196, 0.12);
+  color: #8A8198;
+}
+
+.label-term {
+  color: var(--color-primary-deep);
 }
 
 .dots {
   display: flex;
   gap: 6rpx;
-  height: 12rpx;
-  margin-top: 4rpx;
+  height: 10rpx;
+  margin-top: auto;
+  margin-bottom: 8rpx;
+  align-items: center;
+  justify-content: center;
 }
 
 .dot {
-  width: 11rpx;
-  height: 11rpx;
+  width: 8rpx;
+  height: 8rpx;
   border-radius: 50%;
+  flex-shrink: 0;
 }
 
-.dot-todo {
-  background: #CBB8AE;
-}
-
-.dot-event {
-  background: #FFC28E;
-}
+/* 分类圆点：同色系固定语义色（V2） */
+.dot-todo { background: var(--color-todo); }
+.dot-meal { background: var(--color-meal); }
+.dot-restaurant { background: var(--color-restaurant); }
+.dot-anniversary { background: var(--color-anniversary); }
+.dot-trip { background: var(--color-travel); }
+.dot-period { background: var(--color-period); }
+.dot-custom { background: var(--color-todo); }
+.dot-period-ongoing { background: var(--color-period); }
+.dot-period-predicted { background: #F3A8B5; }
+.dot-period-past { background: #DDB8BC; }
+.dot-rest { background: var(--color-rest); }
 
 .legend-card {
-  margin-top: 14rpx;
+  margin-top: 16rpx;
   background: var(--color-surface);
-  border-radius: var(--radius-lg);
-  padding: 12rpx 20rpx;
+  border-radius: var(--radius-pill);
+  padding: 12rpx 24rpx;
   box-shadow: var(--shadow-soft);
 }
 
@@ -184,10 +244,9 @@
   display: flex;
   align-items: center;
   gap: 8rpx;
-  padding: 6rpx 14rpx;
-  background: #FFF9F4;
-  border: 2rpx solid #FBE9DC;
-  border-radius: 999rpx;
+  padding: 8rpx 16rpx;
+  background: rgba(240, 138, 155, 0.05);
+  border-radius: var(--radius-pill);
   font-size: 20rpx;
   color: var(--color-text-secondary);
 }
@@ -253,13 +312,15 @@
 .todo-item,
 .event-item {
   margin-top: 20rpx;
-  padding: 20rpx;
-  background: #FFF9F4;
-  border-radius: 20rpx;
-  border: 2rpx solid #FBE9DC;
+  padding: 18rpx 20rpx;
+  background: var(--color-surface);
+  border-radius: var(--radius-sm);
+  border: 2rpx solid var(--color-border);
   display: flex;
   align-items: flex-start;
   gap: 16rpx;
+  position: relative;
+  overflow: hidden;
 }
 
 .todo-item.done .todo-title {
@@ -280,10 +341,41 @@
   color: var(--color-text-secondary);
 }
 
+.cat-bar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 8rpx;
+}
+
+/* 分类色条 + 图标浅底（同色系不同明度，V2） */
+.cat-todo .cat-bar { background: var(--color-todo); }
+.cat-meal .cat-bar { background: var(--color-meal); }
+.cat-restaurant .cat-bar { background: var(--color-restaurant); }
+.cat-anniversary .cat-bar { background: var(--color-anniversary); }
+.cat-trip .cat-bar { background: var(--color-travel); }
+.cat-period .cat-bar { background: var(--color-period); }
+.cat-custom .cat-bar { background: var(--color-todo); }
+
+.cat-todo .item-icon { background: var(--tag-todo); }
+.cat-meal .item-icon { background: var(--tag-meal); }
+.cat-restaurant .item-icon { background: var(--tag-restaurant); }
+.cat-anniversary .item-icon { background: var(--tag-anniversary); }
+.cat-trip .item-icon { background: var(--tag-travel); }
+.cat-period .item-icon { background: var(--tag-period); }
+.cat-custom .item-icon { background: var(--tag-todo); }
+
 .item-icon {
-  font-size: 34rpx;
-  line-height: 1.2;
+  font-size: 30rpx;
+  line-height: 1;
   flex-shrink: 0;
+  width: 64rpx;
+  height: 64rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
 }
 
 .item-body {
@@ -409,7 +501,7 @@
 }
 
 .mini-avatar.me {
-  background: #FFE9EC;
+  background: rgba(240, 138, 155, 0.10);
 }
 
 /* 右上角小 ✏️：常驻改名入口，不占布局、不遮挡 */
@@ -473,75 +565,29 @@
   font-size: 28rpx;
 }
 
-/* ---- 格子：周末 / 生理期三态 ---- */
-.day-cell.weekend {
-  background: rgba(167, 159, 196, 0.05);
-}
-
-.day-cell.period-ongoing {
-  background: rgba(217, 83, 79, 0.06);
-}
-
-.day-cell.period-predicted {
-  background: rgba(249, 195, 205, 0.08);
-}
-
-.day-cell.period-past {
-  background: rgba(233, 214, 216, 0.08);
-}
-
-/* 选中/今天 优先级最高，避免被状态色覆盖 */
-.day-cell.selected {
-  background: rgba(255, 150, 161, 0.14);
-}
-
-.day-cell.today:not(.selected) {
-  background: rgba(255, 180, 190, 0.14);
-}
-
-/* ---- 标识徽章 ---- */
-.holiday-label {
-  padding: 2rpx 8rpx;
-  border-radius: 999rpx;
-  background: rgba(214, 82, 82, 0.10);
-  color: var(--color-red);
-  font-weight: 600;
-}
-
-.holiday-label.makeup {
-  background: rgba(235, 146, 89, 0.16);
-  color: #D97B2B;
-}
-
-.holiday-label.weekend-badge {
-  background: transparent;
-  color: #B0A6BE;
-  padding: 0;
-}
-
 /* ---- 事件数量角标 ---- */
 .event-count {
   position: absolute;
-  top: 6rpx;
-  right: 14rpx;
+  top: 8rpx;
+  right: 8rpx;
   min-width: 28rpx;
   height: 28rpx;
   line-height: 28rpx;
   text-align: center;
   font-size: 18rpx;
   color: #ffffff;
-  background: var(--color-accent);
+  background: var(--color-primary);
   border-radius: 999rpx;
   padding: 0 6rpx;
 }
 
-.day-cell {
-  position: relative;
-}
-
 /* ---- 图例 ---- */
+.legend-dot.meal { background: var(--color-meal); }
+.legend-dot.restaurant { background: var(--color-restaurant); }
+.legend-dot.anniversary { background: var(--color-anniversary); }
+.legend-dot.trip { background: var(--color-travel); }
 .legend-dot.period-ongoing {
-  background: #D9534F;
+  background: var(--color-period);
 }
 
 .legend-dot.period-predicted {
@@ -608,17 +654,18 @@
 
 .quick-btn {
   flex: 0 0 calc((100% - 28rpx) / 3);
-  padding: 14rpx 8rpx;
+  padding: 16rpx 8rpx;
   font-size: 24rpx;
   text-align: center;
   color: var(--color-primary-deep);
-  background: #FFF1EF;
-  border-radius: 999rpx;
-  border: 2rpx solid #F7D9D5;
+  background: rgba(240, 138, 155, 0.08);
+  border-radius: var(--radius-pill);
+  border: 2rpx solid rgba(240, 138, 155, 0.18);
+  font-weight: 500;
 }
 
 .quick-btn:active {
-  background: #FFE3DF;
+  background: rgba(240, 138, 155, 0.16);
 }
 
 /* ---- 昵称编辑 ---- */

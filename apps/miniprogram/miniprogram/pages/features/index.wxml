@@ -7,51 +7,51 @@
   <view class="error-text" wx:if="{{error}}">{{error}}</view>
 
   <view class="feature-list">
-    <view class="feature-row" bindtap="onOpenMeal">
-      <text class="fe-emoji">🍚</text>
+    <view class="feature-card" bindtap="onOpenMeal">
+      <view class="fe-icon ic-meal">🍚</view>
       <view class="fe-body">
         <view class="fe-label">今日菜单</view>
-        <view class="fe-sub">今天吃什么 · 随机选 · 预选素材库</view>
+        <view class="fe-sub">今天想吃什么 · 随机选 · 素材库</view>
       </view>
       <text class="fe-arrow">›</text>
     </view>
-    <view class="feature-row" bindtap="onOpenRestaurant">
-      <text class="fe-emoji">🍴</text>
+    <view class="feature-card" bindtap="onOpenRestaurant">
+      <view class="fe-icon ic-restaurant">🍴</view>
       <view class="fe-body">
         <view class="fe-label">漂亮饭</view>
-        <view class="fe-sub">两个人的餐厅收藏库 · 行程 · 搜索</view>
+        <view class="fe-sub">收藏想去的餐厅 · 行程 · 搜索</view>
       </view>
       <text class="fe-arrow">›</text>
     </view>
-    <view class="feature-row" bindtap="onOpenAnniversary">
-      <text class="fe-emoji">❤️</text>
+    <view class="feature-card" bindtap="onOpenAnniversary">
+      <view class="fe-icon ic-anniversary">❤️</view>
       <view class="fe-body">
         <view class="fe-label">纪念日</view>
-        <view class="fe-sub">倒计时 · 正计时 · 每年重复</view>
+        <view class="fe-sub">属于我们的日子 · 每年重复</view>
       </view>
       <text class="fe-arrow">›</text>
     </view>
-    <view class="feature-row" bindtap="onOpenTravel">
-      <text class="fe-emoji">✈️</text>
+    <view class="feature-card" bindtap="onOpenTravel">
+      <view class="fe-icon ic-travel">✈️</view>
       <view class="fe-body">
         <view class="fe-label">旅游计划</view>
-        <view class="fe-sub">我们的下一站 · 行程清单</view>
+        <view class="fe-sub">去过的国家和城市</view>
       </view>
       <text class="fe-arrow">›</text>
     </view>
-    <view class="feature-row" bindtap="onOpenPeriod">
-      <text class="fe-emoji">🌸</text>
+    <view class="feature-card" bindtap="onOpenPeriod">
+      <view class="fe-icon ic-period">🌸</view>
       <view class="fe-body">
         <view class="fe-label">生理期</view>
         <view class="fe-sub">记录与预测 · 日历显示开关</view>
       </view>
       <text class="fe-arrow">›</text>
     </view>
-    <view class="feature-row" bindtap="onOpenManage">
-      <text class="fe-emoji">🛠️</text>
+    <view class="feature-card" bindtap="onOpenManage">
+      <view class="fe-icon ic-manage">🛠️</view>
       <view class="fe-body">
         <view class="fe-label">管理</view>
-        <view class="fe-sub">{{isOwner ? '主管理 · 回收站 · 导出 · 操作记录' : '副管理'}}</view>
+        <view class="fe-sub">{{isOwner ? '回收站 · 数据 · 家庭' : '副管理'}}</view>
       </view>
       <text class="fe-arrow">›</text>
     </view>
@@ -65,10 +65,10 @@
   <view class="tip-card">
     <view class="toggle-row">
       <view>
-        <view class="tip-title">🎨 月度季节自动换肤</view>
-        <view class="tip-text">跟随月份微调背景氛围色；关闭后锁定基础风格</view>
+        <view class="tip-title">🎨 随时节自动换肤</view>
+        <view class="tip-text">跟随二十四节气与昼夜自动切换配色；关闭后锁定基础风格</view>
       </view>
-      <switch checked="{{themeAuto}}" bindchange="onToggleTheme" color="#FF96A1" />
+      <switch checked="{{themeAuto}}" bindchange="onToggleTheme" color="#F08A9B" />
     </view>
   </view>
 </view>

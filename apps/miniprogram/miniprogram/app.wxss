@@ -28,7 +28,7 @@ button::after {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #FFB3BB 0%, #FF96A1 100%);
+  background: linear-gradient(135deg, #F5A0AE 0%, #F08A9B 100%);
   color: #ffffff;
   border-radius: 999rpx;
   font-size: 30rpx;

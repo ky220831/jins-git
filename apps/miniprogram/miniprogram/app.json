@@ -14,18 +14,18 @@
     "pages/manage/index"
   ],
   "window": {
-    "navigationBarBackgroundColor": "#FFF7F0",
+    "navigationBarBackgroundColor": "#FAF8F4",
     "navigationBarTitleText": "我们的生活",
     "navigationBarTextStyle": "black",
-    "backgroundColor": "#FFF7F0",
+    "backgroundColor": "#FAF8F4",
     "backgroundTextStyle": "light"
   },
   "style": "v2",
   "sitemapLocation": "sitemap.json",
   "tabBar": {
     "color": "#9B9B9B",
-    "selectedColor": "#C0564F",
-    "backgroundColor": "#FFFDF9",
+    "selectedColor": "#DD6F84",
+    "backgroundColor": "#FFFFFF",
     "borderStyle": "white",
     "list": [
       {

@@ -18,9 +18,11 @@
   </view>
 
   <view class="cal-header">
-    <view class="cal-nav" bindtap="onPrev">‹</view>
-    <view class="cal-title">{{year}}年{{month}}月</view>
-    <view class="cal-nav" bindtap="onNext">›</view>
+    <view class="cal-pill">
+      <view class="cal-nav" bindtap="onPrev">‹</view>
+      <view class="cal-title">{{year}}年{{month}}月</view>
+      <view class="cal-nav" bindtap="onNext">›</view>
+    </view>
     <view class="cal-today" bindtap="onToday">今天</view>
   </view>
 
@@ -37,14 +39,11 @@
       bindtap="onTapDay"
     >
       <view class="day-num">{{item.day ? item.day : ''}}</view>
-      <view
-        class="holiday-label {{item.holidayKind === 'makeup_workday' ? 'makeup' : ''}} {{item.holidayKind === 'weekend' ? 'weekend-badge' : ''}}"
-        wx:if="{{item.holidayLabel}}"
-      >{{item.holidayLabel}}</view>
+      <view class="cell-label label-{{item.cellKind}}" wx:if="{{item.cellLabel}}">{{item.cellLabel}}</view>
       <view class="dots">
         <view class="dot {{item.periodState === 'ongoing' ? 'dot-period-ongoing' : ''}} {{item.periodState === 'past' ? 'dot-period-past' : ''}} {{item.periodState === 'predicted' ? 'dot-period-predicted' : ''}} {{item.periodState === 'rest' ? 'dot-rest' : ''}}" wx:if="{{item.periodState}}"></view>
         <view class="dot dot-todo" wx:if="{{item.hasTodo}}"></view>
-        <view class="dot dot-event" wx:for="{{item.eventDotList}}" wx:for-item="d" wx:key="*this"></view>
+        <view class="dot {{d}}" wx:for="{{item.eventDotList}}" wx:for-item="d" wx:key="*this"></view>
       </view>
       <view class="event-count" wx:if="{{item.eventCount > 4}}">{{item.eventCount}}</view>
     </view>
@@ -63,7 +62,10 @@
       <view class="legend-chip"><view class="legend-dot weekend"></view><text>周末</text></view>
       <view class="legend-chip"><view class="legend-dot makeup"></view><text>调休</text></view>
       <view class="legend-chip"><view class="legend-dot todo"></view><text>To Do</text></view>
-      <view class="legend-chip"><view class="legend-dot event"></view><text>日程</text></view>
+      <view class="legend-chip"><view class="legend-dot meal"></view><text>菜单</text></view>
+      <view class="legend-chip"><view class="legend-dot restaurant"></view><text>餐厅</text></view>
+      <view class="legend-chip"><view class="legend-dot anniversary"></view><text>纪念日</text></view>
+      <view class="legend-chip"><view class="legend-dot trip"></view><text>旅游</text></view>
     </view>
   </view>
 
@@ -91,13 +93,14 @@
     </view>
 
     <view
-      class="todo-item {{item.status === 'completed' ? 'done' : ''}}"
+      class="todo-item cat-{{item.businessType || 'todo'}} {{item.status === 'completed' ? 'done' : ''}}"
       wx:for="{{dayTodos}}"
       wx:key="id"
       data-id="{{item.id}}"
       data-status="{{item.status}}"
       bindtap="onToggleTodo"
     >
+      <view class="cat-bar"></view>
       <view class="item-icon">{{item.icon}}</view>
       <view class="item-body">
         <view class="todo-title">{{item.title}}</view>
@@ -105,7 +108,8 @@
       </view>
     </view>
 
-    <view class="event-item" wx:for="{{dayEvents}}" wx:key="id" data-type="{{item.sourceType}}" data-id="{{item.sourceId}}" bindtap="onTapEvent">
+    <view class="event-item cat-{{item.sourceType || 'custom'}}" wx:for="{{dayEvents}}" wx:key="id" data-type="{{item.sourceType}}" data-id="{{item.sourceId}}" bindtap="onTapEvent">
+      <view class="cat-bar"></view>
       <view class="item-icon">{{item.icon}}</view>
       <view class="item-body">
         <view class="event-title">{{item.title}}</view>

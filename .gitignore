@@ -10,6 +10,7 @@ project.private.config.json
 # 工作与交付目录
 work/
 outputs/
+output/
 
 # 云开发环境配置（含第三方密钥，如 LBS_KEY），禁止提交
 cloudbaserc.json

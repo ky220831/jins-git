@@ -11,6 +11,7 @@ import { PeriodService } from '../../services/period';
 import { SpaceService } from '../../services/space';
 import { TodoService } from '../../services/todo';
 import { startSilentRefresh } from '../../utils/realtime';
+import { lunarDayName, termNameOf, toLunar } from '../../utils/solar';
 import { formatDateTime } from '../../utils/time';
 import { currentThemeClass } from '../../utils/theme';
 
@@ -25,12 +26,13 @@ interface DayCell {
   hasTodo: boolean;
   hasEvent: boolean;
   eventCount: number;
-  eventDotList: number[];
+  /** 底部边缘分类圆点（最多 4 个，分类色，不压日期数字） */
+  eventDotList: string[];
+  /** 格子内次级标签：法定节假日/调休/周末 > 节气 > 农历 */
+  cellLabel: string;
+  cellKind: '' | 'holiday' | 'makeup' | 'weekend' | 'term' | 'lunar';
   /** 生理期三态 + 休息：ongoing 进行中 / past 已过去 / predicted 预计 / rest 休息 */
   periodState: '' | 'ongoing' | 'past' | 'predicted' | 'rest';
-  holidayLabel: string;
-  /** holiday 法定节假日 / makeup_workday 调休上班 / weekend 普通周末 */
-  holidayKind: '' | 'holiday' | 'makeup_workday' | 'weekend';
 }
 
 interface TodoRow extends TodoView {
@@ -55,6 +57,17 @@ const MODULE_META: Record<string, { icon: string; label: string }> = {
   period: { icon: '🌸', label: '生理期' },
   todo: { icon: '📝', label: 'To Do' },
   custom: { icon: '📌', label: '事项' },
+};
+
+/** 日程分类 → 圆点/色条 class（与功能页图标一致，V2 分类语义色） */
+const DOT_CLASS: Record<string, string> = {
+  meal: 'dot-meal',
+  restaurant: 'dot-restaurant',
+  anniversary: 'dot-anniversary',
+  trip: 'dot-trip',
+  period: 'dot-period',
+  todo: 'dot-todo',
+  custom: 'dot-custom',
 };
 
 /** 去掉标题前已有的模块 emoji，避免图标重复（如 🍴 晚餐 → 晚餐） */
@@ -114,7 +127,7 @@ Page({
     themeClass: currentThemeClass(),
     year: 0,
     month: 0,
-    weekdays: ['日', '一', '二', '三', '四', '五', '六'],
+    weekdays: ['一', '二', '三', '四', '五', '六', '日'],
     days: [] as DayCell[],
     myDisplayName: '',
     partnerDisplayName: '',
@@ -249,16 +262,22 @@ Page({
     const { year, month, selectedDate } = this.data;
     const todoDates = new Set(todos.map((todo) => todo.date));
     const eventDates = new Map<string, number>();
+    const eventDots = new Map<string, string[]>();
     for (const event of events) {
       const date = toShanghaiParts(event.startTime).date;
       eventDates.set(date, (eventDates.get(date) ?? 0) + 1);
+      const cls = DOT_CLASS[event.sourceType] || DOT_CLASS.custom;
+      const list = eventDots.get(date) ?? [];
+      if (list.length < 4 && !list.includes(cls)) list.push(cls);
+      eventDots.set(date, list);
     }
     const periodByDate = new Map(periodDays.map((d) => [d.date, d]));
     const holidayByDate = new Map(holidays.map((h) => [h.date, h]));
     const todayKey = dateKey(new Date().getFullYear(), new Date().getMonth() + 1, new Date().getDate());
     const todayKeyLocal = todayKey;
 
-    const firstWeekday = new Date(year, month - 1, 1).getDay();
+    // 周一起始：周一=0 … 周日=6（与视觉稿一致）
+    const firstWeekday = (new Date(year, month - 1, 1).getDay() + 6) % 7;
     const daysInMonth = new Date(year, month, 0).getDate();
     const emptyCell = (): DayCell => ({
       uid: 0,
@@ -271,9 +290,9 @@ Page({
       hasEvent: false,
       eventCount: 0,
       eventDotList: [],
+      cellLabel: '',
+      cellKind: '',
       periodState: '',
-      holidayLabel: '',
-      holidayKind: '',
     });
     const cells: DayCell[] = [];
     let uid = 0;
@@ -286,6 +305,20 @@ Page({
       const holiday = holidayByDate.get(key);
       const weekend = !holiday && isWeekendKey(key);
       const eventCount = eventDates.get(key) ?? 0;
+      const termName = termNameOf(year, month, day);
+      const lunarLabel = lunarDayName(toLunar(year, month, day).day);
+      let cellLabel = lunarLabel;
+      let cellKind: DayCell['cellKind'] = 'lunar';
+      if (holiday) {
+        cellLabel = holidayLabel(holiday);
+        cellKind = holiday.type === 'makeup_workday' ? 'makeup' : 'holiday';
+      } else if (weekend) {
+        cellLabel = '周末';
+        cellKind = 'weekend';
+      } else if (termName) {
+        cellLabel = termName;
+        cellKind = 'term';
+      }
       cells.push({
         uid: (uid += 1),
         key,
@@ -296,11 +329,11 @@ Page({
         hasTodo: todoDates.has(key),
         hasEvent: eventCount > 0,
         eventCount,
-        eventDotList: Array.from({ length: Math.min(eventCount, 4) }, (_, i) => i),
+        eventDotList: eventDots.get(key) ?? [],
+        cellLabel,
+        cellKind,
         periodState:
           periodVisible && period ? periodStateOf(period, key, todayKeyLocal) : '',
-        holidayLabel: holiday ? holidayLabel(holiday) : weekend ? '周末' : '',
-        holidayKind: holiday ? holiday.type : weekend ? 'weekend' : '',
       });
     }
     while (cells.length % 7 !== 0) {

@@ -1,37 +1,92 @@
-/* 统一设计 Token：与 packages/design-tokens 保持一致（第九阶段：韩风可爱风） */
+/* ============================================================
+   统一设计 Token V2（docs/13-新UI设计规范.md）
+   轻奢高级简约 · 随时节动态换肤
+   动态层只替换：bg / surface / grad / text-soft / festival-accent / 背景纹理
+   固定层：主按钮色、正文色、分类语义色
+   ============================================================ */
 page {
-  --color-bg: #FFF7F0;
+  /* 固定品牌与文字 */
+  --color-primary: #F08A9B;
+  --color-primary-deep: #DD6F84;
+  --color-text: #3D3A3E;
+  --color-text-secondary: #A5A1A8;
+  --color-danger: #DE6B7C;
+
+  /* 动态层（白天默认） */
+  --color-bg: #FAF8F4;
   --color-surface: #FFFFFF;
-  --grad-a: #FFF7F0;
-  --grad-b: #F7F0E8;
-  --color-text: #4E4547;
-  --color-text-secondary: #B9A8A0;
-  --color-border: #F6E8DC;
-  --color-primary: #FF96A1;
-  --color-primary-deep: #F4778A;
-  --color-accent: #FFC28E;
-  --color-blue: #9BC7DE;
-  --color-red: #F56A6A;
+  --grad-a: #FAF8F4;
+  --grad-b: #F1EFEA;
+  --color-border: #EDE9E4;
+  --color-text-soft: #A5A1A8;
+  --festival-accent: #F08A9B;
+
+  /* 分类语义色（固定） */
+  --color-todo: #B8B4BC;
+  --color-meal: #E0A26B;
+  --color-restaurant: #E18FA0;
+  --color-anniversary: #D96E80;
+  --color-travel: #7FA8C9;
+  --color-period: #D96E80;
+  --color-rest: #7FA8C9;
+  --color-accent: #E0A26B;
+  --color-blue: #7FA8C9;
+  --color-red: #D96E80;
   --color-success: #A8D8B9;
-  --color-danger: #F2556D;
-  --color-purple: #C3A6E1;
-  --color-mint: #A8E0D0;
+  --color-purple: #B48AB5;
+  --color-mint: #7FB5AE;
+
+  /* 分类标签浅色底（同色系不同明度） */
+  --tag-todo: #EFEDF1;
+  --tag-meal: #F6E7D8;
+  --tag-restaurant: #F8E6EA;
+  --tag-anniversary: #F7E2E6;
+  --tag-travel: #E3ECF3;
+  --tag-period: #F7E2E6;
+  --tag-rest: #E3ECF3;
+
+  /* 圆角 */
+  --radius-xs: 8rpx;
   --radius-sm: 16rpx;
   --radius-md: 24rpx;
-  --radius-lg: 36rpx;
-  --shadow-card: 0 8rpx 24rpx rgba(244, 177, 177, 0.16);
-  --shadow-soft: 0 4rpx 16rpx rgba(244, 177, 177, 0.12);
+  --radius-lg: 32rpx;
+  --radius-pill: 999rpx;
+
+  /* 间距 */
+  --space-xs: 4rpx;
+  --space-sm: 8rpx;
+  --space-md: 16rpx;
+  --space-lg: 24rpx;
+  --space-xl: 32rpx;
+  --space-xxl: 48rpx;
+
+  /* 阴影（低透明大模糊） */
+  --shadow-card: 0 8rpx 32rpx rgba(80, 70, 90, 0.06);
+  --shadow-soft: 0 4rpx 16rpx rgba(80, 70, 90, 0.05);
+  --shadow-float: 0 12rpx 48rpx rgba(80, 70, 90, 0.12);
+
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", "Microsoft YaHei", sans-serif;
 }
 
-/* ===== 月度季节渐变换肤（1.0.16）：只影响背景/卡片微弱底色，主色与文字固定 ===== */
+/* ===== 兼容保留：月度季节渐变（1.0.16 旧类，新逻辑改用节气类） ===== */
 .theme-base {
-  --color-bg: #FFF7F0;
+  --color-bg: #FAF8F4;
   --color-surface: #FFFFFF;
-  --grad-a: #FFF7F0;
-  --grad-b: #F7F0E8;
+  --grad-a: #FAF8F4;
+  --grad-b: #F1EFEA;
 }
-
-/* 春季（3-5）嫩青奶油绿系 */
+.theme-m1 {
+  --color-bg: #F4F4F4;
+  --color-surface: #FBFBFB;
+  --grad-a: #F4F4F4;
+  --grad-b: #E8E8EC;
+}
+.theme-m2 {
+  --color-bg: #F3EFF8;
+  --color-surface: #FAF8FC;
+  --grad-a: #F3EFF8;
+  --grad-b: #E7E0F0;
+}
 .theme-m3 {
   --color-bg: #FDF2F3;
   --color-surface: #FEF9F8;
@@ -50,8 +105,6 @@ page {
   --grad-a: #F2F8EA;
   --grad-b: #E3EFD8;
 }
-
-/* 夏季（6-8）冰蓝浅青冷调 */
 .theme-m6 {
   --color-bg: #EDF4FB;
   --color-surface: #F8FBFD;
@@ -70,8 +123,6 @@ page {
   --grad-a: #EAF5F2;
   --grad-b: #D9EBE7;
 }
-
-/* 秋季（9-11）暖杏浅橘奶茶系 */
 .theme-m9 {
   --color-bg: #F9F4E9;
   --color-surface: #FDFBF5;
@@ -90,23 +141,144 @@ page {
   --grad-a: #F5F0EA;
   --grad-b: #E9DFD4;
 }
-
-/* 冬季（12-2）低饱和冷调淡紫灰 */
 .theme-m12 {
   --color-bg: #F4EFF3;
   --color-surface: #FBF8FA;
   --grad-a: #F4EFF3;
   --grad-b: #E6DEE8;
 }
-.theme-m1 {
-  --color-bg: #F4F4F4;
-  --color-surface: #FBFBFB;
-  --grad-a: #F4F4F4;
-  --grad-b: #E8E8EC;
+
+/* ===== 二十四节气专属配色（theme-jq-1..24：立春..大寒） ===== */
+.theme-jq-1 { /* 立春：嫩芽绿 */
+  --color-bg: #F7F3EC; --color-surface: #FFFCF8;
+  --grad-a: #F7F3EC; --grad-b: #E8F0E2;
 }
-.theme-m2 {
-  --color-bg: #F3EFF8;
-  --color-surface: #FAF8FC;
-  --grad-a: #F3EFF8;
-  --grad-b: #E7E0F0;
+.theme-jq-2 { /* 雨水：雨雾青 */
+  --color-bg: #F4F3F0; --color-surface: #FCFBFA;
+  --grad-a: #F4F3F0; --grad-b: #E4EBE9;
+}
+.theme-jq-3 { /* 惊蛰：浅草绿 */
+  --color-bg: #F5F5EE; --color-surface: #FDFCF7;
+  --grad-a: #F5F5EE; --grad-b: #E7EEDD;
+}
+.theme-jq-4 { /* 春分：春绿 */
+  --color-bg: #F3F7F0; --color-surface: #FCFEF9;
+  --grad-a: #F3F7F0; --grad-b: #E1EDDB;
+}
+.theme-jq-5 { /* 清明：青灰雨雾 */
+  --color-bg: #F2F6F2; --color-surface: #FAFCF9;
+  --grad-a: #F2F6F2; --grad-b: #DCEAE2;
+}
+.theme-jq-6 { /* 谷雨：翠绿 */
+  --color-bg: #EFF6F1; --color-surface: #F9FCFA;
+  --grad-a: #EFF6F1; --grad-b: #D8EADF;
+}
+.theme-jq-7 { /* 立夏：浅青 */
+  --color-bg: #F0F6F5; --color-surface: #F9FCFB;
+  --grad-a: #F0F6F5; --grad-b: #D9EBE8;
+}
+.theme-jq-8 { /* 小满：麦青 */
+  --color-bg: #F4F6EE; --color-surface: #FBFCF7;
+  --grad-a: #F4F6EE; --grad-b: #E4EDD8;
+}
+.theme-jq-9 { /* 芒种：麦黄 */
+  --color-bg: #F7F5EA; --color-surface: #FDFBF4;
+  --grad-a: #F7F5EA; --grad-b: #EFE8CD;
+}
+.theme-jq-10 { /* 夏至：晴空蓝 */
+  --color-bg: #EDF4FA; --color-surface: #F8FBFD;
+  --grad-a: #EDF4FA; --grad-b: #DCECF6;
+}
+.theme-jq-11 { /* 小暑：水青 */
+  --color-bg: #EDF6F6; --color-surface: #F8FCFB;
+  --grad-a: #EDF6F6; --grad-b: #DAEDEA;
+}
+.theme-jq-12 { /* 大暑：薄荷 */
+  --color-bg: #EBF5F2; --color-surface: #F7FCFA;
+  --grad-a: #EBF5F2; --grad-b: #D8EBE5;
+}
+.theme-jq-13 { /* 立秋：浅杏 */
+  --color-bg: #F8F4EC; --color-surface: #FDFAF4;
+  --grad-a: #F8F4EC; --grad-b: #F0E5D2;
+}
+.theme-jq-14 { /* 处暑：淡橘 */
+  --color-bg: #F9F3E8; --color-surface: #FEFAF3;
+  --grad-a: #F9F3E8; --grad-b: #F2E2CC;
+}
+.theme-jq-15 { /* 白露：米白 */
+  --color-bg: #F8F6F0; --color-surface: #FDFBF7;
+  --grad-a: #F8F6F0; --grad-b: #EFEAE0;
+}
+.theme-jq-16 { /* 秋分：麦金 */
+  --color-bg: #F7F3E9; --color-surface: #FCF9F2;
+  --grad-a: #F7F3E9; --grad-b: #EFE5CC;
+}
+.theme-jq-17 { /* 寒露：暖杏 */
+  --color-bg: #F9F2E8; --color-surface: #FEFAF3;
+  --grad-a: #F9F2E8; --grad-b: #F2E3CE;
+}
+.theme-jq-18 { /* 霜降：灰棕 */
+  --color-bg: #F6F0E9; --color-surface: #FCF9F4;
+  --grad-a: #F6F0E9; --grad-b: #EAE0D4;
+}
+.theme-jq-19 { /* 立冬：暖灰 */
+  --color-bg: #F5F2ED; --color-surface: #FBF9F6;
+  --grad-a: #F5F2ED; --grad-b: #E9E4DB;
+}
+.theme-jq-20 { /* 小雪：淡灰蓝 */
+  --color-bg: #F2F3F1; --color-surface: #FAFAF8;
+  --grad-a: #F2F3F1; --grad-b: #E2E7E9;
+}
+.theme-jq-21 { /* 大雪：雾紫灰 */
+  --color-bg: #F1F1F2; --color-surface: #FAFAFA;
+  --grad-a: #F1F1F2; --grad-b: #E3E1E8;
+}
+.theme-jq-22 { /* 冬至：冷瓷 */
+  --color-bg: #F2F2F4; --color-surface: #FAFAFB;
+  --grad-a: #F2F2F4; --grad-b: #E4E5EC;
+}
+.theme-jq-23 { /* 小寒：淡蓝灰 */
+  --color-bg: #F2F4F6; --color-surface: #FAFBFB;
+  --grad-a: #F2F4F6; --grad-b: #E2E8ED;
+}
+.theme-jq-24 { /* 大寒：淡紫灰 */
+  --color-bg: #F3F1F6; --color-surface: #FBFAFC;
+  --grad-a: #F3F1F6; --grad-b: #E6E1EE;
+}
+
+/* ===== 传统节日轻点缀（叠加在节气主题上，只改 --festival-accent） ===== */
+.theme-festival-spring { --festival-accent: #C96A5F; }
+.theme-festival-lantern { --festival-accent: #C98D6F; }
+.theme-festival-qingming { --festival-accent: #7FAE9A; }
+.theme-festival-dragon { --festival-accent: #8FAE7E; }
+.theme-festival-qixi { --festival-accent: #B48AB5; }
+.theme-festival-midautumn { --festival-accent: #C9A76B; }
+.theme-festival-chongyang { --festival-accent: #C29B6B; }
+.theme-festival-dongzhi { --festival-accent: #9AA0B8; }
+
+/* ===== 昼夜三档（夜间整组深色变量，保证可读） ===== */
+.theme-period-day {
+  /* 白天即基础变量，无需重复 */
+}
+.theme-period-dusk {
+  --color-bg: #F6EFE6;
+  --color-surface: #FFFBF6;
+  --grad-a: #F6EFE6;
+  --grad-b: #EFE2DE;
+  --color-text: #4A4038;
+  --color-text-soft: #A89C92;
+  --color-border: #EADFD3;
+}
+.theme-period-night {
+  --color-bg: #23272E;
+  --color-surface: #2E333B;
+  --grad-a: #23272E;
+  --grad-b: #1E2229;
+  --color-text: #E6E4EA;
+  --color-text-secondary: #9C9AA5;
+  --color-text-soft: #9C9AA5;
+  --color-border: #3A4049;
+  --shadow-card: 0 8rpx 32rpx rgba(0, 0, 0, 0.35);
+  --shadow-soft: 0 4rpx 16rpx rgba(0, 0, 0, 0.28);
+  --shadow-float: 0 12rpx 48rpx rgba(0, 0, 0, 0.45);
 }
