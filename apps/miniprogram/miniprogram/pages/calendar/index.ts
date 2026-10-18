@@ -10,7 +10,7 @@ import { CalendarService } from '../../services/calendar';
 import { PeriodService } from '../../services/period';
 import { SpaceService } from '../../services/space';
 import { TodoService } from '../../services/todo';
-import { moduleLabels } from '../../lib/shared/tokens';
+import { moduleLabels } from '../../lib/shared/tokens/index';
 import { startSilentRefresh } from '../../utils/realtime';
 import { lunarDayName, termNameOf, toLunar } from '../../utils/solar';
 import { formatDateTime } from '../../utils/time';

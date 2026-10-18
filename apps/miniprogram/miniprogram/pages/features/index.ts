@@ -1,6 +1,6 @@
 import { ApiError } from '../../api/cloud';
 import { ROLE_OWNER } from '../../lib/shared/types/index';
-import { moduleLabels } from '../../lib/shared/tokens';
+import { moduleLabels } from '../../lib/shared/tokens/index';
 import { SpaceService } from '../../services/space';
 import { currentThemeClass, setThemeAuto, themeAutoEnabled } from '../../utils/theme';
 
