@@ -1,8 +1,7 @@
 import { ApiError } from '../../api/cloud';
-import { ROLE_OWNER, type MealPlanView, type MealTemplateView, type TrashItemView } from '../../lib/shared/types/index';
+import { ROLE_OWNER, type MealPlanView, type MealTemplateView } from '../../lib/shared/types/index';
 import { MealService } from '../../services/meal';
 import { SpaceService } from '../../services/space';
-import { TrashService } from '../../services/trash';
 import { currentThemeClass } from '../../utils/theme';
 import { enableReminder } from '../../utils/reminder';
 
@@ -25,7 +24,6 @@ Page({
     todayPlans: [] as PlanRow[],
     templates: [] as MealTemplateView[],
     enabledTemplates: [] as MealTemplateView[],
-    trashItems: [] as TrashItemView[],
     isOwner: false,
     loading: false,
     error: '',
@@ -73,12 +71,10 @@ Page({
       ]);
       const isOwner = space.space.myRole === ROLE_OWNER;
       const enabledTemplates = templates.filter((t) => t.enabled);
-      const trashItems = isOwner ? await TrashService.list() : [];
       this.setData({
         todayPlans: plans.map((p) => ({ ...p, timeLabel: p.time || '全天' })),
         templates,
         enabledTemplates,
-        trashItems,
         isOwner,
         error: '',
       });
@@ -388,43 +384,6 @@ Page({
         if (!res.confirm) return;
         try {
           await MealService.deleteTemplate({ templateId: id });
-          this.refresh();
-        } catch (err) {
-          wx.showToast({ title: err instanceof ApiError ? err.message : '删除失败', icon: 'none' });
-        }
-      },
-    });
-  },
-
-  // ---- 回收站（仅主账号）----
-  onRestoreTrash(e: WechatMiniprogram.TouchEvent) {
-    const id = e.currentTarget.dataset.id as string;
-    if (!id) return;
-    wx.showModal({
-      title: '恢复数据',
-      content: '恢复后回到原状态，确定恢复吗？',
-      success: async (res) => {
-        if (!res.confirm) return;
-        try {
-          await TrashService.restore({ trashId: id });
-          this.refresh();
-        } catch (err) {
-          wx.showToast({ title: err instanceof ApiError ? err.message : '恢复失败', icon: 'none' });
-        }
-      },
-    });
-  },
-
-  onPurgeTrash(e: WechatMiniprogram.TouchEvent) {
-    const id = e.currentTarget.dataset.id as string;
-    if (!id) return;
-    wx.showModal({
-      title: '永久删除',
-      content: '永久删除后将无法恢复。确定删除吗？',
-      success: async (res) => {
-        if (!res.confirm) return;
-        try {
-          await TrashService.purge({ trashId: id });
           this.refresh();
         } catch (err) {
           wx.showToast({ title: err instanceof ApiError ? err.message : '删除失败', icon: 'none' });

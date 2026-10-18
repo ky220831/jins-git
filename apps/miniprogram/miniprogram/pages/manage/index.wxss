@@ -254,25 +254,43 @@
 /* ---- 操作记录 ---- */
 .audit-row {
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
+  align-items: center;
   gap: 20rpx;
-  padding: 16rpx 0;
-  border-bottom: 2rpx dashed var(--color-border);
+  padding: 20rpx 0;
+  border-bottom: 2rpx solid var(--color-border);
 }
 
 .audit-row:last-child {
   border-bottom: none;
 }
 
+.audit-avatar {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 50%;
+  background: rgba(240, 138, 155, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30rpx;
+  flex-shrink: 0;
+}
+
+.audit-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+}
+
 .audit-title {
-  font-size: 26rpx;
+  font-size: 28rpx;
   font-weight: 600;
   color: var(--color-text);
 }
 
 .audit-meta {
-  flex-shrink: 0;
-  font-size: 20rpx;
+  font-size: 22rpx;
   color: var(--color-text-secondary);
 }

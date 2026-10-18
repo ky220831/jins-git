@@ -27,36 +27,81 @@
   <view class="guest-error" wx:if="{{guestMode && guestError}}" bindtap="onRetry">⚠️ 网络异常，节假日可能未加载 · 点此重试</view>
 
   <view class="cal-header">
+    <view class="view-switch">
+      <view class="view-item {{viewMode === 'month' ? 'active' : ''}}" data-mode="month" bindtap="onSwitchView">月</view>
+      <view class="view-item {{viewMode === 'week' ? 'active' : ''}}" data-mode="week" bindtap="onSwitchView">周</view>
+      <view class="view-item {{viewMode === 'year' ? 'active' : ''}}" data-mode="year" bindtap="onSwitchView">年</view>
+    </view>
     <view class="cal-pill">
       <view class="cal-nav" bindtap="onPrev">‹</view>
-      <view class="cal-title">{{year}}年{{month}}月</view>
+      <picker wx:if="{{viewMode !== 'year'}}" class="cal-picker" mode="date" fields="month" value="{{pickerDate}}" bindchange="onMonthPick">
+        <view class="cal-title">{{year}}年{{month}}月</view>
+      </picker>
+      <picker wx:else class="cal-picker" mode="date" fields="year" value="{{yearPickerDate}}" bindchange="onYearPick">
+        <view class="cal-title">{{year}}年</view>
+      </picker>
       <view class="cal-nav" bindtap="onNext">›</view>
     </view>
     <view class="cal-today" bindtap="onToday">今天</view>
   </view>
 
-  <view class="week-row">
-    <view class="week-cell" wx:for="{{weekdays}}" wx:key="*this">{{item}}</view>
-  </view>
-
-  <view class="grid">
-    <view
-      class="day-cell {{item.inMonth ? '' : 'dim'}} {{item.isToday ? 'today' : ''}} {{item.key === selectedDate ? 'selected' : ''}} {{item.isWeekend ? 'weekend' : ''}} {{item.periodState === 'ongoing' ? 'period-ongoing' : ''}} {{item.periodState === 'past' ? 'period-past' : ''}} {{item.periodState === 'predicted' ? 'period-predicted' : ''}} {{item.periodState === 'rest' ? 'rest' : ''}}"
-      wx:for="{{days}}"
-      wx:key="uid"
-      data-key="{{item.key}}"
-      bindtap="onTapDay"
-    >
-      <view class="day-num">{{item.day ? item.day : ''}}</view>
-      <view class="cell-label label-{{item.cellKind}}" wx:if="{{item.cellLabel}}">{{item.cellLabel}}</view>
-      <view class="dots">
-        <view class="dot {{item.periodState === 'ongoing' ? 'dot-period-ongoing' : ''}} {{item.periodState === 'past' ? 'dot-period-past' : ''}} {{item.periodState === 'predicted' ? 'dot-period-predicted' : ''}} {{item.periodState === 'rest' ? 'dot-rest' : ''}}" wx:if="{{item.periodState}}"></view>
-        <view class="dot dot-todo" wx:if="{{item.hasTodo}}"></view>
-        <view class="dot {{d}}" wx:for="{{item.eventDotList}}" wx:for-item="d" wx:key="*this"></view>
-      </view>
-      <view class="event-count" wx:if="{{item.eventCount > 4}}">{{item.eventCount}}</view>
+  <block wx:if="{{viewMode === 'month'}}">
+    <view class="week-row">
+      <view class="week-cell" wx:for="{{weekdays}}" wx:key="*this">{{item}}</view>
     </view>
-  </view>
+    <view class="grid">
+      <view
+        class="day-cell {{item.inMonth ? '' : 'dim'}} {{item.isToday ? 'today' : ''}} {{item.key === selectedDate ? 'selected' : ''}} {{item.isWeekend ? 'weekend' : ''}} {{item.periodState === 'ongoing' ? 'period-ongoing' : ''}} {{item.periodState === 'past' ? 'period-past' : ''}} {{item.periodState === 'predicted' ? 'period-predicted' : ''}} {{item.periodState === 'rest' ? 'rest' : ''}}"
+        wx:for="{{days}}"
+        wx:key="uid"
+        data-key="{{item.key}}"
+        bindtap="onTapDay"
+      >
+        <view class="day-num">{{item.day ? item.day : ''}}</view>
+        <view class="cell-label label-{{item.cellKind}}" wx:if="{{item.cellLabel}}">{{item.cellLabel}}</view>
+        <view class="dots">
+          <view class="dot {{item.periodState === 'ongoing' ? 'dot-period-ongoing' : ''}} {{item.periodState === 'past' ? 'dot-period-past' : ''}} {{item.periodState === 'predicted' ? 'dot-period-predicted' : ''}} {{item.periodState === 'rest' ? 'dot-rest' : ''}}" wx:if="{{item.periodState}}"></view>
+          <view class="dot dot-todo" wx:if="{{item.hasTodo}}"></view>
+          <view class="dot {{d}}" wx:for="{{item.eventDotList}}" wx:for-item="d" wx:key="*this"></view>
+        </view>
+        <view class="event-count" wx:if="{{item.eventCount > 4}}">{{item.eventCount}}</view>
+      </view>
+    </view>
+  </block>
+
+  <block wx:elif="{{viewMode === 'week'}}">
+    <view class="week-row">
+      <view class="week-cell" wx:for="{{weekdays}}" wx:key="*this">{{item}}</view>
+    </view>
+    <view class="week-grid">
+      <view
+        class="day-cell {{item.isToday ? 'today' : ''}} {{item.key === selectedDate ? 'selected' : ''}} {{item.isWeekend ? 'weekend' : ''}} {{item.periodState === 'ongoing' ? 'period-ongoing' : ''}} {{item.periodState === 'past' ? 'period-past' : ''}} {{item.periodState === 'predicted' ? 'period-predicted' : ''}} {{item.periodState === 'rest' ? 'rest' : ''}}"
+        wx:for="{{weekDays}}"
+        wx:key="key"
+        data-key="{{item.key}}"
+        bindtap="onTapDay"
+      >
+        <view class="day-num">{{item.day}}</view>
+        <view class="cell-label label-{{item.cellKind}}" wx:if="{{item.cellLabel}}">{{item.cellLabel}}</view>
+        <view class="dots">
+          <view class="dot {{item.periodState === 'ongoing' ? 'dot-period-ongoing' : ''}} {{item.periodState === 'past' ? 'dot-period-past' : ''}} {{item.periodState === 'predicted' ? 'dot-period-predicted' : ''}} {{item.periodState === 'rest' ? 'dot-rest' : ''}}" wx:if="{{item.periodState}}"></view>
+          <view class="dot dot-todo" wx:if="{{item.hasTodo}}"></view>
+          <view class="dot {{d}}" wx:for="{{item.eventDotList}}" wx:for-item="d" wx:key="*this"></view>
+        </view>
+        <view class="event-count" wx:if="{{item.eventCount > 4}}">{{item.eventCount}}</view>
+      </view>
+    </view>
+  </block>
+
+  <block wx:elif="{{viewMode === 'year'}}">
+    <view class="year-grid">
+      <view class="month-card {{month === item.month ? 'active' : ''}}" wx:for="{{yearMonths}}" wx:key="month" data-month="{{item.month}}" bindtap="onTapMonth">
+        <view class="month-num">{{item.month}}月</view>
+        <view class="month-days">{{item.daysInMonth}} 天</view>
+      </view>
+    </view>
+    <view class="year-hint">点击月份进入月视图</view>
+  </block>
 
   <view class="legend-card guest-tip" wx:if="{{guestMode}}">
     <view class="legend-head">
@@ -86,7 +131,7 @@
 
   <view class="error-text" wx:if="{{error}}">{{error}}</view>
 
-  <view class="day-panel" wx:if="{{selectedDate}}">
+  <view class="day-panel" wx:if="{{selectedDate && viewMode !== 'year'}}">
     <view class="day-title">{{selectedDate}}</view>
     <view class="mark-chips">
       <view class="mark-chip {{item.kind === 'makeup_workday' ? 'makeup' : ''}} {{item.kind === 'weekend' ? 'weekend' : ''}}" wx:for="{{dayMarks}}" wx:key="label">{{item.label}}</view>

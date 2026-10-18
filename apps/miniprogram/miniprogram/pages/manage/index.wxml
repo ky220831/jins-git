@@ -39,8 +39,11 @@
       <view class="card-title">操作记录（最近 50 条）</view>
       <view class="empty" wx:if="{{!auditLogs.length}}">暂无操作记录</view>
       <view class="audit-row" wx:for="{{auditLogs}}" wx:key="id">
+        <view class="audit-avatar">{{item.icon}}</view>
+        <view class="audit-body">
         <view class="audit-title">{{item.actionLabel}}</view>
-        <view class="audit-meta">{{item.timeLabel}} · {{item.actorUserId}}</view>
+          <view class="audit-meta">{{item.timeLabel}}</view>
+        </view>
       </view>
     </view>
 

@@ -36,6 +36,11 @@ interface DayCell {
   periodState: '' | 'ongoing' | 'past' | 'predicted' | 'rest';
 }
 
+interface YearMonthCell {
+  month: number;
+  daysInMonth: number;
+}
+
 interface TodoRow extends TodoView {
   timeLabel: string;
   priorityLabel: string;
@@ -112,11 +117,42 @@ function periodStateOf(
   return key < todayKey ? 'past' : 'ongoing';
 }
 
+/** 本地公共日期格子（周视图跨月、游客占位用）：周末/节气/农历，无业务数据 */
+function publicDayCell(year: number, month: number, day: number, todayKey: string): DayCell {
+  const key = dateKey(year, month, day);
+  const weekend = isWeekendKey(key);
+  const termName = termNameOf(year, month, day);
+  const lunarLabel = lunarDayName(toLunar(year, month, day).day);
+  const cellLabel = weekend ? '周末' : termName || lunarLabel;
+  const cellKind: DayCell['cellKind'] = weekend ? 'weekend' : termName ? 'term' : 'lunar';
+  return {
+    uid: 0,
+    key,
+    day,
+    inMonth: true,
+    isToday: key === todayKey,
+    isWeekend: weekend,
+    hasTodo: false,
+    hasEvent: false,
+    eventCount: 0,
+    eventDotList: [],
+    cellLabel,
+    cellKind,
+    periodState: '',
+  };
+}
+
 Page({
   data: {
     themeClass: currentThemeClass(),
     year: 0,
     month: 0,
+    /** 视图模式：月 / 周 / 年 */
+    viewMode: 'month' as 'month' | 'week' | 'year',
+    pickerDate: '',
+    yearPickerDate: '',
+    weekDays: [] as DayCell[],
+    yearMonths: [] as YearMonthCell[],
     weekdays: ['一', '二', '三', '四', '五', '六', '日'],
     days: [] as DayCell[],
     myDisplayName: '',
@@ -159,7 +195,13 @@ Page({
 
   onLoad() {
     const now = new Date();
-    this.setData({ year: now.getFullYear(), month: now.getMonth() + 1, loading: true });
+    this.setData({
+      year: now.getFullYear(),
+      month: now.getMonth() + 1,
+      pickerDate: `${now.getFullYear()}-${pad(now.getMonth() + 1)}`,
+      yearPickerDate: String(now.getFullYear()),
+      loading: true,
+    });
     // 立即渲染本地公共日历（日期/周末/农历/节气），避免进入时空白闪现；
     // bootstrap 完成后再覆盖为完整业务数据或游客模式节假日版本。
     this.buildMonth([], [], [], [], false);
@@ -391,6 +433,9 @@ Page({
       periodDays,
       holidays,
     });
+    if (this.data.viewMode === 'week') {
+      this.buildWeek();
+    }
     this.updateDayDetail(selectedDate || todayKey, todos, events);
   },
 
@@ -445,28 +490,155 @@ Page({
     });
   },
 
+  // ---- 视图切换（月 / 周 / 年） ----
+  onSwitchView(e: WechatMiniprogram.TouchEvent) {
+    const mode = (e.currentTarget.dataset.mode || 'month') as 'month' | 'week' | 'year';
+    this.setData({ viewMode: mode });
+    if (mode === 'week') this.buildWeek();
+    if (mode === 'year') this.buildYear();
+  },
+
+  /** 年月滚轮：月/周视图点标题弹出选择年/月 */
+  onMonthPick(e: WechatMiniprogram.PickerChange) {
+    const v = String(e.detail.value || '');
+    const [y, m] = v.split('-').map(Number);
+    if (!y || !m) return;
+    this.setData({ year: y, month: m, pickerDate: v });
+    if (this.data.viewMode === 'year') {
+      this.buildYear();
+      return;
+    }
+    this.data.guestMode ? this.buildGuestMonth() : this.refresh();
+  },
+
+  /** 年份滚轮：年视图点标题弹出选择年份 */
+  onYearPick(e: WechatMiniprogram.PickerChange) {
+    const y = Number(e.detail.value || 0);
+    if (!y) return;
+    this.setData({ year: y, yearPickerDate: String(y) });
+    this.buildYear();
+  },
+
+  /** 周视图：以选中日为中心生成周一~周日 7 格（跨月用本地公共信息） */
+  buildWeek() {
+    const { selectedDate, year, month, days } = this.data;
+    const todayKey = dateKey(new Date().getFullYear(), new Date().getMonth() + 1, new Date().getDate());
+    const [y, m, d] = (selectedDate || dateKey(year, month, 1)).split('-').map(Number);
+    const base = new Date(y, m - 1, d);
+    const monday = new Date(y, m - 1, d - ((base.getDay() + 6) % 7));
+    const byKey = new Map<string, DayCell>();
+    for (const cell of days) {
+      if (cell.key) byKey.set(cell.key, cell);
+    }
+    const week: DayCell[] = [];
+    for (let i = 0; i < 7; i += 1) {
+      const date = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + i);
+      const key = dateKey(date.getFullYear(), date.getMonth() + 1, date.getDate());
+      week.push(
+        byKey.get(key) ||
+          publicDayCell(date.getFullYear(), date.getMonth() + 1, date.getDate(), todayKey),
+      );
+    }
+    this.setData({ weekDays: week });
+  },
+
+  /** 年视图：12 个月卡片（点击进入该月） */
+  buildYear() {
+    const { year } = this.data;
+    const months = Array.from({ length: 12 }, (_, i) => ({
+      month: i + 1,
+      daysInMonth: new Date(year, i + 1, 0).getDate(),
+    }));
+    this.setData({ yearMonths: months });
+  },
+
+  onTapMonth(e: WechatMiniprogram.TouchEvent) {
+    const m = Number(e.currentTarget.dataset.month);
+    if (!m) return;
+    this.setData({ viewMode: 'month', month: m });
+    this.data.guestMode ? this.buildGuestMonth() : this.refresh();
+  },
+
   onPrev() {
-    const { year, month } = this.data;
+    const { year, month, viewMode } = this.data;
+    if (viewMode === 'year') {
+      this.setData({ year: year - 1, yearPickerDate: String(year - 1) });
+      this.buildYear();
+      return;
+    }
+    if (viewMode === 'week') {
+      this.shiftWeek(-7);
+      return;
+    }
     const d = new Date(year, month - 2, 1);
-    this.setData({ year: d.getFullYear(), month: d.getMonth() + 1 });
+    this.setData({
+      year: d.getFullYear(),
+      month: d.getMonth() + 1,
+      pickerDate: `${d.getFullYear()}-${pad(d.getMonth() + 1)}`,
+    });
     this.data.guestMode ? this.buildGuestMonth() : this.refresh();
   },
 
   onNext() {
-    const { year, month } = this.data;
+    const { year, month, viewMode } = this.data;
+    if (viewMode === 'year') {
+      this.setData({ year: year + 1, yearPickerDate: String(year + 1) });
+      this.buildYear();
+      return;
+    }
+    if (viewMode === 'week') {
+      this.shiftWeek(7);
+      return;
+    }
     const d = new Date(year, month, 1);
-    this.setData({ year: d.getFullYear(), month: d.getMonth() + 1 });
+    this.setData({
+      year: d.getFullYear(),
+      month: d.getMonth() + 1,
+      pickerDate: `${d.getFullYear()}-${pad(d.getMonth() + 1)}`,
+    });
     this.data.guestMode ? this.buildGuestMonth() : this.refresh();
   },
 
   onToday() {
     const now = new Date();
+    const todayKey = dateKey(now.getFullYear(), now.getMonth() + 1, now.getDate());
+    const { viewMode } = this.data;
+    if (viewMode === 'year') {
+      this.setData({ year: now.getFullYear(), yearPickerDate: String(now.getFullYear()) });
+      this.buildYear();
+      return;
+    }
+    if (viewMode === 'week') {
+      this.setData({
+        year: now.getFullYear(),
+        month: now.getMonth() + 1,
+        selectedDate: todayKey,
+      });
+      this.buildWeek();
+      this.updateDayDetail(todayKey);
+      return;
+    }
     this.setData({
       year: now.getFullYear(),
       month: now.getMonth() + 1,
-      selectedDate: dateKey(now.getFullYear(), now.getMonth() + 1, now.getDate()),
+      selectedDate: todayKey,
+      pickerDate: `${now.getFullYear()}-${pad(now.getMonth() + 1)}`,
     });
     this.data.guestMode ? this.buildGuestMonth() : this.refresh();
+  },
+
+  shiftWeek(offset: number) {
+    const base = this.data.selectedDate || dateKey(this.data.year, this.data.month, 1);
+    const [y, m, d] = base.split('-').map(Number);
+    const nd = new Date(y, m - 1, d + offset);
+    const key = dateKey(nd.getFullYear(), nd.getMonth() + 1, nd.getDate());
+    this.setData({
+      selectedDate: key,
+      year: nd.getFullYear(),
+      month: nd.getMonth() + 1,
+    });
+    this.buildWeek();
+    this.updateDayDetail(key);
   },
 
   onTapDay(e: WechatMiniprogram.TouchEvent) {
@@ -474,6 +646,9 @@ Page({
     if (!key) return;
     this.setData({ selectedDate: key });
     this.updateDayDetail(key);
+    if (this.data.viewMode === 'week') {
+      this.buildWeek();
+    }
   },
 
   onToggleLegend() {

@@ -5,9 +5,30 @@
 .cal-header {
   display: flex;
   align-items: center;
-  justify-content: center;
   gap: 20rpx;
   margin-top: 8rpx;
+}
+
+.view-switch {
+  display: flex;
+  background: var(--color-surface);
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-soft);
+  padding: 4rpx;
+  flex-shrink: 0;
+}
+
+.view-item {
+  padding: 8rpx 20rpx;
+  font-size: 24rpx;
+  color: var(--color-text-secondary);
+  border-radius: 999rpx;
+}
+
+.view-item.active {
+  color: #ffffff;
+  background: var(--color-primary);
+  font-weight: 600;
 }
 
 .cal-pill {
@@ -48,6 +69,12 @@
   font-weight: 600;
 }
 
+.cal-picker {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
 .cal-options {
   display: flex;
   justify-content: flex-end;
@@ -82,6 +109,59 @@
   flex-wrap: wrap;
   gap: 12rpx;
   margin-top: 16rpx;
+}
+
+.week-grid {
+  display: flex;
+  gap: 12rpx;
+  margin-top: 16rpx;
+}
+
+.week-grid .day-cell {
+  flex: 1;
+  width: auto;
+}
+
+.year-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+  margin-top: 16rpx;
+}
+
+.month-card {
+  width: calc((100% - 32rpx) / 3);
+  height: 120rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-soft);
+}
+
+.month-card.active {
+  box-shadow: inset 0 0 0 2rpx rgba(240, 138, 155, 0.55), var(--shadow-soft);
+}
+
+.month-num {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.month-days {
+  font-size: 20rpx;
+  color: var(--color-text-secondary);
+}
+
+.year-hint {
+  margin-top: 20rpx;
+  text-align: center;
+  font-size: 22rpx;
+  color: var(--color-text-secondary);
 }
 
 .day-cell {

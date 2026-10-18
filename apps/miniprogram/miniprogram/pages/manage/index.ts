@@ -83,6 +83,18 @@ const COLLECTION_LABELS: Record<string, string> = {
   trip_plans: '旅行行程',
 };
 
+/** 审计动作 → 图标（操作记录美化） */
+function actionIcon(action: string): string {
+  if (action.startsWith('meal')) return '🍚';
+  if (action.startsWith('restaurant')) return '🍴';
+  if (action.startsWith('anniversary')) return '❤️';
+  if (action.startsWith('trip')) return '✈️';
+  if (action.startsWith('period')) return '🌸';
+  if (action.startsWith('trash')) return '🗑️';
+  if (action.startsWith('space') || action.startsWith('member')) return '🏠';
+  return '📋';
+}
+
 const COLLECTION_OPTIONS = [
   { label: '全部类型', value: '' },
   ...Object.entries(COLLECTION_LABELS).map(([value, label]) => ({ label, value })),
@@ -160,6 +172,7 @@ Page({
             ...log,
             timeLabel: formatDateTime(log.createdAt),
             actionLabel: ACTION_LABELS[log.action] || log.action,
+            icon: actionIcon(log.action),
           })),
           error: '',
         });
