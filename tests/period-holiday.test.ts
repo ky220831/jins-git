@@ -52,7 +52,7 @@ function seedHoliday(
   });
 }
 
-test('记录第一次实际生理期：预计开始 = 结束日 + 22 天，预计持续 7 天', async () => {
+test('记录第一次实际生理期：预计开始 = 开始日 + 28 天（单日标记，不再用时间段）', async () => {
   const { periodService } = await fresh();
   const views = await periodService.recordActual('openid-A', {
     startDate: '2026-07-23',
@@ -65,10 +65,10 @@ test('记录第一次实际生理期：预计开始 = 结束日 + 22 天，预�
   assert.ok(actual && predicted);
   assert.equal(actual.startDate, '2026-07-23');
   assert.equal(actual.isEstimated, false);
-  assert.equal(predicted.startDate, '2026-08-18');
-  assert.equal(predicted.endDate, '2026-08-24');
+  assert.equal(predicted.startDate, '2026-08-20');
+  assert.equal(predicted.endDate, '2026-08-20');
   assert.equal(predicted.isEstimated, true);
-  assert.equal(predicted.cycleLength, 22);
+  assert.equal(predicted.cycleLength, 28);
 });
 
 test('第二次实际生理期：只保留最近 2 条 actual + 1 条 predicted，旧数据滚动', async () => {
@@ -95,8 +95,8 @@ test('第二次实际生理期：只保留最近 2 条 actual + 1 条 predicted�
     ['2026-07-23', '2026-08-14'],
   );
   // 预测 = 最近实际结束 08-18 + 22 天 = 09-09，持续 7 天
-  assert.equal(predicted[0].startDate, '2026-09-09');
-  assert.equal(predicted[0].endDate, '2026-09-15');
+  assert.equal(predicted[0].startDate, '2026-09-11');
+  assert.equal(predicted[0].endDate, '2026-09-11');
 });
 
 test('月视图：生理期红色 + 结束后 1 天蓝色休息；预测（08-27 起）不产生休息标记', async () => {
@@ -113,8 +113,8 @@ test('月视图：生理期红色 + 结束后 1 天蓝色休息；预测（08-27
   assert.equal(byDate.get('2026-08-07'), undefined);
   // 预测 = 08-05 + 22 天 = 08-27 ~ 09-02；8 月内为 08-27~08-31
   assert.equal(byDate.get('2026-08-23'), undefined);
-  assert.equal(byDate.get('2026-08-27')?.kind, 'period');
-  assert.equal(byDate.get('2026-08-31')?.kind, 'period');
+  assert.equal(byDate.get('2026-08-29')?.kind, 'period');
+  assert.equal(byDate.get('2026-08-30'), undefined);
   // 预测结束后一天 09-03 不应标记休息
   assert.equal(byDate.get('2026-09-03'), undefined);
 });
@@ -128,7 +128,7 @@ test('今日状态：今日处于预测生理期，返回 today=period 与下次
   });
   const info = await periodService.info('openid-A');
   assert.deepEqual(info.today, { date: '2026-08-20', kind: 'period' });
-  assert.deepEqual(info.nextPredicted, { startDate: '2026-08-18', endDate: '2026-08-24' });
+  assert.deepEqual(info.nextPredicted, { startDate: '2026-08-20', endDate: '2026-08-20' });
   assert.equal(info.calendarVisible, true);
 });
 
@@ -218,9 +218,10 @@ test('两步记录：先记开始日期，期间内补录结束日期（双人�
   });
   const updatedActual = updated.find((v) => v.id === actual.id);
   assert.equal(updatedActual?.endDate, '2026-08-21');
-  // 预测改为基于新的结束日 +22 天
+  // 预测 = 最近实际开始日（08-14）+ 28 天 = 09-11（单日）
   const predicted = updated.find((v) => v.type === 'predicted');
-  assert.equal(predicted?.startDate, '2026-09-12');
+  assert.equal(predicted?.startDate, '2026-09-11');
+  assert.equal(predicted?.endDate, '2026-09-11');
 });
 
 test('补录结束日期：非法输入 / 预测记录 / 跨空间被拒绝', async () => {

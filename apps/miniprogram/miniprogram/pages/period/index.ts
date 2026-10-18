@@ -70,13 +70,17 @@ Page({
           .map((r) => ({
             ...r,
             rangeLabel:
-              r.endDate === r.startDate
-                ? `${r.startDate} 起`
-                : `${r.startDate} ~ ${r.endDate}`,
+              r.type === 'predicted'
+                ? `${r.startDate}（预计开始）`
+                : r.endDate === r.startDate
+                  ? `${r.startDate} 起`
+                  : `${r.startDate} ~ ${r.endDate}`,
             metaLabel:
-              r.endDate === r.startDate
-                ? '实际 · 进行中，待补结束日期'
-                : `${r.type === 'actual' ? '实际' : '预测'} · 周期 ${r.cycleLength} 天`,
+              r.type === 'predicted'
+                ? '预测 · 预计开始日'
+                : r.endDate === r.startDate
+                  ? '实际 · 进行中，待补结束日期'
+                  : `实际 · 周期 ${r.cycleLength} 天`,
           }))
           .sort((a, b) => (a.startDate < b.startDate ? -1 : 1)),
         isOwner: space.space.myRole === ROLE_OWNER,

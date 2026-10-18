@@ -1,7 +1,7 @@
 <view class="container period-page">
   <view class="page-head">
     <view class="page-title">🌸 生理期</view>
-    <view class="page-sub">只保留最近 2 次实际记录 + 1 次预测（+22 天）</view>
+    <view class="page-sub">只保留最近 2 次实际记录 + 1 次预测（开始日 + 28 天）</view>
   </view>
 
   <view class="error-text" wx:if="{{error}}">{{error}}</view>
@@ -22,7 +22,7 @@
       <picker mode="date" value="{{startDate}}" bindchange="onStartChange">
         <view class="picker-value">{{startDate}}</view>
       </picker>
-      <view class="form-tip">记录后，可在生理期期间再补录结束日期；系统按“结束日 + 22 天”预测下次（持续 7 天）</view>
+      <view class="form-tip">记录后，可在生理期期间再补录结束日期；系统按“开始日 + 28 天”预测下一次开始日</view>
       <button class="btn-primary save-btn" bindtap="onSave" loading="{{saving}}" disabled="{{saving}}">记录开始日期</button>
     </block>
   </view>

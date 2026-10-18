@@ -204,7 +204,7 @@ button::after {
 /* ---- 表单布局（1.0.5 优化：日期时间并排 + 字段标签） ---- */
 .form-row {
   display: flex;
-  gap: 16rpx;
+  gap: 20rpx;
 }
 
 .form-col {
@@ -215,5 +215,5 @@ button::after {
 .field-label {
   font-size: 24rpx;
   color: var(--color-text-secondary);
-  margin: 16rpx 0 8rpx;
+  margin: 20rpx 0 10rpx;
 }

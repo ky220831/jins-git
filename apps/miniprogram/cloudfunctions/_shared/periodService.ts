@@ -302,13 +302,13 @@ export class PeriodService {
 
     const latest = actuals[actuals.length - 1];
     const cycleLength = latest.cycleLength || DEFAULT_CYCLE_LENGTH;
-    // 用户口径：预计开始日 = 最近一次实际“结束节点”+ 22 天；预计持续 7 天
-    const predictedStart = addDays(latest.endDate, cycleLength);
+    // 用户口径（2026-08-14）：下一个预计开始日 = 最近一次实际开始日 + 28 天；仅单日标记，不再用时间段
+    const predictedStart = addDays(latest.startDate, cycleLength);
     const predicted: PeriodRecordRecord = {
       id: newId('pr'),
       spaceId,
       startDate: predictedStart,
-      endDate: addDays(predictedStart, DEFAULT_PREDICTED_DURATION - 1),
+      endDate: predictedStart,
       type: PERIOD_TYPE_PREDICTED,
       isEstimated: true,
       cycleLength,

@@ -55,11 +55,11 @@ export const TRIP_IMAGES_MAX = 20;
 export const TRASH_RETENTION_HOURS = 72;
 /** 定时任务等系统操作使用的虚拟身份 */
 export const SYSTEM_ACTOR = 'system';
-/** 生理期默认周期（天），可调整（PRD §27） */
-export const DEFAULT_CYCLE_LENGTH = 22;
+/** 生理期默认周期（天）：下一次预计开始日 = 最近一次实际开始日 + 28 天（2026-08-14 用户口径） */
+export const DEFAULT_CYCLE_LENGTH = 28;
 export const PERIOD_ACTUAL_MAX = 2;
 export const PERIOD_PREDICTED_MAX = 1;
 /** 生理期结束后标记为“休息”的天数（蓝色） */
 export const PERIOD_REST_DAYS = 1;
-/** 预计生理期持续天数（PRD 预留可调；用户要求：按结束节点 +22 天为预计开始，再算 7 天） */
+/** 预留：预测不再用时间段表示，仅标记预计开始日单日 */
 export const DEFAULT_PREDICTED_DURATION = 7;
