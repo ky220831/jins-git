@@ -8,11 +8,11 @@
 | --- | --- | --- |
 | 官方显示名 | 中文名，简洁有识别度 | 我们的生活 |
 | 代码标识 | 小写英文连字符（slug） | our-life |
-| 版本号 | 语义化版本 v主.次.修订 | v1.0.0 |
-| 产物/备份文件 | 中文名-代码名-版本-日期.zip | 我们的生活-our-life-v1.0.0-2026-08-14.zip |
+| 版本号 | 语义化版本 v主.次.修订 | v1.2.0 |
+| 产物/备份文件 | 中文名-代码名-版本-日期.zip | 我们的生活-our-life-v1.2.0-2026-08-16.zip |
 | 云函数 | 小写英文连字符 | auth-login / restaurant-search / … |
 | Git 提交 | conventional commits | feat: / fix: / style: / chore: … |
-| 文档 | 两位数字编号 + 中文标题 | docs/00-… ~ docs/11-… |
+| 文档 | 两位数字编号 + 中文标题 | docs/00-… ~ docs/16-… |
 
 ## 技术栈
 
@@ -26,12 +26,15 @@
 apps/miniprogram/          微信开发者工具打开的项目根
   miniprogram/             小程序前端（TS）
   cloudfunctions/          云函数（esbuild 打包为 dist/index.js 后上传）
+    _shared/               共享业务逻辑（Service 层 + Repo 数据访问层，未来 APP 复用）
 packages/                  跨端共享代码
   types/                   类型与常量（同步到小程序 lib/shared）
   design-tokens/           设计 Token
-scripts/                   环境检查 / 共享代码同步 / 云函数构建
+scripts/                   环境检查 / 共享代码同步 / 云函数构建 / 节假日导入 / 备份
 docs/                      环境、架构、数据模型、操作手册
 tests/                     跨 Space 安全测试
+tsconfig.json              小程序无关代码（packages / tests）类型检查
+tsconfig.cloud.json        云函数 + _shared + 云端 E2E 类型检查
 ```
 
 ## 快速开始（开发机已具备 Node 24 / npm / Git / CloudBase CLI）
@@ -42,12 +45,28 @@ cd apps/miniprogram
 npm install            # 安装小程序 API 类型（编辑器智能提示用）
 cd ../..
 npm run sync           # 同步共享包到小程序 lib/shared
-npm run typecheck      # 类型检查
+npm run typecheck      # 类型检查（前端无关代码 + 云函数）
 npm test               # 跨 Space 安全测试
 npm run build          # 打包云函数（cloudfunctions/*/dist/index.js）
 ```
 
 之后用微信开发者工具导入 `apps/miniprogram`，开通云开发，创建集合、设置安全规则、部署云函数。详细步骤见 [docs/04-开发者操作手册.md](docs/04-开发者操作手册.md)。
+
+## 架构分层与未来 APP 扩展
+
+调用链自上而下：页面 → 小程序 Service 层 → API 封装（wx.cloud）→ 云函数薄入口 →
+`cloudfunctions/_shared` 共享业务逻辑（SpaceService 等）→ Repo 数据访问层
+（CloudRepo 生产 / MemoryRepo 测试）→ 云数据库（客户端不可直连）。
+
+未来开发 iOS / Android APP 时**不需要重写后端**：
+
+1. `packages/types` 与 `packages/design-tokens` 是纯 TS 共享包，APP 可直接以 npm 依赖复用；
+2. 业务规则全部在 `cloudfunctions/_shared`，APP 端通过云函数（或 CloudBase HTTP 访问）
+   走同一套身份→空间→权限链路，数据库安全规则不变；
+3. APP 端只需新写“页面 + Service + API 适配层”三部分，替换 `api/cloud.ts` 的
+   wx.cloud 实现即可，业务类型与数据模型零改动。
+
+云端回归可用 `npm run test:e2e`（连接真实云环境，建临时空间并自动清理）。
 
 ## 当前状态
 

@@ -1,4 +1,5 @@
-<view class="container {{themeClass}} calendar-page">
+<view class="container {{themeClass}} calendar-page {{viewMode === 'week' ? 'cal-view-week' : ''}}">
+  <image class="page-bg" src="{{themeBg}}" mode="aspectFill"></image>
   <custom-nav title="日历" />
   <!-- 顶部：双人爱心连接 + 右上角小邀请码 -->
   <view class="top-bar" wx:if="{{guestMode}}">
@@ -50,7 +51,7 @@
     <view class="week-row">
       <view class="week-cell" wx:for="{{weekdays}}" wx:key="*this">{{item}}</view>
     </view>
-    <view class="grid">
+    <view class="grid" bindtouchstart="onSwipeStart" bindtouchend="onSwipeEnd">
       <view
         class="day-cell {{item.inMonth ? '' : 'dim'}} {{item.isToday ? 'today' : ''}} {{item.key === selectedDate ? 'selected' : ''}} {{item.isWeekend ? 'weekend' : ''}} {{item.periodState === 'ongoing' ? 'period-ongoing' : ''}} {{item.periodState === 'past' ? 'period-past' : ''}} {{item.periodState === 'predicted' ? 'period-predicted' : ''}} {{item.periodState === 'rest' ? 'rest' : ''}}"
         wx:for="{{days}}"
@@ -74,7 +75,7 @@
     <view class="week-row">
       <view class="week-cell" wx:for="{{weekdays}}" wx:key="*this">{{item}}</view>
     </view>
-    <view class="week-grid">
+    <view class="week-grid" bindtouchstart="onSwipeStart" bindtouchend="onSwipeEnd">
       <view
         class="day-cell {{item.inMonth ? '' : 'dim'}} {{item.isToday ? 'today' : ''}} {{item.key === selectedDate ? 'selected' : ''}} {{item.isWeekend ? 'weekend' : ''}} {{item.periodState === 'ongoing' ? 'period-ongoing' : ''}} {{item.periodState === 'past' ? 'period-past' : ''}} {{item.periodState === 'predicted' ? 'period-predicted' : ''}} {{item.periodState === 'rest' ? 'rest' : ''}}"
         wx:for="{{weekDays}}"
@@ -95,7 +96,7 @@
   </block>
 
   <block wx:elif="{{viewMode === 'year'}}">
-    <view class="year-grid">
+    <view class="year-grid" bindtouchstart="onSwipeStart" bindtouchend="onSwipeEnd">
       <view class="month-card {{month === item.month ? 'active' : ''}}" wx:for="{{yearMonths}}" wx:key="month" data-month="{{item.month}}" bindtap="onTapMonth">
         <view class="month-num">{{item.month}}月</view>
         <view class="month-days">{{item.daysInMonth}} 天</view>
@@ -112,8 +113,16 @@
   </view>
   <view class="legend-card" wx:else>
     <view class="legend-head" bindtap="onToggleLegend">
-      <text class="legend-title">图例</text>
-      <text class="legend-arrow">{{legendOpen ? '收起 ▴' : '展开 ▾'}}</text>
+      <view class="legend-head-left">
+        <view class="legend-dots-preview">
+          <view class="ldot period"></view>
+          <view class="ldot todo"></view>
+          <view class="ldot meal"></view>
+          <view class="ldot trip"></view>
+        </view>
+        <text class="legend-title">图例</text>
+      </view>
+      <view class="legend-btn {{legendOpen ? 'on' : ''}}">{{legendOpen ? '收起' : '展开'}}</view>
     </view>
     <view class="legend-grid" wx:if="{{legendOpen}}">
       <view class="legend-chip"><view class="legend-dot period-ongoing"></view><text>生理期进行中</text></view>
@@ -130,55 +139,63 @@
   <view class="error-text" wx:if="{{error}}">{{error}}</view>
 
   <view class="day-panel" wx:if="{{selectedDate && viewMode !== 'year'}}">
-    <view class="day-title">{{selectedDate}}</view>
-    <view class="mark-chips">
-      <view class="mark-chip {{item.kind === 'makeup_workday' ? 'makeup' : ''}} {{item.kind === 'weekend' ? 'weekend' : ''}}" wx:for="{{dayMarks}}" wx:key="label">{{item.label}}</view>
-    </view>
-    <view class="status-line period-ongoing" wx:if="{{dayPeriodState === 'ongoing'}}">🔴 生理期（进行中）</view>
-    <view class="status-line period-predicted" wx:if="{{dayPeriodState === 'predicted'}}">🌸 生理期（预计）</view>
-    <view class="status-line period-past" wx:if="{{dayPeriodState === 'past'}}">🩷 生理期（已过去）</view>
-    <view class="status-line rest" wx:if="{{dayPeriodState === 'rest'}}">🔵 休息日</view>
-    <view class="day-empty" wx:if="{{guestMode}}">创建空间后，这里会记录你们的一天</view>
-    <view class="day-empty" wx:elif="{{loading}}">正在加载这一天…</view>
-    <view class="day-empty" wx:elif="{{!dayTodos.length && !dayEvents.length && !dayPeriodState && !dayMarks.length}}">
-      <view class="empty-icon">🌷</view>
-      <view>这一天还没有安排，点下方按钮快速添加</view>
-    </view>
-
-    <!-- 快速入口：日历 → 核心功能新增/编辑（自动带入当天日期） -->
-    <view class="quick-row">
-      <view class="quick-btn" bindtap="onShowForm">＋ 事项</view>
-      <view class="quick-btn" bindtap="onQuickPeriod">🌸 生理期</view>
-      <view class="quick-btn" bindtap="onQuickMeal">🍚 吃什么</view>
-      <view class="quick-btn" bindtap="onQuickRestaurant">🍴 下馆子</view>
-      <view class="quick-btn" bindtap="onQuickTravel">✈️ 旅行</view>
-      <view class="quick-btn" bindtap="onQuickAnniversary">❤️ 纪念日</view>
-    </view>
-
-    <view
-      class="todo-item cat-{{item.businessType || 'todo'}} {{item.status === 'completed' ? 'done' : ''}}"
-      wx:for="{{dayTodos}}"
-      wx:key="id"
-      data-id="{{item.id}}"
-      data-status="{{item.status}}"
-      bindtap="onToggleTodo"
-    >
-      <view class="cat-bar"></view>
-      <view class="item-icon">{{item.icon}}</view>
-      <view class="item-body">
-        <view class="todo-title">{{item.title}}</view>
-        <view class="todo-meta">{{item.moduleLabel}} · {{item.timeLabel}} · {{item.priorityLabel}}</view>
+    <view class="day-head" bindtap="onToggleDay">
+      <view class="day-title">{{selectedDate}}<text class="day-weekday"> 周{{dayWeekday}}</text></view>
+      <view class="day-head-right">
+        <text class="day-count" wx:if="{{!dayOpen}}">{{dayCountLabel}}</text>
+        <view class="day-toggle">{{dayOpen ? '收起 ▾' : '展开 ▸'}}</view>
       </view>
     </view>
-
-    <view class="event-item cat-{{item.sourceType || 'custom'}}" wx:for="{{dayEvents}}" wx:key="id" data-type="{{item.sourceType}}" data-id="{{item.sourceId}}" bindtap="onTapEvent">
-      <view class="cat-bar"></view>
-      <view class="item-icon">{{item.icon}}</view>
-      <view class="item-body">
-        <view class="event-title">{{item.title}}</view>
-        <view class="event-meta">{{item.moduleLabel}} · {{item.timeLabel}}</view>
+    <block wx:if="{{dayOpen}}">
+      <view class="mark-chips">
+        <view class="mark-chip {{item.kind === 'makeup_workday' ? 'makeup' : ''}} {{item.kind === 'weekend' ? 'weekend' : ''}} {{item.kind === 'festival' ? 'festival' : ''}}" wx:for="{{dayMarks}}" wx:key="label">{{item.label}}</view>
       </view>
-    </view>
+      <view class="status-line period-ongoing" wx:if="{{dayPeriodState === 'ongoing'}}">🔴 生理期（进行中）</view>
+      <view class="status-line period-predicted" wx:if="{{dayPeriodState === 'predicted'}}">🌸 生理期（预计）</view>
+      <view class="status-line period-past" wx:if="{{dayPeriodState === 'past'}}">🩷 生理期（已过去）</view>
+      <view class="status-line rest" wx:if="{{dayPeriodState === 'rest'}}">🔵 休息日</view>
+      <view class="day-empty" wx:if="{{guestMode}}">创建空间后，这里会记录你们的一天</view>
+      <view class="day-empty" wx:elif="{{loading}}">正在加载这一天…</view>
+      <view class="day-empty" wx:elif="{{!dayTodos.length && !dayEvents.length && !dayPeriodState && !dayMarks.length}}">
+        <view class="empty-icon">🌷</view>
+        <view>这一天还没有安排，点下方按钮快速添加</view>
+      </view>
+
+      <!-- 快速入口：日历 → 核心功能新增/编辑（自动带入当天日期） -->
+      <view class="quick-row">
+        <view class="quick-btn" bindtap="onShowForm"><text class="quick-ico">📌</text><text>事项</text></view>
+        <view class="quick-btn" bindtap="onQuickPeriod"><text class="quick-ico">🌸</text><text>生理期</text></view>
+        <view class="quick-btn" bindtap="onQuickMeal"><text class="quick-ico">🍚</text><text>吃什么</text></view>
+        <view class="quick-btn" bindtap="onQuickRestaurant"><text class="quick-ico">🍴</text><text>下馆子</text></view>
+        <view class="quick-btn" bindtap="onQuickTravel"><text class="quick-ico">✈️</text><text>旅行</text></view>
+        <view class="quick-btn" bindtap="onQuickAnniversary"><text class="quick-ico">❤️</text><text>纪念日</text></view>
+      </view>
+
+      <view
+        class="todo-item cat-{{item.businessType || 'todo'}} {{item.status === 'completed' ? 'done' : ''}}"
+        wx:for="{{dayTodos}}"
+        wx:key="id"
+        data-id="{{item.id}}"
+        data-status="{{item.status}}"
+        bindtap="onToggleTodo"
+      >
+        <view class="cat-bar"></view>
+        <view class="item-icon">{{item.icon}}</view>
+        <view class="item-body">
+          <view class="todo-title">{{item.title}}</view>
+          <view class="todo-meta">{{item.moduleLabel}} · {{item.timeLabel}} · {{item.priorityLabel}}</view>
+        </view>
+      </view>
+
+      <view class="event-item cat-{{item.sourceType || 'custom'}}" wx:for="{{dayEvents}}" wx:key="id" data-type="{{item.sourceType}}" data-id="{{item.sourceId}}" bindtap="onTapEvent">
+        <view class="cat-bar"></view>
+        <view class="item-icon">{{item.icon}}</view>
+        <view class="item-body">
+          <view class="event-title">{{item.title}}</view>
+          <view class="event-meta">{{item.moduleLabel}} · {{item.timeLabel}}</view>
+        </view>
+      </view>
+    </block>
 
   </view>
 

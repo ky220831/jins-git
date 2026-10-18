@@ -1,13 +1,14 @@
 {
   "name": "our-life",
-  "version": "1.1.16",
+  "version": "1.2.0",
   "private": true,
   "description": "“我们的生活”——双人私密生活系统 V1.0（微信小程序 + CloudBase）",
   "scripts": {
     "sync": "node scripts/sync-shared.mjs",
-    "typecheck": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.cloud.json",
     "build": "node scripts/build-functions.mjs",
     "test": "tsx --test tests/**/*.test.ts",
+    "test:e2e": "tsx scripts/cloud-e2e-manage.ts",
     "holidays:import": "node scripts/import-holidays.cjs",
     "backup": "node scripts/backup-cloud.cjs"
   },

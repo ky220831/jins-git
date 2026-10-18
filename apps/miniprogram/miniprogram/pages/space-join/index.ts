@@ -1,16 +1,17 @@
 import { ApiError } from '../../api/cloud';
 import { SpaceService } from '../../services/space';
-import { currentThemeClass } from '../../utils/theme';
+import { currentThemeClass, themeBgPath } from '../../utils/theme';
 
 Page({
   data: {
     themeClass: currentThemeClass(),
+    themeBg: themeBgPath(),
     inviteCode: '',
     submitting: false,
   },
 
   onShow() {
-    this.setData({ themeClass: currentThemeClass() });
+    this.setData({ themeClass: currentThemeClass(), themeBg: themeBgPath() });
   },
 
   onCodeInput(e: WechatMiniprogram.Input) {

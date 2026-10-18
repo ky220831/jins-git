@@ -15,7 +15,8 @@
   "window": {
     "navigationStyle": "custom",
     "backgroundColor": "#FAF8F4",
-    "backgroundTextStyle": "light"
+    "backgroundTextStyle": "dark",
+    "darkmode": true
   },
   "usingComponents": {
     "custom-nav": "/components/custom-nav/index"

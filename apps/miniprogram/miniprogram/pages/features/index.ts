@@ -2,7 +2,14 @@ import { ApiError } from '../../api/cloud';
 import { ROLE_OWNER } from '../../lib/shared/types/index';
 import { moduleLabels } from '../../lib/shared/tokens/index';
 import { SpaceService } from '../../services/space';
-import { currentThemeClass, setThemeAuto, themeAutoEnabled } from '../../utils/theme';
+import {
+  currentThemeClass,
+  nightModeEnabled,
+  setNightMode,
+  setThemeAuto,
+  themeAutoEnabled,
+  themeBgPath,
+} from '../../utils/theme';
 
 interface FeatureItem {
   key: string;
@@ -24,7 +31,9 @@ const DEFAULT_FEATURE_LIST: FeatureItem[] = [
 Page({
   data: {
     themeClass: currentThemeClass(),
+    themeBg: themeBgPath(),
     themeAuto: themeAutoEnabled(),
+    nightMode: nightModeEnabled(),
     isOwner: false,
     featureList: DEFAULT_FEATURE_LIST,
     loading: true,
@@ -41,7 +50,11 @@ Page({
   },
 
   onShow() {
-    this.setData({ themeClass: currentThemeClass() });
+    this.setData({
+      themeClass: currentThemeClass(),
+      themeBg: themeBgPath(),
+      nightMode: nightModeEnabled(),
+    });
     const tabBar = (this as unknown as { getTabBar?: () => { setData(d: Record<string, unknown>): void } }).getTabBar?.();
     if (tabBar) {
       tabBar.setData({ selected: 1, themeClass: currentThemeClass() });
@@ -108,5 +121,11 @@ Page({
     const enabled = !!e.detail.value;
     setThemeAuto(enabled);
     this.setData({ themeAuto: enabled, themeClass: currentThemeClass() });
+  },
+
+  onToggleNight(e: WechatMiniprogram.SwitchChange) {
+    const enabled = !!e.detail.value;
+    setNightMode(enabled);
+    this.setData({ nightMode: enabled, themeClass: currentThemeClass() });
   },
 });

@@ -1,5 +1,6 @@
 .nav-holder {
   background: linear-gradient(165deg, var(--grad-a), var(--grad-b));
+  background-color: var(--color-bg);
 }
 
 .custom-nav {
@@ -9,6 +10,7 @@
   right: 0;
   z-index: 1000;
   background: linear-gradient(165deg, var(--grad-a), var(--grad-b));
+  background-color: var(--color-bg);
   /* 防止机型渲染接缝白线 */
   box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.03);
 }
@@ -20,17 +22,25 @@
 }
 
 .nav-back {
-  width: 64rpx;
-  height: 64rpx;
-  margin-left: 24rpx;
+  width: 72rpx;
+  height: 72rpx;
+  margin-left: 16rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 44rpx;
-  color: var(--color-text);
-  background: var(--color-surface);
-  border-radius: 50%;
-  box-shadow: var(--shadow-soft);
+  border-radius: 20rpx;
+  background: rgba(255, 255, 255, 0.55);
+  border: 2rpx solid rgba(0, 0, 0, 0.04);
+  box-shadow: none;
+}
+
+.nav-chevron {
+  width: 20rpx;
+  height: 20rpx;
+  border-left: 4rpx solid var(--color-text);
+  border-bottom: 4rpx solid var(--color-text);
+  transform: rotate(45deg);
+  box-sizing: border-box;
 }
 
 .nav-title {

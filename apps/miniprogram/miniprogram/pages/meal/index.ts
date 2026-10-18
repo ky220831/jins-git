@@ -2,7 +2,7 @@ import { ApiError } from '../../api/cloud';
 import { ROLE_OWNER, type MealPlanView, type MealTemplateView } from '../../lib/shared/types/index';
 import { MealService } from '../../services/meal';
 import { SpaceService } from '../../services/space';
-import { currentThemeClass } from '../../utils/theme';
+import { currentThemeClass, themeBgPath } from '../../utils/theme';
 import { enableReminder } from '../../utils/reminder';
 
 interface PlanRow extends MealPlanView {
@@ -20,6 +20,7 @@ function dateKey(year: number, month: number, day: number): string {
 Page({
   data: {
     themeClass: currentThemeClass(),
+    themeBg: themeBgPath(),
     todayDate: '',
     todayPlans: [] as PlanRow[],
     templates: [] as MealTemplateView[],
@@ -57,7 +58,7 @@ Page({
   },
 
   onShow() {
-    this.setData({ themeClass: currentThemeClass() });
+    this.setData({ themeClass: currentThemeClass(), themeBg: themeBgPath() });
     this.refresh();
   },
 

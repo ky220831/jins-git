@@ -1,17 +1,18 @@
 import { ApiError } from '../../api/cloud';
 import { AuthService } from '../../services/auth';
 import { SpaceService } from '../../services/space';
-import { currentThemeClass } from '../../utils/theme';
+import { currentThemeClass, themeBgPath } from '../../utils/theme';
 
 Page({
   data: {
     themeClass: currentThemeClass(),
+    themeBg: themeBgPath(),
     logging: false,
     error: '',
   },
 
   onShow() {
-    this.setData({ themeClass: currentThemeClass() });
+    this.setData({ themeClass: currentThemeClass(), themeBg: themeBgPath() });
     // 已登录且已有空间时，直接进入首页；否则停留在登录页
     SpaceService.mySpace()
       .then(() => {

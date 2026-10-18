@@ -8,7 +8,7 @@ import {
 import { SpaceService } from '../../services/space';
 import { TravelService } from '../../services/travel';
 import { RestaurantImagesService } from '../../services/restaurant';
-import { currentThemeClass } from '../../utils/theme';
+import { currentThemeClass, themeBgPath } from '../../utils/theme';
 
 interface TripRow extends TripView {
   coverUrl: string;
@@ -121,6 +121,7 @@ function tripDisplayName(city: string, country: string): string {
 Page({
   data: {
     themeClass: currentThemeClass(),
+    themeBg: themeBgPath(),
     trips: [] as TripRow[],
     plans: [] as PlanRow[],
     isOwner: false,
@@ -159,7 +160,7 @@ Page({
   },
 
   onShow() {
-    this.setData({ themeClass: currentThemeClass() });
+    this.setData({ themeClass: currentThemeClass(), themeBg: themeBgPath() });
     this.refresh();
   },
 

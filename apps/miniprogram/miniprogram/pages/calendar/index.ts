@@ -12,9 +12,9 @@ import { SpaceService } from '../../services/space';
 import { TodoService } from '../../services/todo';
 import { moduleLabels } from '../../lib/shared/tokens/index';
 import { startSilentRefresh } from '../../utils/realtime';
-import { lunarDayName, termNameOf, toLunar } from '../../utils/solar';
+import { festivalNameOf, lunarDayName, termNameOf, toLunar } from '../../utils/solar';
 import { formatDateTime } from '../../utils/time';
-import { currentThemeClass } from '../../utils/theme';
+import { currentThemeClass, setThemeMonth, themeBgPath } from '../../utils/theme';
 
 interface DayCell {
   uid: number;
@@ -29,9 +29,9 @@ interface DayCell {
   eventCount: number;
   /** 底部边缘分类圆点（最多 4 个，分类色，不压日期数字） */
   eventDotList: string[];
-  /** 格子内次级标签：法定节假日/调休/周末 > 节气 > 农历 */
+  /** 格子内次级标签：法定节假日/调休 > 节日(七夕/情人节等) > 周末 > 节气 > 农历 */
   cellLabel: string;
-  cellKind: '' | 'holiday' | 'makeup' | 'weekend' | 'term' | 'lunar';
+  cellKind: '' | 'holiday' | 'makeup' | 'festival' | 'weekend' | 'term' | 'lunar';
   /** 生理期三态 + 休息：ongoing 进行中 / past 已过去 / predicted 预计 / rest 休息 */
   periodState: '' | 'ongoing' | 'past' | 'predicted' | 'rest';
 }
@@ -121,10 +121,17 @@ function periodStateOf(
 function publicDayCell(year: number, month: number, day: number, todayKey: string): DayCell {
   const key = dateKey(year, month, day);
   const weekend = isWeekendKey(key);
+  const festivalName = festivalNameOf(year, month, day);
   const termName = termNameOf(year, month, day);
   const lunarLabel = lunarDayName(toLunar(year, month, day).day);
-  const cellLabel = weekend ? '周末' : termName || lunarLabel;
-  const cellKind: DayCell['cellKind'] = weekend ? 'weekend' : termName ? 'term' : 'lunar';
+  const cellLabel = festivalName || (weekend ? '周末' : termName || lunarLabel);
+  const cellKind: DayCell['cellKind'] = festivalName
+    ? 'festival'
+    : weekend
+      ? 'weekend'
+      : termName
+        ? 'term'
+        : 'lunar';
   return {
     uid: 0,
     key,
@@ -145,6 +152,7 @@ function publicDayCell(year: number, month: number, day: number, todayKey: strin
 Page({
   data: {
     themeClass: currentThemeClass(),
+    themeBg: themeBgPath(),
     year: 0,
     month: 0,
     /** 视图模式：月 / 周 / 年 */
@@ -175,6 +183,10 @@ Page({
     dayPeriodState: '' as '' | 'ongoing' | 'past' | 'predicted' | 'rest',
     dayMarks: [] as { label: string; kind: string }[],
     dayHoliday: null as HolidayDayView | null,
+    /** 当日详情面板：可收起（黄圈优化） */
+    dayOpen: true,
+    dayWeekday: '',
+    dayCountLabel: '',
     periodVisible: true,
     legendOpen: false,
     isOwner: false,
@@ -202,6 +214,7 @@ Page({
       yearPickerDate: String(now.getFullYear()),
       loading: true,
     });
+    this.applyTheme();
     // 立即渲染本地公共日历（日期/周末/农历/节气），避免进入时空白闪现；
     // bootstrap 完成后再覆盖为完整业务数据或游客模式节假日版本。
     this.buildMonth([], [], [], [], false);
@@ -209,7 +222,7 @@ Page({
   },
 
   onShow() {
-    this.setData({ themeClass: currentThemeClass() });
+    this.setData({ themeClass: currentThemeClass(), themeBg: themeBgPath() });
     const tabBar = (this as unknown as { getTabBar?: () => { setData(d: Record<string, unknown>): void } }).getTabBar?.();
     if (tabBar) {
       tabBar.setData({ selected: 0, themeClass: currentThemeClass() });
@@ -396,6 +409,7 @@ Page({
       const holiday = holidayByDate.get(key);
       const weekend = !holiday && isWeekendKey(key);
       const eventCount = eventDates.get(key) ?? 0;
+      const festivalName = festivalNameOf(year, month, day);
       const termName = termNameOf(year, month, day);
       const lunarLabel = lunarDayName(toLunar(year, month, day).day);
       let cellLabel = lunarLabel;
@@ -403,6 +417,9 @@ Page({
       if (holiday) {
         cellLabel = holidayLabel(holiday);
         cellKind = holiday.type === 'makeup_workday' ? 'makeup' : 'holiday';
+      } else if (festivalName) {
+        cellLabel = festivalName;
+        cellKind = 'festival';
       } else if (weekend) {
         cellLabel = '周末';
         cellKind = 'weekend';
@@ -472,17 +489,22 @@ Page({
       ? this.data.periodDays.find((p) => p.date === date)
       : undefined;
     const holiday = this.data.holidays.find((h) => h.date === date);
+    const [fy, fm, fd] = date.split('-').map(Number);
+    const festivalName = fy ? festivalNameOf(fy, fm, fd) : '';
     const marks: { label: string; kind: string }[] = [];
     if (holiday) {
       marks.push({
         label: holiday.type === 'makeup_workday' ? '🔄 调休上班' : `🇨🇳 ${holiday.name}`,
         kind: holiday.type,
       });
+    } else if (festivalName) {
+      marks.push({ label: `✨ ${festivalName}`, kind: 'festival' });
     } else if (isWeekendKey(date)) {
       marks.push({ label: '☕ 周末', kind: 'weekend' });
     }
     const todayKey = dateKey(new Date().getFullYear(), new Date().getMonth() + 1, new Date().getDate());
     const dayPeriodState = period ? periodStateOf(period, date, todayKey) : '';
+    const count = dayTodos.length + dayEvents.length;
     this.setData({
       selectedDate: date,
       dayTodos,
@@ -491,6 +513,8 @@ Page({
       dayPeriodState,
       dayMarks: marks,
       dayHoliday: holiday || null,
+      dayWeekday: ['日', '一', '二', '三', '四', '五', '六'][new Date(fy, fm - 1, fd).getDay()],
+      dayCountLabel: count > 0 ? `${count} 项安排` : '暂无安排',
     });
   },
 
@@ -508,6 +532,7 @@ Page({
     const [y, m] = v.split('-').map(Number);
     if (!y || !m) return;
     this.setData({ year: y, month: m, pickerDate: v });
+    this.applyTheme();
     if (this.data.viewMode === 'year') {
       this.buildYear();
       return;
@@ -566,7 +591,20 @@ Page({
     const m = Number(e.currentTarget.dataset.month);
     if (!m) return;
     this.setData({ viewMode: 'month', month: m });
+    this.applyTheme();
     this.data.guestMode ? this.buildGuestMonth() : this.refresh();
+  },
+
+  /** 换肤绑定日历查看的月份：翻到哪个月，全局主题与背景图跟随哪个月 */
+  applyTheme() {
+    setThemeMonth(this.data.month);
+    this.setData({ themeClass: currentThemeClass(), themeBg: themeBgPath() });
+    const tabBar = (this as unknown as {
+      getTabBar?: () => { setData(d: Record<string, unknown>): void };
+    }).getTabBar?.();
+    if (tabBar) {
+      tabBar.setData({ themeClass: currentThemeClass() });
+    }
   },
 
   onPrev() {
@@ -586,6 +624,7 @@ Page({
       month: d.getMonth() + 1,
       pickerDate: `${d.getFullYear()}-${pad(d.getMonth() + 1)}`,
     });
+    this.applyTheme();
     this.data.guestMode ? this.buildGuestMonth() : this.refresh();
   },
 
@@ -606,6 +645,7 @@ Page({
       month: d.getMonth() + 1,
       pickerDate: `${d.getFullYear()}-${pad(d.getMonth() + 1)}`,
     });
+    this.applyTheme();
     this.data.guestMode ? this.buildGuestMonth() : this.refresh();
   },
 
@@ -624,6 +664,7 @@ Page({
         month: now.getMonth() + 1,
         selectedDate: todayKey,
       });
+      this.applyTheme();
       this.buildWeek();
       this.updateDayDetail(todayKey);
       return;
@@ -634,6 +675,7 @@ Page({
       selectedDate: todayKey,
       pickerDate: `${now.getFullYear()}-${pad(now.getMonth() + 1)}`,
     });
+    this.applyTheme();
     this.data.guestMode ? this.buildGuestMonth() : this.refresh();
   },
 
@@ -647,6 +689,7 @@ Page({
       year: nd.getFullYear(),
       month: nd.getMonth() + 1,
     });
+    this.applyTheme();
     this.buildWeek();
     this.updateDayDetail(key);
   },
@@ -663,6 +706,34 @@ Page({
 
   onToggleLegend() {
     this.setData({ legendOpen: !this.data.legendOpen });
+  },
+
+  /** 当日详情面板收起/展开 */
+  onToggleDay() {
+    this.setData({ dayOpen: !this.data.dayOpen });
+  },
+
+  /** 日历区域横向滑动切换月份/年份（阈值 60px，垂直滚动不触发） */
+  onSwipeStart(e: WechatMiniprogram.TouchEvent) {
+    const t = e.touches[0];
+    (this as unknown as { _swipeX: number; _swipeY: number })._swipeX = t.clientX;
+    (this as unknown as { _swipeX: number; _swipeY: number })._swipeY = t.clientY;
+  },
+
+  onSwipeEnd(e: WechatMiniprogram.TouchEvent) {
+    const self = this as unknown as { _swipeX?: number; _swipeY?: number };
+    if (self._swipeX === undefined || self._swipeY === undefined) return;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - self._swipeX;
+    const dy = t.clientY - self._swipeY;
+    self._swipeX = undefined;
+    self._swipeY = undefined;
+    if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+    if (dx < 0) {
+      this.onNext();
+    } else {
+      this.onPrev();
+    }
   },
 
   // ---- 游客模式：引导创建/加入空间（目标 1/2） ----

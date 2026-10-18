@@ -19,6 +19,8 @@ export const COLLECTIONS = {
   tripPlans: 'trip_plans',
   rateLimits: 'rate_limits',
   subscribeGrants: 'subscribe_grants',
+  clientLogs: 'client_logs',
+  backupMeta: 'backup_meta',
 } as const;
 
 /** 频控：每用户每分钟最大调用次数（仅对“烧钱”的外部资源接口启用） */

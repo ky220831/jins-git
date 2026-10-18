@@ -24,6 +24,13 @@ const names = [
   'trash_records',
   'restaurants',
   'restaurant_visits',
+  'anniversaries',
+  'trips',
+  'trip_plans',
+  'subscribe_grants',
+  'rate_limits',
+  'client_logs',
+  'backup_meta',
 ];
 
 if (!envId) {

@@ -123,21 +123,21 @@
 }
 
 .year-grid {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 16rpx;
   margin-top: 16rpx;
 }
 
 .month-card {
-  width: calc((100% - 32rpx) / 3);
+  width: auto;
   height: 120rpx;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 8rpx;
-  background: var(--color-surface);
+  background: var(--cell-bg, var(--color-surface));
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-soft);
 }
@@ -172,16 +172,11 @@
   align-items: center;
   justify-content: flex-start;
   border-radius: var(--radius-sm);
-  background: var(--color-surface);
+  background: var(--cell-bg, var(--color-surface));
   box-shadow: var(--shadow-soft);
   padding-top: 10rpx;
   box-sizing: border-box;
   position: relative;
-}
-
-.day-cell.today {
-  background: var(--color-surface);
-  box-shadow: inset 0 0 0 2rpx rgba(240, 138, 155, 0.55), var(--shadow-soft);
 }
 
 .day-cell.period {
@@ -198,6 +193,20 @@
 }
 
 .day-cell.selected .day-num {
+  color: var(--color-primary-deep);
+  font-weight: 600;
+}
+
+/* 今天：数字套主色细圆圈（V3：弱化整格色块，聚焦日期本身） */
+.day-cell.today .day-num {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 56rpx;
+  height: 56rpx;
+  box-sizing: border-box;
+  border: 2rpx solid var(--color-primary);
+  border-radius: 50%;
   color: var(--color-primary-deep);
   font-weight: 600;
 }
@@ -249,6 +258,12 @@
   font-weight: 500;
 }
 
+.label-festival {
+  background: rgba(240, 138, 155, 0.14);
+  color: var(--color-primary-deep);
+  font-weight: 600;
+}
+
 .label-weekend {
   background: rgba(167, 159, 196, 0.12);
   color: #8A8198;
@@ -291,8 +306,8 @@
 .legend-card {
   margin-top: 16rpx;
   background: var(--color-surface);
-  border-radius: var(--radius-pill);
-  padding: 12rpx 24rpx;
+  border-radius: var(--radius-lg);
+  padding: 20rpx 24rpx;
   box-shadow: var(--shadow-soft);
 }
 
@@ -302,32 +317,68 @@
   align-items: center;
 }
 
+.legend-head-left {
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+}
+
+.legend-dots-preview {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.ldot {
+  width: 14rpx;
+  height: 14rpx;
+  border-radius: 50%;
+}
+
+.ldot.period { background: var(--color-period); }
+.ldot.todo { background: var(--color-todo); }
+.ldot.meal { background: var(--color-meal); }
+.ldot.trip { background: var(--color-travel); }
+
 .legend-title {
-  font-size: 22rpx;
+  font-size: 24rpx;
   font-weight: 600;
   color: var(--color-text-secondary);
   margin-bottom: 0;
 }
 
-.legend-arrow {
-  font-size: 20rpx;
+.legend-btn {
+  padding: 8rpx 24rpx;
+  font-size: 22rpx;
+  font-weight: 600;
   color: var(--color-text-secondary);
+  background: rgba(61, 58, 62, 0.05);
+  border-radius: 999rpx;
+}
+
+.legend-btn.on {
+  color: var(--color-primary-deep);
+  background: rgba(240, 138, 155, 0.12);
 }
 
 .legend-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12rpx 20rpx;
-  margin-top: 12rpx;
+  gap: 14rpx;
+  margin-top: 20rpx;
+  padding-top: 20rpx;
+  border-top: 2rpx dashed var(--color-border);
 }
 
 .legend-chip {
   display: flex;
   align-items: center;
-  gap: 8rpx;
-  padding: 4rpx 0;
-  font-size: 20rpx;
+  gap: 10rpx;
+  padding: 10rpx 16rpx;
+  font-size: 22rpx;
   color: var(--color-text-secondary);
+  background: rgba(61, 58, 62, 0.05);
+  border-radius: 999rpx;
 }
 
 .legend-dot {
@@ -370,6 +421,41 @@
 .day-title {
   font-size: 30rpx;
   font-weight: 600;
+}
+
+.day-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16rpx;
+  padding-bottom: 20rpx;
+  border-bottom: 2rpx dashed var(--color-border);
+}
+
+.day-weekday {
+  font-size: 24rpx;
+  font-weight: 400;
+  color: var(--color-text-secondary);
+}
+
+.day-head-right {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.day-count {
+  font-size: 22rpx;
+  color: var(--color-text-secondary);
+}
+
+.day-toggle {
+  padding: 8rpx 22rpx;
+  font-size: 22rpx;
+  font-weight: 600;
+  color: var(--color-primary-deep);
+  background: rgba(240, 138, 155, 0.10);
+  border-radius: 999rpx;
 }
 
 .status-line {
@@ -797,6 +883,11 @@
   background: rgba(150, 141, 170, 0.12);
 }
 
+.mark-chip.festival {
+  color: var(--color-primary-deep);
+  background: rgba(240, 138, 155, 0.14);
+}
+
 .status-line.period-ongoing {
   color: #D9534F;
 }
@@ -811,22 +902,35 @@
 
 /* ---- 快速入口 ---- */
 .quick-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 14rpx;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16rpx;
   margin-top: 20rpx;
+  padding-bottom: 20rpx;
+  border-bottom: 2rpx dashed var(--color-border);
 }
 
 .quick-btn {
-  flex: 0 0 calc((100% - 28rpx) / 3);
-  padding: 16rpx 8rpx;
-  font-size: 24rpx;
+  width: auto;
+  height: 116rpx;
+  padding: 0 8rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6rpx;
+  font-size: 22rpx;
   text-align: center;
   color: var(--color-primary-deep);
   background: rgba(240, 138, 155, 0.08);
   border-radius: var(--radius-pill);
   border: 2rpx solid rgba(240, 138, 155, 0.18);
   font-weight: 500;
+}
+
+.quick-ico {
+  font-size: 40rpx;
+  line-height: 1;
 }
 
 .quick-btn:active {

@@ -22,9 +22,10 @@ export const main = createHandler<
   if (event?.action === 'export') {
     const { userId } = await requireSpaceMember(repo, OPENID);
     await enforceRateLimit(repo, userId, 'exportData');
-    const { payload, fileName } = await service.buildExport(OPENID);
+    const { payload, fileName, csvFiles } = await service.buildExport(OPENID);
     const json = JSON.stringify(payload, null, 2);
-    const cloudPath = `exports/${(payload.space as { id?: string } | null)?.id ?? 'space'}/${fileName}`;
+    const spaceDir = `exports/${(payload.space as { id?: string } | null)?.id ?? 'space'}`;
+    const cloudPath = `${spaceDir}/${fileName}`;
     const upload = await cloud.uploadFile({
       cloudPath,
       fileContent: Buffer.from(json, 'utf8'),
@@ -34,7 +35,29 @@ export const main = createHandler<
     if (!tempFileURL) {
       throw new AppError(ErrorCodes.INTERNAL, '导出文件生成失败，请重试');
     }
-    return { fileName, tempFileURL, sizeBytes: Buffer.byteLength(json, 'utf8') };
+    // CSV 分表（v1.1.18 增强导出）
+    const csvFilesOut: { name: string; tempFileURL: string; sizeBytes: number }[] = [];
+    for (const csv of csvFiles) {
+      const csvPath = `${spaceDir}/csv/${csv.name}`;
+      const csvUpload = await cloud.uploadFile({
+        cloudPath: csvPath,
+        fileContent: Buffer.from(csv.content, 'utf8'),
+      });
+      const csvUrl = await cloud.getTempFileURL({
+        fileList: [{ fileID: csvUpload.fileID, maxAge: 3600 }],
+      });
+      const csvTemp = csvUrl.fileList?.[0]?.tempFileURL || '';
+      if (csvTemp) {
+        csvFilesOut.push({ name: csv.name, tempFileURL: csvTemp, sizeBytes: Buffer.byteLength(csv.content, 'utf8') });
+      }
+    }
+    return {
+      fileName,
+      tempFileURL,
+      sizeBytes: Buffer.byteLength(json, 'utf8'),
+      csvFiles: csvFilesOut,
+      images: (payload.images as string[]) || [],
+    };
   }
   if (event?.action === 'audit-logs') {
     return service.listAuditLogs(OPENID);

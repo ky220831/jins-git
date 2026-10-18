@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
+  festivalNameOf,
   termDate,
   termIndexOf,
   toLunar,
@@ -36,6 +37,15 @@ test('农历：2026 年春节/端午/七夕/中秋日期正确', () => {
   assert.deepEqual(toLunar(2026, 9, 25), { month: 8, day: 15, isLeap: false }); // 中秋
 });
 
+test('节日：七夕/情人节/春节等每年自动识别（festivalNameOf）', () => {
+  assert.equal(festivalNameOf(2026, 2, 14), '情人节');
+  assert.equal(festivalNameOf(2027, 2, 14), '情人节');
+  assert.equal(festivalNameOf(2026, 8, 19), '七夕');
+  assert.equal(festivalNameOf(2027, 8, 8), '七夕'); // 2027 农历七月初七
+  assert.equal(festivalNameOf(2026, 2, 17), '春节');
+  assert.equal(festivalNameOf(2026, 8, 15), '');
+});
+
 test('昼夜：时段边界正确（Asia/Shanghai）', () => {
   assert.equal(dayPeriodOf(5, 59), 'night');
   assert.equal(dayPeriodOf(6, 0), 'day');
@@ -54,6 +64,12 @@ test('节日：春节与中秋当天识别为节日点缀', () => {
   const midautumn = themeDayContext(new Date('2026-09-25T04:00:00Z')); // 上海 9/25 12:00
   assert.equal(midautumn.festivalKey, 'midautumn');
   assert.equal(midautumn.festivalName, '中秋');
+});
+
+test('节日：情人节 2/14 每年识别为节日点缀（themeDayContext）', () => {
+  const ctx = themeDayContext(new Date('2026-02-14T04:00:00Z')); // 上海 2/14 12:00
+  assert.equal(ctx.festivalKey, 'valentine');
+  assert.equal(ctx.festivalName, '情人节');
 });
 
 test('主题上下文：夏季普通日上午为白天档、非节气日', () => {

@@ -1,0 +1,10 @@
+{
+  "name": "client-log",
+  "version": "1.0.0",
+  "private": true,
+  "description": "前端错误日志上报（App.onError / onUnhandledRejection）",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "^4.0.2"
+  }
+}

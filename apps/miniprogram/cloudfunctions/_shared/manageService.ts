@@ -27,6 +27,42 @@ export function serializeDates(value: unknown): unknown {
   return value;
 }
 
+function csvEscape(value: unknown): string {
+  const s = value === null || value === undefined ? '' : String(value);
+  return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+}
+
+/** 对象数组 → CSV 文本（表头取所有字段并集，v1.1.18 增强导出） */
+export function rowsToCsv(rows: Record<string, unknown>[]): string {
+  if (!rows.length) return 'no data';
+  const headers = Array.from(new Set(rows.flatMap((r) => Object.keys(r))));
+  const lines = [headers.join(',')];
+  for (const row of rows) {
+    lines.push(headers.map((h) => csvEscape(row[h])).join(','));
+  }
+  return lines.join('\n');
+}
+
+/** 收集数据中的云存储图片 fileID（cloud:// 开头），供导出归档 */
+function collectImageFileIds(data: Record<string, unknown>): string[] {
+  const out = new Set<string>();
+  const walk = (value: unknown): void => {
+    if (typeof value === 'string') {
+      if (value.startsWith('cloud://')) out.add(value);
+      return;
+    }
+    if (Array.isArray(value)) {
+      for (const item of value) walk(item);
+      return;
+    }
+    if (value && typeof value === 'object') {
+      for (const item of Object.values(value as Record<string, unknown>)) walk(item);
+    }
+  };
+  walk(data);
+  return Array.from(out);
+}
+
 export class ManageService {
   constructor(private readonly repo: Repo) {}
 
@@ -64,8 +100,12 @@ export class ManageService {
     };
   }
 
-  /** 组装导出 JSON（仅主账号；上传由云函数完成） */
-  async buildExport(providerUserId: string): Promise<{ payload: Record<string, unknown>; fileName: string }> {
+  /** 组装导出内容（仅主账号）：JSON 载荷 + CSV 分表 + 图片清单；上传由云函数完成 */
+  async buildExport(providerUserId: string): Promise<{
+    payload: Record<string, unknown>;
+    fileName: string;
+    csvFiles: { name: string; content: string }[];
+  }> {
     const { spaceId, role } = await requireSpaceMember(this.repo, providerUserId);
     if (role !== ROLE_OWNER) {
       throw new AppError(ErrorCodes.FORBIDDEN, '只有主账号可以导出数据');
@@ -107,8 +147,16 @@ export class ManageService {
         trashRecords: serializeDates(trash),
       },
     };
+    const data = payload.data as Record<string, unknown>;
+    const csvFiles = Object.entries(data)
+      .filter(([, rows]) => Array.isArray(rows))
+      .map(([key, rows]) => ({
+        name: `${key}.csv`,
+        content: rowsToCsv(rows as Record<string, unknown>[]),
+      }));
+    payload.images = collectImageFileIds(data);
     const fileName = `our-life-${spaceId}-${now.toISOString().slice(0, 19).replace(/[:T]/g, '-')}.json`;
-    return { payload, fileName };
+    return { payload, fileName, csvFiles };
   }
 
   /** 审计日志（仅主账号，只读，PRD §59） */

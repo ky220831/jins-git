@@ -1,16 +1,16 @@
 <view class="container {{themeClass}} manage-page">
+  <image class="page-bg" src="{{themeBg}}" mode="aspectFill"></image>
   <custom-nav title="设置与数据" showBack="{{true}}" />
-  <view class="page-head">
-    <view class="page-title">设置与数据</view>
-    <view class="page-sub">{{isOwner ? '主管理' : '副管理'}}</view>
-  </view>
 
   <view class="error-text" wx:if="{{error}}">{{error}}</view>
 
   <!-- 主管理 -->
   <block wx:if="{{isOwner}}">
     <view class="card">
-      <view class="card-title">数据概览</view>
+      <view class="card-title-row">
+        <text class="card-title">数据概览</text>
+        <view class="role-badge">主管理</view>
+      </view>
       <view class="count-grid">
         <view class="count-item"><view class="count-num">{{counts.todos}}</view><view class="count-label">待办</view></view>
         <view class="count-item"><view class="count-num">{{counts.mealTemplates}}</view><view class="count-label">菜单素材</view></view>
@@ -25,11 +25,18 @@
     </view>
 
     <view class="card">
-      <view class="card-title">数据导出（JSON）</view>
-      <view class="manage-desc">导出全部业务数据为 JSON 文件，链接 1 小时内有效，不会永久公开。</view>
+      <view class="card-title">数据导出（JSON + CSV）</view>
+      <view class="manage-desc">导出全部业务数据：JSON 完整备份 + 各模块 CSV 表格 + 图片清单，链接 1 小时内有效，不会永久公开。</view>
       <view class="manage-result" wx:if="{{exportUrl}}">
         {{exportName}}（{{exportSizeLabel}}）
       </view>
+      <view class="csv-list" wx:if="{{csvFiles.length}}">
+        <view class="csv-row" wx:for="{{csvFiles}}" wx:key="name">
+          <text class="csv-name">📄 {{item.name}}</text>
+          <view class="link-btn" data-url="{{item.tempFileURL}}" bindtap="onCopyCsv">复制链接</view>
+        </view>
+      </view>
+      <view class="manage-desc" wx:if="{{exportImages.length}}">🖼 图片清单 {{exportImages.length}} 项已包含在 JSON 文件中（cloud:// 地址）</view>
       <view class="btn-row">
         <button class="btn-primary flex-btn" bindtap="onExport" loading="{{exporting}}" disabled="{{exporting}}">导出数据</button>
         <button class="btn-secondary flex-btn" wx:if="{{exportUrl}}" bindtap="onCopyExportUrl">复制链接</button>
@@ -40,7 +47,7 @@
       <view class="card-title">操作记录（最近 50 条）</view>
       <view class="empty" wx:if="{{!auditLogs.length}}">暂无操作记录</view>
       <view class="audit-row" wx:for="{{auditLogs}}" wx:key="id">
-        <view class="audit-avatar">{{item.icon}}</view>
+        <view class="audit-avatar av-{{item.module}}">{{item.icon}}</view>
         <view class="audit-body">
         <view class="audit-title">{{item.actionLabel}}</view>
           <view class="audit-meta">{{item.timeLabel}}</view>
@@ -55,7 +62,7 @@
       </picker>
       <view class="empty" wx:if="{{!trash.length}}">回收站是空的</view>
       <view class="trash-row" wx:for="{{trash}}" wx:key="id">
-        <view class="trash-check" data-id="{{item.id}}" bindtap="onToggleSelect">{{item.selected ? '☑' : '☐'}}</view>
+        <view class="trash-check {{item.selected ? 'on' : ''}}" data-id="{{item.id}}" bindtap="onToggleSelect">{{item.selected ? '✓' : ''}}</view>
         <view class="trash-body">
           <view class="trash-title">{{item.collectionLabel}} · {{item.title}}</view>
           <view class="trash-meta">删除于 {{item.deletedLabel}} · 将于 {{item.purgeLabel}} 永久删除</view>
@@ -78,8 +85,11 @@
       <view class="card-title">家庭管理</view>
       <view class="member" wx:for="{{members}}" wx:key="userId">
         <view class="member-left">
-          <view class="member-role">{{item.roleLabel}}</view>
-          <view class="member-id">ID {{item.userId}}</view>
+          <view class="member-avatar">{{item.role === 'owner' ? '👑' : '💗'}}</view>
+          <view class="member-info">
+            <view class="member-role">{{item.nickname || item.roleLabel}}</view>
+            <view class="member-id">ID {{item.userId}} · {{item.roleLabel}}</view>
+          </view>
         </view>
       </view>
       <view class="invite-box" wx:if="{{inviteCode}}">
@@ -106,7 +116,10 @@
   <!-- 副管理 -->
   <block wx:else>
     <view class="card">
-      <view class="card-title">收起今天的菜单</view>
+      <view class="card-title-row">
+        <text class="card-title">收起今天的菜单</text>
+        <view class="role-badge">副管理</view>
+      </view>
       <view class="empty" wx:if="{{!mealPlans.length}}">今天没有已加上的菜单</view>
       <view class="plan-row" wx:for="{{mealPlans}}" wx:key="id">
         <view class="plan-left">

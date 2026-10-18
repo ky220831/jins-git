@@ -1,5 +1,5 @@
 /* ============================================================
-   统一设计 Token V2（docs/13-新UI设计规范.md）
+   统一设计 Token V2（docs/15-新UI设计规范.md）
    轻奢高级简约 · 随时节动态换肤
    动态层只替换：bg / surface / grad / text-soft / festival-accent / 背景纹理
    固定层：主按钮色、正文色、分类语义色
@@ -74,78 +74,91 @@ page {
   --color-surface: #FFFFFF;
   --grad-a: #FAF8F4;
   --grad-b: #F1EFEA;
+  --cell-bg: #F1EFEA;
 }
 .theme-m1 {
   --color-bg: #F4F4F4;
   --color-surface: #FBFBFB;
   --grad-a: #F4F4F4;
   --grad-b: #E8E8EC;
+  --cell-bg: #E8E8EC;
 }
 .theme-m2 {
   --color-bg: #F3EFF8;
   --color-surface: #FAF8FC;
   --grad-a: #F3EFF8;
   --grad-b: #E7E0F0;
+  --cell-bg: #E7E0F0;
 }
 .theme-m3 {
   --color-bg: #FDF2F3;
   --color-surface: #FEF9F8;
   --grad-a: #FDF2F3;
   --grad-b: #EAF2EC;
+  --cell-bg: #EAF2EC;
 }
 .theme-m4 {
   --color-bg: #ECF7F3;
   --color-surface: #F8FCFA;
   --grad-a: #ECF7F3;
   --grad-b: #DFF0E9;
+  --cell-bg: #DFF0E9;
 }
 .theme-m5 {
   --color-bg: #F2F8EA;
   --color-surface: #FAFCF6;
   --grad-a: #F2F8EA;
   --grad-b: #E3EFD8;
+  --cell-bg: #E3EFD8;
 }
 .theme-m6 {
   --color-bg: #EDF4FB;
   --color-surface: #F8FBFD;
   --grad-a: #EDF4FB;
   --grad-b: #DCECF6;
+  --cell-bg: #DCECF6;
 }
 .theme-m7 {
   --color-bg: #EAF6F5;
   --color-surface: #F7FCFB;
   --grad-a: #EAF6F5;
   --grad-b: #D9EFED;
+  --cell-bg: #D9EFED;
 }
 .theme-m8 {
   --color-bg: #EAF5F2;
   --color-surface: #F7FCFA;
   --grad-a: #EAF5F2;
   --grad-b: #D9EBE7;
+  --cell-bg: #D9EBE7;
 }
 .theme-m9 {
   --color-bg: #F9F4E9;
   --color-surface: #FDFBF5;
   --grad-a: #F9F4E9;
   --grad-b: #EFE6D3;
+  --cell-bg: #EFE6D3;
 }
 .theme-m10 {
   --color-bg: #FBF2E5;
   --color-surface: #FEFAF4;
   --grad-a: #FBF2E5;
   --grad-b: #F2E0CB;
+  --cell-bg: #F2E0CB;
 }
 .theme-m11 {
   --color-bg: #F5F0EA;
   --color-surface: #FCF9F5;
   --grad-a: #F5F0EA;
   --grad-b: #E9DFD4;
+  --cell-bg: #E9DFD4;
 }
 .theme-m12 {
   --color-bg: #F4EFF3;
   --color-surface: #FBF8FA;
   --grad-a: #F4EFF3;
   --grad-b: #E6DEE8;
+  --cell-bg: #E6DEE8;
 }
 
 /* ===== 二十四节气专属配色（theme-jq-1..24：立春..大寒） ===== */
@@ -272,6 +285,7 @@ page {
 .theme-period-night {
   --color-bg: #23272E;
   --color-surface: #2E333B;
+  --cell-bg: #2E333B;
   --grad-a: #23272E;
   --grad-b: #1E2229;
   --color-text: #E6E4EA;

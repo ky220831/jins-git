@@ -1,4 +1,5 @@
 <view class="container {{themeClass}}">
+  <image class="page-bg" src="{{themeBg}}" mode="aspectFill"></image>
   <custom-nav title="加入空间" showBack="{{true}}" />
   <view class="tip">输入对方给你的 8 位邀请码</view>
   <input

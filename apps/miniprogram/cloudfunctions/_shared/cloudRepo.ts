@@ -717,11 +717,6 @@ class TxCloudRepo extends CloudRepo {
     await this.assertOwned(COLLECTIONS.todos, todoId, spaceId);
     await this.tx.collection(COLLECTIONS.todos).doc(todoId).update({ data: patch });
   }
-  override async deleteTodo(spaceId: string, todoId: string): Promise<void> {
-    await this.assertOwned(COLLECTIONS.todos, todoId, spaceId);
-    await this.tx.collection(COLLECTIONS.todos).doc(todoId).remove();
-  }
-
   // ---- 今日菜单临时记录 ----
   override async createMealPlan(plan: MealPlanRecord): Promise<void> {
     await this.tx.collection(COLLECTIONS.mealPlans).doc(plan.id).set({ data: plan });

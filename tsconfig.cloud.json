@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    "packages/**/*.ts",
+    "apps/miniprogram/cloudfunctions/_shared/**/*.ts",
+    "apps/miniprogram/cloudfunctions/*/src/**/*.ts",
+    "apps/miniprogram/cloudfunctions/typings/**/*.d.ts",
+    "scripts/*.ts"
+  ]
+}

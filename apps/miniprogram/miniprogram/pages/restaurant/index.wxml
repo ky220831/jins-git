@@ -1,4 +1,5 @@
 <view class="container {{themeClass}} restaurant-page">
+  <image class="page-bg" src="{{themeBg}}" mode="aspectFill"></image>
   <custom-nav title="下馆子" showBack="{{true}}" />
   <view class="page-head">
     <view class="page-title">下馆子</view>

@@ -213,7 +213,10 @@ export function lunarDayName(day: number): string {
   return `${tens}${units === 0 ? '' : '一二三四五六七八九'[units - 1]}`;
 }
 
-const FESTIVALS: Record<string, { name: string; lunar?: { m: number; d: number }; term?: number }> = {
+const FESTIVALS: Record<
+  string,
+  { name: string; lunar?: { m: number; d: number }; term?: number; solar?: { m: number; d: number } }
+> = {
   spring: { name: '春节', lunar: { m: 1, d: 1 } },
   lantern: { name: '元宵', lunar: { m: 1, d: 15 } },
   qingming: { name: '清明', term: 4 },
@@ -222,7 +225,22 @@ const FESTIVALS: Record<string, { name: string; lunar?: { m: number; d: number }
   midautumn: { name: '中秋', lunar: { m: 8, d: 15 } },
   chongyang: { name: '重阳', lunar: { m: 9, d: 9 } },
   dongzhi: { name: '冬至', term: 21 },
+  /** 公历固定节日：每年自动生效（2/14 情人节） */
+  valentine: { name: '情人节', solar: { m: 2, d: 14 } },
 };
+
+/** 某日传统节日名（农历节日 + 清明/冬至节气日 + 公历节日如情人节），无则返回空串；每年自动计算 */
+export function festivalNameOf(year: number, month: number, day: number): string {
+  const lunar = toLunar(year, month, day);
+  const termIndex = termIndexOf(year, month, day);
+  for (const key of Object.keys(FESTIVALS)) {
+    const f = FESTIVALS[key];
+    if (f.solar && month === f.solar.m && day === f.solar.d) return f.name;
+    if (f.lunar && !lunar.isLeap && lunar.month === f.lunar.m && lunar.day === f.lunar.d) return f.name;
+    if (f.term !== undefined && termIndex === f.term) return f.name;
+  }
+  return '';
+}
 
 /** 上海时区当日档位：06:00–17:30 白天，17:30–19:30 黄昏，其余夜间 */
 export function dayPeriodOf(hour: number, minute: number): DayPeriod {
@@ -247,6 +265,11 @@ export function themeDayContext(now: Date = new Date()): ThemeDayContext {
   let festivalName = '';
   for (const key of Object.keys(FESTIVALS)) {
     const f = FESTIVALS[key];
+    if (f.solar && month === f.solar.m && day === f.solar.d) {
+      festivalKey = key;
+      festivalName = f.name;
+      break;
+    }
     if (f.lunar && !lunar.isLeap && lunar.month === f.lunar.m && lunar.day === f.lunar.d) {
       festivalKey = key;
       festivalName = f.name;

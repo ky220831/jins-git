@@ -2,7 +2,7 @@ import { ApiError } from '../../api/cloud';
 import { ROLE_OWNER, type AnniversaryView } from '../../lib/shared/types/index';
 import { AnniversaryService } from '../../services/anniversary';
 import { SpaceService } from '../../services/space';
-import { currentThemeClass } from '../../utils/theme';
+import { currentThemeClass, themeBgPath } from '../../utils/theme';
 import { enableReminder } from '../../utils/reminder';
 
 interface AnniversaryRow extends AnniversaryView {
@@ -14,6 +14,7 @@ interface AnniversaryRow extends AnniversaryView {
 Page({
   data: {
     themeClass: currentThemeClass(),
+    themeBg: themeBgPath(),
     items: [] as AnniversaryRow[],
     isOwner: false,
     loading: false,
@@ -30,7 +31,7 @@ Page({
   },
 
   onShow() {
-    this.setData({ themeClass: currentThemeClass() });
+    this.setData({ themeClass: currentThemeClass(), themeBg: themeBgPath() });
     this.refresh();
   },
 

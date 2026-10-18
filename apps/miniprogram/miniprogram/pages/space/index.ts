@@ -1,12 +1,13 @@
-import { currentThemeClass } from '../../utils/theme';
+import { currentThemeClass, themeBgPath } from '../../utils/theme';
 
 Page({
   data: {
     themeClass: currentThemeClass(),
+    themeBg: themeBgPath(),
   },
 
   onShow() {
-    this.setData({ themeClass: currentThemeClass() });
+    this.setData({ themeClass: currentThemeClass(), themeBg: themeBgPath() });
   },
 
   onCreateSpace() {

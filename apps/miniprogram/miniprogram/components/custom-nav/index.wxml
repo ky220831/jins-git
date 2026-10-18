@@ -2,7 +2,9 @@
 <view class="custom-nav">
   <view style="height:{{statusBarHeight}}px;"></view>
   <view class="nav-inner" style="height:{{navHeight}}px; padding-right:{{capsuleRight}}px;">
-    <view class="nav-back" wx:if="{{showBack}}" bindtap="onBack">‹</view>
+    <view class="nav-back" wx:if="{{showBack}}" bindtap="onBack">
+      <view class="nav-chevron"></view>
+    </view>
     <view class="nav-title">{{title}}</view>
   </view>
 </view>

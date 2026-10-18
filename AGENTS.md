@@ -16,20 +16,22 @@
 | --- | --- | --- |
 | 官方显示名 | 中文名，简洁有识别度 | 我们的生活 |
 | 代码标识 | 小写英文连字符（slug） | our-life |
-| 版本号 | 语义化版本 v主.次.修订 | v1.1.15 |
-| 产物 / 备份文件 | 中文名-代码名-版本-日期.zip | 我们的生活-our-life-v1.1.15-2026-08-16.zip |
+| 版本号 | 语义化版本 v主.次.修订 | v1.2.0 |
+| 产物 / 备份文件 | 中文名-代码名-版本-日期.zip | 我们的生活-our-life-v1.2.0-2026-08-16.zip |
 | 云函数 | 小写英文连字符 | auth-login / restaurant-search / daily-maintenance 等 |
 | Git 提交 | conventional commits | feat: / fix: / style: / chore: |
-| 文档 | 两位数字编号 + 中文标题 | docs/00-… ~ docs/11-… |
+| 文档 | 两位数字编号 + 中文标题 | docs/00-… ~ docs/16-… |
 
 ## 常用命令（项目根）
 
 - `npm install`：安装构建与测试工具
 - `npm run sync`：同步共享包到小程序 lib/shared
-- `npm run typecheck`：类型检查
-- `npm test`：跨 Space 安全测试（当前 79 项全绿）
+- `npm run typecheck`：类型检查（根 tsconfig + tsconfig.cloud.json，云函数与 _shared 全覆盖）
+- `npm test`：跨 Space 安全测试（当前 103 项全绿）
 - `npm run build`：打包云函数（cloudfunctions/*/dist/index.js）
-- 节假日年度导入：`node scripts/import-holidays.cjs holidays-2027.json`
+- `npm run test:e2e`：云端 E2E（需临时密钥 + CLOUDBASE_ENV_ID）
+- 节假日年度导入：`node scripts/import-holidays.cjs --template 2027`（生成模板）、
+  `... holidays-2027.json --dry-run`（只校验）、`... holidays-2027.json`（正式导入）
 
 ## 技术要点
 
@@ -65,12 +67,13 @@
 ## UI 偏好（第九阶段已落地）
 
 - 风格：韩风、可爱但不幼稚；米白 / 浅灰 / 低饱和粉 + 红 / 蓝 / 橙统一 color token。
-- 新 UI 设计规范 V2（docs/13-新UI设计规范.md，2026-08-15）：轻奢高级简约，低饱和、大留白、克制线条；主色 #F08A9B，正文 #3D3A3E；圆角 8/16/24/32/999rpx，阴影低透明大模糊。动态换肤只替换背景/卡片/点缀变量，布局结构不变。
+- 新 UI 设计规范 V2（docs/15-新UI设计规范.md，2026-08-15）：轻奢高级简约，低饱和、大留白、克制线条；主色 #F08A9B，正文 #3D3A3E；圆角 8/16/24/32/999rpx，阴影低透明大模糊。动态换肤只替换背景/卡片/点缀变量，布局结构不变。
 - 随时节换肤引擎（v1.1.5 已发版）：二十四节气专属配色 theme-jq-1..24（太阳黄经 NOAA 算法，已验证 2026 全年与官方时刻表一致）；传统节日点缀 theme-festival-*（春节/元宵/清明/端午/七夕/中秋/重阳/冬至，农历表 1900–2100）；昼夜三档 theme-period-day/dusk/night（06:00–17:30 白天 / 17:30–19:30 黄昏 / 19:30–06:00 夜间自动生效，features 页可关闭 themeAuto 回退基础风格）。
 - 日历格子 V2：日期 30rpx/500 + 次级标签 20rpx（优先级：法定节假日/调休 > 周末 > 节气 > 农历），底部边缘最多 4 个分类色圆点 + 数量角标（不压日期）；周一起始；今天=主色描边，选中=浅粉底+描边，过往日文字降明度；日程列表同色系左侧条 + 浅底图标；图例默认折叠为胶囊。
 - 首页：打开即当月日历，其余功能项在日历下方排成一列。
 - 邀请码在右上角缩小显示；昵称可自定义，双人昵称之间用爱心连接。
 - 交互硬规范（docs/12-交互规范.md）：所有新增/编辑表单禁止内嵌平铺在页面正文，必须用底部弹窗 + 半透明遮罩；保存/取消后关闭恢复浏览态；独立新页面为允许的替代形式。新增功能必须遵守。
+- 换肤绑定规划（v1.1.18 约定）：皮肤/背景图最终应绑定「日历当前查看的月份」（看 9 月 → 9 月皮肤），由用户确认后续版本实现；当前版本皮肤跟随真实当前月份（如现在是 8 月，翻看其他月仍是 8 月皮肤），保证「只要是 8 月就是一套皮肤」。
 
 ## 当前状态（截至 2026-08-15）
 
@@ -97,7 +100,7 @@
 - 2026-08-15：开发版 1.1.2：订阅消息模板已选用并填入（纪念日提醒 + 日程提醒共用），发送字段按模板适配（纪念日 thing1/date2/date3，菜单行程 thing1/date2/time3），miniprogramState=trial 便于体验版测试。
 - 2026-08-15：开发版 1.1.3：修复“开启提醒失败”——改为点击瞬间同步弹 wx.requestSubscribeMessage（模板 ID 前端常量 CLIENT_REMINDER_TEMPLATES），收到 accept 后再异步写 subscribe_grants，避免先 await 云函数导致手势中断。
 - 2026-08-15：开发版 1.1.4：修正 1.1.3 遗留的调用错误——enableReminder 改为返回 Promise（授权仍在点击调用栈内同步发起），三个提醒按钮页面的错误提示改为展示具体原因（未授权/开启失败/模板未配置）。
-- 2026-08-15：新 UI 设计规范 V2（docs/13-新UI设计规范.md）+ 随时节换肤引擎落地（utils/solar.ts 节气/农历/节日/昼夜，theme.wxss 24 节气 + 节日 + 昼夜类，design-tokens 同步）；96/96 测试全绿，未发版（等视觉稿与 UI 重构）。
+- 2026-08-15：新 UI 设计规范 V2（docs/15-新UI设计规范.md）+ 随时节换肤引擎落地（utils/solar.ts 节气/农历/节日/昼夜，theme.wxss 24 节气 + 节日 + 昼夜类，design-tokens 同步）；96/96 测试全绿，未发版（等视觉稿与 UI 重构）。
 - 2026-08-15：V2 视觉稿出齐并验收（Qwen-Image-3.0-Pro 生成 8 张：春夏秋冬/昼夜日历 + 功能页 + 底部弹窗，见 output/imagegen/ui-*-v2/v3.png）；正式版 1.1.5 落地 V2 UI——日历农历/节气标签（节气/节日/周末/农历优先级）、分类色圆点、周一起始、月份切换胶囊、日程分类色条、功能页卡片化；节假日年度更新链路验证可用（import-holidays.cjs 带版本号可覆盖，任何年份生效）；96/96 测试全绿，已上传微信 1.1.5。
 - 2026-08-15：正式版 1.1.6 入口优化（方案 B）——①首屏即日历：已绑定用户打开即用、全程无登录按钮（微信身份静默下发）；未绑定用户进入“游客模式”显示公共日历（日期/周末/农历/节气 + 官方节假日/调休，新增公共云函数 holiday-public，仅返回公开字段）；②游客点击业务功能引导创建/加入空间；③数据仅双人可见不变，新增测试：未绑定用户调日历接口 NOT_IN_SPACE、公共节假日接口不依赖空间且无私人字段；97/97 测试全绿，holiday-public 已部署并云端验证（2026-10 国庆/调休正确返回），reminder 云函数重传修复（tcb 上传忽略 dist 导致入口缺失），已上传微信 1.1.6。
 - 2026-08-15：正式版 1.1.7 三项优化——①今日菜单：已上架菜单可编辑（名称/时间/备注/图片）、可上传菜单图片（选择→压缩→云存储 fileID）、可一键加入预选素材库；菜单新增/编辑后给已授权的另一方发订阅消息“菜单已更新：xx”（一次性授权，发后删除）；漂亮饭餐厅行程新增/编辑同样通知；②菜单 OCR 修复：微信印刷体识别失败/结果为空时自动降级百炼 qwen-vl-max 智能识别（支持手机截图/团购页，如美团双人餐截图；OCR_DASHSCOPE_API_KEY 配置在 restaurant-ocr 云函数环境变量，不提交 Git）；③主题修复：8 个页面 onShow 重新计算 themeClass，关闭“随时节自动换肤”后返回任意页面立即恢复基础风格。101/101 测试全绿；云函数 meal-plan/restaurant/restaurant-ocr/reminder 已部署；已上传微信 1.1.7。
@@ -110,4 +113,17 @@
 - 阶段 1~9 全部完成：登录 / 绑定、日历 + To Do、生理期、节假日、今日菜单、漂亮饭（搜索 / OCR / 图片 / 导航）、纪念日、旅游、主副管理、安全测试 79/79 通过、韩风 UI。
 - 2026-08-16：正式版 1.1.14 月度专属主题 UI——①主题引擎改为每月一套 theme-m1..m12（保留昼夜/节日点缀），配色集中到 design-tokens `monthlyThemes`（换年度/换设计只改一处，theme.wxss .theme-m* 同步）；②自定义底部导航栏 custom-tab-bar（tabBar.custom=true），背景跟随月度/昼夜主题，整屏底色铺满不再割裂；③图例精简：删除周末/调休/休息（格子上已标识），保留生理期×3/待办/菜单/餐厅/纪念日/旅行，改两列 grid；当天详情空态美化；④周视图跨月按当前年月判定：本月格子完整 UI、次月/上月透明弱化；⑤登录/创建/加入空间页也挂 themeClass 全局跟随。自动化实测跨月判定（2026-09-01 周：8/31 弱化、9/1-9/6 正常）与控制台无异常；101/101 测试全绿，已上传微信 1.1.14。
 - 2026-08-16：正式版 1.1.15 顶部区域全面优化——①全局自定义导航栏组件 components/custom-nav（app.json navigationStyle=custom，12 个页面全部接入）：背景跟随月度/昼夜主题渐变、标题居中完整显示、自动适配状态栏高度与右上角胶囊（getMenuButtonBoundingClientRect 预留）、非 Tab 页带返回箭头、fixed 置顶 + 同高占位不遮挡内容；②日历顶部双人信息区重排：couple 区 flex 自适应 min-width:0、昵称 max-width 170rpx 长名滚动完整展示、邀请码徽章固定右侧（字号 22rpx、主色加深、带边框），深色主题下也清晰可读。自动化实测日历页/今天吃什么页无控制台异常、昵称与邀请码完整显示；101/101 测试全绿，已上传微信 1.1.15。
-- 最新提交 90d567a（tag v1.1.15）。
+- 2026-08-16：正式版 1.1.16 机型适配——自定义导航栏占位 view 加同色渐变（消除部分机型状态栏边缘 1px 白线/接缝），固定导航栏加微弱阴影过渡；底部自定义 tabBar 去掉 border-top 改柔和上阴影（避免浅色分隔线观感）。当前模拟器（iPhone 15 Pro）实测顶部/底部无白线、导航与页面同色。101/101 测试全绿，已上传微信 1.1.16。
+- 2026-08-16：正式版 1.1.17 V3 视觉稿落地（方案 A，智谱生图 8+2 张见 output/imagegen/ui-v3-*）——①更多页由竖排列表改为 2 列圆角卡片网格（彩色圆形图标 + 名称 + 小字副标题，对齐 ui-v3-features）；②日历页今天由整格描边改为「数字套主色细圆圈」（弱化色块聚焦日期），选中保持浅粉填充 + 主色描边（对齐 ui-v3-calendar-month）。纯前端改动，typecheck / 101 测试 / build 全绿。附 scripts/zhipu-image-gen.ps1（key 仅从 ZHIPU_API_KEY 环境变量读取，绝不入库）。
+- 2026-08-16：正式版 1.1.18 月度专属背景图（用户选定「扁平极简泡水风」铺满全年）——①硅基流动 SiliconFlow 通道启用（Qwen/Qwen-Image 无水印高清，Kolors 可用；FLUX 免费档该账号不可用；scripts/siliconflow-image-gen.ps1，key 仅从 SF_API_KEY 环境变量读取）；②12 个月统一风格背景：上半约 55% 浅米白留白 + 下半水面白色波浪线 + 主元素部分浸水 + 一串气泡，无杯子/吸管/文字；元素按月度主题：1 月棉花糖雪花 / 2 月薰衣草 / 3 月樱花花瓣 / 4 月薄荷叶 / 5 月小雏菊 / 6 月纸飞机+云朵（Qwen 对云/冰块总加笑脸，多次重出后改为纸飞机，无表情）/ 7 月冰块 / 8 月柠檬片泡水（用户参考图定稿）/ 9 月麦穗 / 10 月秋柿+银杏 / 11 月咖啡豆+奶泡 / 12 月星星棉花糖；压缩为 750px JPEG q62（12 张共约 500KB）存入 images/theme-bg/m1..m12.jpg；③背景用 <image class="page-bg"> 组件承载（教训：微信 WXSS background-image 不支持本地图片，写 url('/images/...') 在模拟器/真机都不显示；需用 image 标签 + z-index:-1，容器当月主题透明，theme-base / theme-period-night 隐藏背景图），utils/theme.ts 新增 themeBgPath()，12 个页面 data/onShow 同步；④.page-bg 用 position:absolute + width/height 100%（随页面上下滚动，背景跟着内容走）；周视图 .cal-view-week .page-bg transform:scale(1.3) 截取上部留白区。模拟器实测：白天柠檬背景正常显示、夜间自动回退深色渐变（19:30 后）。typecheck / 101 测试全绿，已提交 3329a20 / debac28 / 8359d8f。
+- 2026-08-16：正式版 1.1.18 月度专属背景图 + 日历 UI 大改——①12 个月统一「扁平极简泡水风」背景（上半留白 + 下半水面波浪 + 元素泡水 + 气泡，无杯子吸管文字）：1 月棉花糖 / 2 月薰衣草 / 3 月樱花 / 4 月薄荷叶 / 5 月小雏菊 / 6 月纸飞机（Qwen 对云/冰块总加笑脸故换纸飞机）/ 7 月冰块 / 8 月柠檬片（用户参考图定稿）/ 9 月麦穗 / 10 月秋柿 / 11 月咖啡豆 / 12 月星星棉花糖，images/theme-bg/m1..m12.jpg（750px JPEG q62，共约 500KB）；②背景用 <image class="page-bg"> 承载（教训：WXSS background-image 不支持本地图片，必须 image 标签 + z-index:-1 + 当月容器透明；theme-base 隐藏），themeBgPath() 12 页同步，position:absolute 随滚动，周视图 scale(1.3) 截上部；③图例重做：圆点预览 + 「图例」+ 展开/收起胶囊按钮，展开为两列圆点胶囊 chips，卡片圆角加大、虚线分隔；④当日详情面板可收起：标题行=日期+周几+「N 项安排」+ 收起/展开按钮，快捷按钮改图标在上文字在下两行网格；⑤节日每年自动：solar.ts 新增 festivalNameOf()（农历节日 春节/元宵/清明/端午/七夕/中秋/重阳/冬至 + 公历 2/14 情人节），日历格子优先级 法定节假日/调休 > 节日 > 周末 > 节气 > 农历，当日详情加 ✨ 节日 chip；⑥夜间模式独立开关（更多页 🌙 夜间模式，themeNight 存储，强制 theme-period-night）；⑦日历月/周/年视图支持横向滑动切换月份/年份（touchstart/touchend，阈值 60px，垂直滚动不触发）；⑧修复深浅冲突：夜间深浅只由「夜间模式」开关决定，随时节自动换肤不再自动强制夜间（夜晚且夜间开关关时回退 theme-period-day 白天档，浅色背景图仍显示；保留黄昏微暖档）。逻辑实测：21:01 夜间开关关/自动开 → theme-m8 theme-period-day。103/103 测试全绿，已提交 3329a20 / debac28 / 8359d8f / 0d5fc95 / 5b32506。
+- 2026-08-16：正式版 1.1.18 大版本整合（用户要求除低优先级全做）——①换肤绑定日历查看月份：theme.ts 新增 setThemeMonth/viewedMonth，日历页所有换月入口 applyTheme() 同步全局主题与背景图，其他页面 onShow 自动跟随；②日期格子随月份皮肤：monthlyThemes 新增 cellBg（=gradB），theme.wxss --cell-bg（夜间覆盖深色），day-cell/month-card 改用 var(--cell-bg)；③更多页头部统一：删除「更多」大标题+副标题；④前端错误监控：新云函数 client-log（App.onError/onUnhandledRejection 上报，每用户每分钟 20 条限流，client_logs ADMINONLY）；⑤备份自动化：daily-maintenance 每日全量备份到云存储 backups/daily/YYYY-MM-DD.json，backup_meta 记录，保留 7 天；⑥数据导出增强：JSON + CSV 分表 + 图片清单，管理页展示 CSV 列表；⑦纪念日提醒一次性授权提示。云端已建 client_logs/backup_meta 集合（ADMINONLY）；三个云函数已用 tcb CLI zip 模式部署成功并实测（client-log 返回 ok；daily-maintenance 生成 backups/daily/2026-08-16.json 58KB）。教训：新云函数必须带根目录 index.js（require dist），否则 tcb 部署报 ZipCodeFmt（mjs: command not found / filename not matched: index.js）；tcb 部署用 --deployMode zip + 管道 y 确认。103/103 测试全绿，已提交 d5d186b / 69e5340。
+- 2026-08-16：正式版 1.1.18 大版本整合（用户要求除低优先级全做）——①换肤绑定日历查看月份：theme.ts 新增 setThemeMonth/viewedMonth，日历页所有换月入口 applyTheme() 同步全局主题与背景图（含底部 tabBar 实时更新），其他页面 onShow 自动跟随；②日期格子随月份皮肤：monthlyThemes 新增 cellBg（=gradB），theme.wxss --cell-bg（夜间覆盖深色），day-cell/month-card 改用 var(--cell-bg)；③更多页头部统一：删除「更多」大标题+副标题；④前端错误监控：新云函数 client-log（App.onError/onUnhandledRejection 上报，每用户每分钟 20 条限流，client_logs ADMINONLY）；⑤备份自动化：daily-maintenance 每日全量备份到云存储 backups/daily/YYYY-MM-DD.json，backup_meta 记录，保留 7 天；⑥数据导出增强：JSON + CSV 分表 + 图片清单，管理页展示 CSV 列表；⑦纪念日提醒一次性授权提示；⑧底部导航栏跟随月度皮肤：custom-tab-bar 背景改 var(--cell-bg)（8 月薄荷青实测生效，夜间自动深色）。云端已建 client_logs/backup_meta 集合（ADMINONLY）；三个云函数已用 tcb CLI zip 模式部署成功并实测。教训：新云函数必须带根目录 index.js（require dist），否则 tcb 部署报 ZipCodeFmt；tcb 部署用 --deployMode zip + 管道 y 确认。103/103 测试全绿，已提交 d5d186b / 69e5340 / 81c4594。
+- 2026-08-16：正式版 1.1.18 大版本整合（用户要求除低优先级全做）——①换肤绑定日历查看月份：theme.ts 新增 setThemeMonth/viewedMonth，日历页所有换月入口 applyTheme() 同步全局主题与背景图（含底部 tabBar 实时更新），其他页面 onShow 自动跟随；②日期格子随月份皮肤：monthlyThemes 新增 cellBg（=gradB），theme.wxss --cell-bg（夜间覆盖深色），day-cell/month-card 改用 var(--cell-bg)；③更多页头部统一：删除「更多」大标题+副标题；④前端错误监控：新云函数 client-log（App.onError/onUnhandledRejection 上报，每用户每分钟 20 条限流，client_logs ADMINONLY）；⑤备份自动化：daily-maintenance 每日全量备份到云存储 backups/daily/YYYY-MM-DD.json，backup_meta 记录，保留 7 天；⑥数据导出增强：JSON + CSV 分表 + 图片清单，管理页展示 CSV 列表；⑦纪念日提醒一次性授权提示；⑧底部导航栏跟随月度皮肤：custom-tab-bar 背景改 var(--cell-bg)；⑨设置与数据页 UI 协调：删除重复大标题（导航已有），主/副管理改卡片标题旁胶囊徽章，数据概览 3 列精确计算，操作记录图标底色按模块分类色（me/餐厅/纪念日/旅行/生理期/回收站/空间），回收站勾选改自定义圆角方块，家庭管理显示昵称+头像，按钮字号统一 28rpx。云端已建 client_logs/backup_meta 集合（ADMINONLY）；三个云函数已用 tcb CLI zip 模式部署成功并实测。教训：新云函数必须带根目录 index.js（require dist），否则 tcb 部署报 ZipCodeFmt；tcb 部署用 --deployMode zip + 管道 y 确认。103/103 测试全绿，已提交 d5d186b / 69e5340 / 81c4594 / 2ff34bd。
+- 2026-08-16：正式版 1.1.18 返回箭头修复——custom-nav 原「‹」字符在部分字体渲染成黑色方块（用户圈选），改 CSS border 旋转画 chevron（所有带返回页生效）；右上角 ⋯/⊙ 为微信系统胶囊按钮不可改，布局已预留间距不遮挡。已提交 6a8554e。
+- 2026-08-16：正式版 1.1.18 返回按钮协调——用户两轮圈选顶部返回键+右上角系统胶囊，返回键从「大白圆圈+阴影」改为「柔和圆角矩形+透明白底+细边框」（72rpx、圆角20rpx），与系统胶囊风格协调；右上 ⋯/⊙ 仍为微信系统按钮不可改。已提交 d3635d6。
+- 2026-08-16：正式版 1.1.18 当日详情面板对齐——头部日期行下加虚线分隔、快捷按钮统一 116rpx 等高（3 列精确 calc((100%-32rpx)/3)、图标 40rpx 上文字下）、按钮区与日程列表间加虚线分隔；模拟器实测整齐无报错。另：状态栏黑边加固（导航/页面加 background-color 兜底，c933644）。已提交 a00f06b。
+- 2026-08-16：正式版 1.1.18 真机深色模式状态栏黑块修复——根因：微信要求小程序声明 darkmode:true 才会随系统深色模式适配，未声明时官方组件强制深色而自绘页面仍浅色，真机上灵动岛两侧状态栏出现黑块（模拟器不出现）。修复：app.json window 增加 darkmode:true、backgroundTextStyle 改 dark；theme.ts 新增 applyStatusBarStyle()（currentThemeClass 时调用 wx.setNavigationBarColor：浅色主题黑字 #000000、夜间白字 #ffffff）。用户验证：手机系统深色模式下打开，黑块消失。103/103 测试全绿，已提交 64ae62f。
+- 2026-08-16：正式版 1.1.18 三列布局修复——用户绿圈指出日历当天面板 6 个快捷按钮显示成 2 列 3 行，要求一行均等排 3 个。根因：WXSS 对 `calc((100% - 32rpx) / 3)` 除法支持不稳定，第 3 个放不下自动换行。修复：3 处（日历快捷按钮 .quick-row、年视图 .month-card、管理页 .count-item）全部改为 `display:grid; grid-template-columns: repeat(3, 1fr)`（图例已用 grid 渲染正常，可信）。教训：小程序 WXSS 三列均分优先用 grid，别用 calc 除法。103/103 测试全绿，已提交 4f58185。
+- 2026-08-16：正式版 1.1.18 代码整理 + 类型检查补全——①删除 19 个一次性/过期脚本（auto-* 阶段自动化 ×10、apply-acceptance、db-inspect、db-cleanup-e2e、db-bootstrap-phase6、seed-holidays-2026、e2e-meal-trash/e2e-restaurant/e2e-period-* ×4，均在 Git 历史可恢复）；②根因发现：原 `npm run typecheck` 从未覆盖云函数代码（路径 include 不匹配），云函数层长期无类型检查；新增 tsconfig.cloud.json（覆盖 cloudfunctions/_shared + 各函数 src + scripts/*.ts + 自定义 typings），`npm run typecheck` 改为双工程跑；③新建 cloudfunctions/typings/wx-server-sdk.d.ts 收敛 SDK 类型（云端装 2.6.3、本地 4.x 类型过宽，get()/count() 返回 string|void 联合导致 .data 误报；仅类型层不影响运行时）；④删除 TxCloudRepo 无人调用的 deleteTodo 死代码（接口/内存版均无此方法）；⑤import-holidays.cjs 升级：--template 生成年度模板、--dry-run 只校验、严格日期/重复/type 校验（修掉 JS Date 把 2027-02-30 进位成 3 月 2 日的漏洞）；⑥docs 重命名去重：13-备份与年度节假日更新→13-备份与数据维护、13-新UI设计规范→15-新UI设计规范（15 号空缺），新增第 9 节“年度 UI 换装指引（换一年只改三处）”；⑦README 增加“架构分层与未来 APP 扩展”章节（APP 复用 packages/_shared，只替换 api 适配层）；⑧npm 脚本新增 test:e2e（tsx scripts/cloud-e2e-manage.ts）。103/103 测试 + 双工程 typecheck + build 全绿，待提交。
+- 最新提交 bfcb4dd（1.1.18 代码整理：f5fede1 云函数类型检查+删 19 个脚本+节假日工具升级；此前 4f58185 三列 grid、64ae62f 深色状态栏）。

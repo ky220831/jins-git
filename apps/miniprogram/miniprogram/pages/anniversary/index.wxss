@@ -134,6 +134,13 @@
   margin-top: 8rpx;
 }
 
+.reminder-tip {
+  text-align: center;
+  font-size: 20rpx;
+  color: var(--color-text-secondary);
+  padding-bottom: 8rpx;
+}
+
 .form-btn {
   flex: 1;
   font-size: 28rpx;

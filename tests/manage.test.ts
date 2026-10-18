@@ -56,7 +56,7 @@ test('数据导出：主账号拿到完整 JSON 载荷，副账号被拒绝', as
   const { repo, manageService } = await fresh();
   const restaurant = new RestaurantService(repo);
   await restaurant.createRestaurant('openid-A', { name: '私密餐厅', note: '不导出给第三方' });
-  const { payload, fileName } = await manageService.buildExport('openid-A');
+  const { payload, fileName, csvFiles } = await manageService.buildExport('openid-A');
   assert.ok(fileName.endsWith('.json'));
   assert.equal((payload.data as { restaurants: unknown[] }).restaurants.length, 1);
   assert.equal(
@@ -64,6 +64,10 @@ test('数据导出：主账号拿到完整 JSON 载荷，副账号被拒绝', as
     '私密餐厅',
   );
   assert.ok((payload.exportedAt as string).endsWith('Z'));
+  // CSV 分表（v1.1.18 增强导出）
+  assert.ok(csvFiles.some((f) => f.name === 'restaurants.csv'));
+  assert.ok(csvFiles.every((f) => f.content.length > 0));
+  assert.ok(Array.isArray(payload.images));
   await expectError(manageService.buildExport('openid-B'), ErrorCodes.FORBIDDEN);
 });
 

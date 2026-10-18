@@ -14,7 +14,7 @@ import { RestaurantService } from '../../services/restaurant';
 import { SpaceService } from '../../services/space';
 import { TrashService } from '../../services/trash';
 import { formatDate, formatDateTime } from '../../utils/time';
-import { currentThemeClass } from '../../utils/theme';
+import { currentThemeClass, themeBgPath } from '../../utils/theme';
 
 interface TrashRow extends TrashItemView {
   collectionLabel: string;
@@ -30,6 +30,7 @@ interface MemberRow extends SpaceMemberView {
 interface AuditRow extends AuditLogView {
   timeLabel: string;
   actionLabel: string;
+  module: string;
 }
 
 const ACTION_LABELS: Record<string, string> = {
@@ -95,6 +96,18 @@ function actionIcon(action: string): string {
   return '📋';
 }
 
+/** 审计动作 → 模块 key（操作记录图标底色分类，与功能页同色系） */
+function actionModule(action: string): string {
+  if (action.startsWith('meal')) return 'meal';
+  if (action.startsWith('restaurant')) return 'restaurant';
+  if (action.startsWith('anniversary')) return 'anniversary';
+  if (action.startsWith('trip')) return 'trip';
+  if (action.startsWith('period')) return 'period';
+  if (action.startsWith('trash')) return 'trash';
+  if (action.startsWith('space') || action.startsWith('member')) return 'space';
+  return 'todo';
+}
+
 const COLLECTION_OPTIONS = [
   { label: '全部类型', value: '' },
   ...Object.entries(COLLECTION_LABELS).map(([value, label]) => ({ label, value })),
@@ -107,6 +120,7 @@ function collectionLabel(collection: string): string {
 Page({
   data: {
     themeClass: currentThemeClass(),
+    themeBg: themeBgPath(),
     isOwner: false,
     loading: false,
     error: '',
@@ -129,6 +143,8 @@ Page({
     exportUrl: '',
     exportName: '',
     exportSizeLabel: '',
+    csvFiles: [] as { name: string; tempFileURL: string; sizeBytes: number }[],
+    exportImages: [] as string[],
     space: null as SpaceView | null,
     members: [] as MemberRow[],
     inviteCode: '',
@@ -139,7 +155,7 @@ Page({
   },
 
   onShow() {
-    this.setData({ themeClass: currentThemeClass() });
+    this.setData({ themeClass: currentThemeClass(), themeBg: themeBgPath() });
     this.refresh();
   },
 
@@ -173,6 +189,7 @@ Page({
             timeLabel: formatDateTime(log.createdAt),
             actionLabel: ACTION_LABELS[log.action] || log.action,
             icon: actionIcon(log.action),
+            module: actionModule(log.action),
           })),
           error: '',
         });
@@ -333,17 +350,19 @@ Page({
 
   async onExport() {
     if (this.data.exporting) return;
-    this.setData({ exporting: true, exportUrl: '', exportName: '', exportSizeLabel: '' });
+    this.setData({ exporting: true, exportUrl: '', exportName: '', exportSizeLabel: '', csvFiles: [], exportImages: [] });
     try {
       const res = await ManageService.exportJson();
       this.setData({
         exportUrl: res.tempFileURL,
         exportName: res.fileName,
         exportSizeLabel: res.sizeBytes > 1024 ? `${(res.sizeBytes / 1024).toFixed(1)} KB` : `${res.sizeBytes} B`,
+        csvFiles: res.csvFiles || [],
+        exportImages: res.images || [],
       });
       wx.showModal({
         title: '导出成功',
-        content: `文件：${res.fileName}\n链接 1 小时内有效，可复制到电脑浏览器下载。`,
+        content: `JSON：${res.fileName}\nCSV 表格：${(res.csvFiles || []).length} 个\n图片清单：${(res.images || []).length} 项\n链接 1 小时内有效，可复制到电脑浏览器下载。`,
         confirmText: '复制链接',
         cancelText: '关闭',
         success: (m) => {
@@ -360,6 +379,12 @@ Page({
   onCopyExportUrl() {
     if (!this.data.exportUrl) return;
     wx.setClipboardData({ data: this.data.exportUrl });
+  },
+
+  onCopyCsv(e: WechatMiniprogram.TouchEvent) {
+    const url = e.currentTarget.dataset.url as string;
+    if (!url) return;
+    wx.setClipboardData({ data: url });
   },
 
   onCopyInvite() {

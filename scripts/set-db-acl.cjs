@@ -30,6 +30,10 @@ const ALL_COLLECTIONS = [
   'anniversaries',
   'trips',
   'trip_plans',
+  'subscribe_grants',
+  'rate_limits',
+  'client_logs',
+  'backup_meta',
 ];
 
 const app = CloudBase.init({

@@ -6,7 +6,8 @@
   z-index: 999;
   height: 100rpx;
   padding-bottom: env(safe-area-inset-bottom);
-  background: var(--color-bg);
+  /* 跟随月度皮肤：使用月份深色调（与日期格子一致），夜间自动深色 */
+  background: var(--cell-bg, var(--color-bg));
   border-top: none;
   box-shadow: 0 -2rpx 12rpx rgba(80, 70, 90, 0.08);
   display: flex;

@@ -773,6 +773,10 @@ export interface ExportDataResult {
   fileName: string;
   tempFileURL: string;
   sizeBytes: number;
+  /** CSV 分表文件（v1.1.18 增强导出） */
+  csvFiles?: { name: string; tempFileURL: string; sizeBytes: number }[];
+  /** 图片云存储 fileID 清单（便于归档/打包） */
+  images?: string[];
 }
 
 export interface TrashBatchInput {

@@ -1,20 +1,14 @@
 <view class="container {{themeClass}} features-page">
+  <image class="page-bg" src="{{themeBg}}" mode="aspectFill"></image>
   <custom-nav title="更多" />
-  <view class="page-head">
-    <view class="page-title">更多</view>
-    <view class="page-sub">日历在左侧 Tab · 点这里进入各模块</view>
-  </view>
 
   <view class="error-text" wx:if="{{error}}">{{error}}</view>
 
-  <view class="feature-list">
+  <view class="feature-grid">
     <view class="feature-card" wx:for="{{featureList}}" wx:key="key" data-key="{{item.key}}" bindtap="onOpenFeature">
       <view class="fe-icon ic-{{item.key}}">{{item.icon}}</view>
-      <view class="fe-body">
-        <view class="fe-label">{{item.label}}</view>
-        <view class="fe-sub">{{item.sub}}</view>
-      </view>
-      <text class="fe-arrow">›</text>
+      <view class="fe-label">{{item.label}}</view>
+      <view class="fe-sub">{{item.sub}}</view>
     </view>
   </view>
 
@@ -27,9 +21,19 @@
     <view class="toggle-row">
       <view>
         <view class="tip-title">🎨 随时节自动换肤</view>
-        <view class="tip-text">跟随二十四节气与昼夜自动切换配色；关闭后锁定基础风格</view>
+        <view class="tip-text">跟随当月主题与二十四节气换肤；夜间深浅由「夜间模式」单独控制</view>
       </view>
       <switch checked="{{themeAuto}}" bindchange="onToggleTheme" color="#F08A9B" />
+    </view>
+  </view>
+
+  <view class="tip-card">
+    <view class="toggle-row">
+      <view>
+        <view class="tip-title">🌙 夜间模式</view>
+        <view class="tip-text">开启后强制使用夜间深色，与自动换肤互不干扰</view>
+      </view>
+      <switch checked="{{nightMode}}" bindchange="onToggleNight" color="#7FA8C9" />
     </view>
   </view>
 </view>

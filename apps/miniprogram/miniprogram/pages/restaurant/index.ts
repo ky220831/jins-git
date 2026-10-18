@@ -7,7 +7,7 @@ import {
   RestaurantService,
 } from '../../services/restaurant';
 import { SpaceService } from '../../services/space';
-import { currentThemeClass } from '../../utils/theme';
+import { currentThemeClass, themeBgPath } from '../../utils/theme';
 import { enableReminder } from '../../utils/reminder';
 
 interface RestaurantRow extends RestaurantView {
@@ -49,6 +49,7 @@ function normalizeCategory(v: string): string {
 Page({
   data: {
     themeClass: currentThemeClass(),
+    themeBg: themeBgPath(),
     restaurants: [] as RestaurantRow[],
     visits: [] as VisitRow[],
     searchResults: [] as RestaurantSearchItem[],
@@ -82,7 +83,7 @@ Page({
   },
 
   onShow() {
-    this.setData({ themeClass: currentThemeClass() });
+    this.setData({ themeClass: currentThemeClass(), themeBg: themeBgPath() });
     this.refresh();
   },
 

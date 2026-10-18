@@ -25,33 +25,38 @@
   text-align: center;
 }
 
-.feature-list {
+.feature-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20rpx;
   margin-top: 8rpx;
 }
 
 .feature-card {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 24rpx;
-  padding: 28rpx 28rpx;
-  margin-top: 20rpx;
+  gap: 12rpx;
+  width: calc((100% - 20rpx) / 2);
+  box-sizing: border-box;
+  padding: 32rpx 16rpx 28rpx;
   background: var(--color-surface);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   box-shadow: var(--shadow-card);
 }
 
 .feature-card:active {
-  transform: scale(0.98);
+  transform: scale(0.97);
 }
 
 .fe-icon {
-  width: 88rpx;
-  height: 88rpx;
-  border-radius: var(--radius-md);
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 40rpx;
+  font-size: 44rpx;
   flex-shrink: 0;
 }
 
@@ -66,21 +71,14 @@
   font-size: 30rpx;
   font-weight: 600;
   color: var(--color-text);
-}
-
-.fe-body {
-  flex: 1;
+  text-align: center;
 }
 
 .fe-sub {
-  margin-top: 6rpx;
-  font-size: 22rpx;
+  font-size: 20rpx;
   color: var(--color-text-secondary);
-}
-
-.fe-arrow {
-  font-size: 40rpx;
-  color: var(--color-text-secondary);
+  text-align: center;
+  line-height: 1.4;
 }
 
 .tip-card {
