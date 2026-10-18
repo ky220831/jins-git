@@ -155,20 +155,35 @@
   background: #FFC28E;
 }
 
-.legend {
-  display: flex;
-  gap: 24rpx;
-  margin-top: 16rpx;
-  padding: 12rpx 20rpx;
+.legend-card {
+  margin-top: 20rpx;
   background: var(--color-surface);
-  border-radius: 999rpx;
+  border-radius: var(--radius-lg);
+  padding: 24rpx 28rpx;
   box-shadow: var(--shadow-soft);
 }
 
-.legend-item {
+.legend-title {
+  font-size: 24rpx;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  margin-bottom: 16rpx;
+}
+
+.legend-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+}
+
+.legend-chip {
   display: flex;
   align-items: center;
-  gap: 8rpx;
+  gap: 10rpx;
+  padding: 8rpx 18rpx;
+  background: #FFF9F4;
+  border: 2rpx solid #FBE9DC;
+  border-radius: 999rpx;
   font-size: 22rpx;
   color: var(--color-text-secondary);
 }

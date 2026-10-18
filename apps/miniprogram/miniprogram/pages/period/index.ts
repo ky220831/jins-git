@@ -28,7 +28,8 @@ Page({
     periodVisible: true,
     isOwner: false,
     saving: false,
-    mode: 'start' as 'start' | 'end',
+    mode: 'start' as 'start' | 'edit',
+    editingId: '',
     startDate: '',
     endDate: '',
     ongoingRecord: null as { id: string; startDate: string } | null,
@@ -63,6 +64,7 @@ Page({
         today <= addDays(latest.startDate, 21)
           ? { id: latest.id, startDate: latest.startDate }
           : null;
+      const editingId = this.data.editingId;
       this.setData({
         loading: false,
         periodVisible: info.calendarVisible,
@@ -84,11 +86,12 @@ Page({
           }))
           .sort((a, b) => (a.startDate < b.startDate ? -1 : 1)),
         isOwner: space.space.myRole === ROLE_OWNER,
-        mode: ongoing ? 'end' : 'start',
+        mode: editingId || ongoing ? 'edit' : 'start',
+        editingId: editingId || (ongoing ? ongoing.id : ''),
         ongoingRecord: ongoing,
         ongoingEndMax: ongoing ? addDays(ongoing.startDate, 30) : '',
-        endDate: ongoing ? today : this.data.endDate,
-        startDate: ongoing ? ongoing.startDate : this.data.startDate,
+        endDate: editingId ? this.data.endDate : ongoing ? today : this.data.endDate,
+        startDate: editingId ? this.data.startDate : ongoing ? ongoing.startDate : this.data.startDate,
         error: '',
       });
     } catch (err) {
@@ -100,7 +103,11 @@ Page({
   },
 
   onStartChange(e: WechatMiniprogram.PickerChange) {
-    this.setData({ startDate: e.detail.value });
+    const startDate = e.detail.value;
+    this.setData({
+      startDate,
+      ...(this.data.mode === 'edit' ? { ongoingEndMax: addDays(startDate, 30) } : {}),
+    });
   },
 
   onEndChange(e: WechatMiniprogram.PickerChange) {
@@ -112,17 +119,20 @@ Page({
     this.setData({ saving: true });
     try {
       const today = dateKey(new Date());
-      if (this.data.mode === 'end' && this.data.ongoingRecord) {
+      if (this.data.mode === 'edit' && this.data.editingId) {
+        const start = this.data.startDate;
         const end = this.data.endDate;
-        if (end < this.data.ongoingRecord.startDate) {
+        if (end < start) {
           wx.showToast({ title: '结束日期不能早于开始日期', icon: 'none' });
           return;
         }
-        await PeriodService.updateEnd({
-          recordId: this.data.ongoingRecord.id,
+        await PeriodService.update({
+          recordId: this.data.editingId,
+          startDate: start,
           endDate: end,
         });
-        wx.showToast({ title: '已补录结束日期', icon: 'success' });
+        this.setData({ editingId: '' });
+        wx.showToast({ title: '已保存修改', icon: 'success' });
       } else {
         const start = this.data.startDate;
         if (!start) {
@@ -167,6 +177,20 @@ Page({
           wx.showToast({ title: err instanceof ApiError ? err.message : '删除失败', icon: 'none' });
         }
       },
+    });
+  },
+
+  onEditRecord(e: WechatMiniprogram.TouchEvent) {
+    const id = e.currentTarget.dataset.id as string;
+    const record = this.data.periodRecords.find((r) => r.id === id);
+    if (!record) return;
+    this.setData({
+      mode: 'edit',
+      editingId: id,
+      startDate: record.startDate,
+      endDate: record.endDate,
+      ongoingRecord: null,
+      ongoingEndMax: addDays(record.startDate, 30),
     });
   },
 });

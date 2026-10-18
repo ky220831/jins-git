@@ -248,6 +248,13 @@ export interface UpdatePeriodEndInput {
   endDate: string;
 }
 
+/** 修改生理期实际记录的开始/结束日期（改错日期时用，替换而非新增） */
+export interface UpdatePeriodInput {
+  recordId: string;
+  startDate: string;
+  endDate: string;
+}
+
 // ---- 今日菜单 ----
 export const MEAL_PLAN_STATUS_PUBLISHED = 'published';
 export const MEAL_PLAN_STATUS_OFFLINE = 'offline';

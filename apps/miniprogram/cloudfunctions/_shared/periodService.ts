@@ -8,6 +8,7 @@ import {
   type PeriodRecordView,
   type RecordPeriodInput,
   type SetPeriodVisibilityInput,
+  type UpdatePeriodInput,
   type UpdatePeriodEndInput,
 } from '../../../../packages/types/src';
 import { requireSpaceMember } from './access';
@@ -148,6 +149,54 @@ export class PeriodService {
       spaceId,
       actorUserId: userId,
       action: 'period.record.update_end',
+      targetType: 'period_record',
+      targetId: recordId,
+      result: 'success',
+      createdAt: now,
+    });
+    return this.listViews(spaceId);
+  }
+
+  /** 修改实际记录的开始/结束日期（替换原记录，不产生新记录） */
+  async update(
+    providerUserId: string,
+    input: UpdatePeriodInput,
+  ): Promise<PeriodRecordView[]> {
+    const { spaceId, userId } = await requireSpaceMember(this.repo, providerUserId);
+    const recordId = input?.recordId?.trim();
+    const startDate = (input?.startDate ?? '').trim();
+    const endDate = (input?.endDate ?? '').trim();
+    if (!recordId) {
+      throw new AppError(ErrorCodes.VALIDATION, '缺少生理期记录 ID');
+    }
+    if (!isDateString(startDate) || !isDateString(endDate)) {
+      throw new AppError(ErrorCodes.VALIDATION, '生理期日期格式不正确');
+    }
+    if (startDate > endDate) {
+      throw new AppError(ErrorCodes.VALIDATION, '开始日期不能晚于结束日期');
+    }
+    if (endDate > addDays(startDate, 31)) {
+      throw new AppError(ErrorCodes.VALIDATION, '结束日期超出合理范围，请检查');
+    }
+    const record = await this.repo.findPeriodRecordById(spaceId, recordId);
+    if (!record) {
+      throw new AppError(ErrorCodes.NOT_FOUND, '生理期记录不存在');
+    }
+    if (record.type !== PERIOD_TYPE_ACTUAL) {
+      throw new AppError(ErrorCodes.VALIDATION, '预测记录不能修改');
+    }
+    const now = this.clock();
+    await this.repo.updatePeriodRecord(spaceId, recordId, {
+      startDate,
+      endDate,
+      updatedAt: now,
+    });
+    await this.recomputePrediction(spaceId, now);
+    await this.repo.writeAudit({
+      id: newId('al'),
+      spaceId,
+      actorUserId: userId,
+      action: 'period.record.update',
       targetType: 'period_record',
       targetId: recordId,
       result: 'success',

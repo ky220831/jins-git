@@ -7,15 +7,19 @@
   <view class="error-text" wx:if="{{error}}">{{error}}</view>
 
   <view class="card">
-    <view class="card-title">{{mode === 'end' ? '补录结束日期' : '记录开始日期'}}</view>
-    <block wx:if="{{mode === 'end' && ongoingRecord}}">
-      <view class="ongoing-line">🌸 本次生理期已从 {{ongoingRecord.startDate}} 开始</view>
-      <view class="field-label">结束日期（可在生理期期间随时补录）</view>
-      <picker mode="date" value="{{endDate}}" start="{{ongoingRecord.startDate}}" end="{{ongoingEndMax}}" bindchange="onEndChange">
+    <view class="card-title">{{mode === 'edit' ? '修改本次记录' : '记录开始日期'}}</view>
+    <block wx:if="{{mode === 'edit'}}">
+      <view class="ongoing-line" wx:if="{{ongoingRecord}}">🌸 本次生理期已从 {{ongoingRecord.startDate}} 开始</view>
+      <view class="field-label">开始日期</view>
+      <picker mode="date" value="{{startDate}}" bindchange="onStartChange">
+        <view class="picker-value">{{startDate}}</view>
+      </picker>
+      <view class="field-label">结束日期</view>
+      <picker mode="date" value="{{endDate}}" start="{{startDate}}" end="{{ongoingEndMax}}" bindchange="onEndChange">
         <view class="picker-value">{{endDate}}</view>
       </picker>
-      <view class="form-tip">例如 8.14 开始，8.21 结束，就在 8.14~8.21 期间补录结束日期</view>
-      <button class="btn-primary save-btn" bindtap="onSave" loading="{{saving}}" disabled="{{saving}}">补录结束日期</button>
+      <view class="form-tip">改错日期直接修改后保存即可，不会再生成重复记录</view>
+      <button class="btn-primary save-btn" bindtap="onSave" loading="{{saving}}" disabled="{{saving}}">保存修改</button>
     </block>
     <block wx:else>
       <view class="field-label">开始日期</view>
@@ -43,7 +47,10 @@
         <view class="period-range">{{item.rangeLabel}}</view>
         <view class="period-meta">{{item.metaLabel}}</view>
       </view>
-      <view class="period-delete" wx:if="{{isOwner && item.type === 'actual'}}" data-id="{{item.id}}" bindtap="onDelete">删除</view>
+      <view class="period-actions">
+        <view class="period-edit" wx:if="{{item.type === 'actual'}}" data-id="{{item.id}}" bindtap="onEditRecord">修改</view>
+        <view class="period-delete" wx:if="{{isOwner && item.type === 'actual'}}" data-id="{{item.id}}" bindtap="onDelete">删除</view>
+      </view>
     </view>
     <view class="period-empty" wx:if="{{!periodRecords.length}}">还没有记录，选择日期保存第一条吧</view>
   </view>

@@ -49,15 +49,18 @@
     </view>
   </view>
 
-  <view class="legend">
-    <view class="legend-item"><view class="legend-dot period-ongoing"></view>生理期进行中</view>
-    <view class="legend-item"><view class="legend-dot period-predicted"></view>生理期预计</view>
-    <view class="legend-item"><view class="legend-dot period-past"></view>生理期已过</view>
-    <view class="legend-item"><view class="legend-dot rest"></view>🔵 休息</view>
-    <view class="legend-item"><view class="legend-dot weekend"></view>周末</view>
-    <view class="legend-item"><view class="legend-dot makeup"></view>调休</view>
-    <view class="legend-item"><view class="legend-dot todo"></view>To Do</view>
-    <view class="legend-item"><view class="legend-dot event"></view>日程</view>
+  <view class="legend-card">
+    <view class="legend-title">图例</view>
+    <view class="legend-grid">
+      <view class="legend-chip"><view class="legend-dot period-ongoing"></view><text>生理期进行中</text></view>
+      <view class="legend-chip"><view class="legend-dot period-predicted"></view><text>生理期预计</text></view>
+      <view class="legend-chip"><view class="legend-dot period-past"></view><text>生理期已过</text></view>
+      <view class="legend-chip"><view class="legend-dot rest"></view><text>休息</text></view>
+      <view class="legend-chip"><view class="legend-dot weekend"></view><text>周末</text></view>
+      <view class="legend-chip"><view class="legend-dot makeup"></view><text>调休</text></view>
+      <view class="legend-chip"><view class="legend-dot todo"></view><text>To Do</text></view>
+      <view class="legend-chip"><view class="legend-dot event"></view><text>日程</text></view>
+    </view>
   </view>
 
   <view class="error-text" wx:if="{{error}}">{{error}}</view>

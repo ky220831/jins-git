@@ -4,6 +4,7 @@ import type {
   PeriodRecordView,
   RecordPeriodInput,
   UpdatePeriodEndInput,
+  UpdatePeriodInput,
 } from '../../../../../packages/types/src';
 import { CloudRepo } from '../../_shared/cloudRepo';
 import { createHandler } from '../../_shared/handler';
@@ -13,6 +14,7 @@ const service = new PeriodService(new CloudRepo());
 
 type PeriodRecordEvent =
   | ({ action: 'add' } & RecordPeriodInput)
+  | ({ action: 'update' } & UpdatePeriodInput)
   | ({ action: 'update-end' } & UpdatePeriodEndInput)
   | { action: 'list' }
   | ({ action: 'delete' } & DeletePeriodInput);
@@ -25,6 +27,9 @@ export const main = createHandler<PeriodRecordEvent, PeriodRecordView[] | { ok: 
     }
     if (event?.action === 'update-end') {
       return service.updateEnd(OPENID, event);
+    }
+    if (event?.action === 'update') {
+      return service.update(OPENID, event);
     }
     if (event?.action === 'delete') {
       await service.delete(OPENID, event);
