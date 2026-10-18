@@ -2,10 +2,11 @@
   <!-- 顶部：双人爱心连接 + 右上角小邀请码 -->
   <view class="top-bar">
     <view class="couple">
-      <view class="mini-avatar me" bindtap="onStartEditName">
-        <text class="mini-emoji">{{isOwner ? '👑' : '💗'}}</text>
-        <text class="mini-name {{myNameLong ? 'long' : ''}}">{{myDisplayName}}</text>
-      </view>
+        <view class="mini-avatar me" bindtap="onStartEditName">
+          <text class="mini-emoji">{{isOwner ? '👑' : '💗'}}</text>
+          <text class="mini-name {{myNameLong ? 'long' : ''}}">{{myDisplayName}}</text>
+          <view class="edit-badge" catchtap="onStartEditName">✏️</view>
+        </view>
       <view class="heart">❤️</view>
       <view class="mini-avatar">
           <text class="mini-emoji">{{isOwner ? '💗' : '👑'}}</text>
@@ -114,13 +115,18 @@
 
   </view>
 
-  <!-- 昵称编辑 -->
-  <view class="name-edit" wx:if="{{showNameEdit}}">
-    <view class="name-edit-title">改我的昵称</view>
-    <input class="input" placeholder="最多 16 字" value="{{nameInput}}" bindinput="onNameInput" maxlength="16" />
-    <view class="name-edit-actions">
-      <button class="btn-secondary name-edit-btn" bindtap="onHideNameEdit">取消</button>
-      <button class="btn-primary name-edit-btn" bindtap="onSaveName" loading="{{savingName}}" disabled="{{savingName}}">保存</button>
+  <!-- 昵称编辑（底部弹窗） -->
+  <view class="modal" wx:if="{{showNameEdit}}">
+    <view class="mask" bindtap="onHideNameEdit"></view>
+    <view class="sheet">
+      <view class="sheet-handle"></view>
+      <view class="form-title">改我的昵称</view>
+      <view class="field-label">昵称（最多 16 字）</view>
+      <textarea class="input textarea auto-grow" placeholder="最多 16 字" value="{{nameInput}}" bindinput="onNameInput" maxlength="16" auto-height />
+      <view class="form-actions">
+        <button class="btn-secondary form-btn" bindtap="onHideNameEdit">取消</button>
+        <button class="btn-primary form-btn" bindtap="onSaveName" loading="{{savingName}}" disabled="{{savingName}}">保存</button>
+      </view>
     </view>
   </view>
 
