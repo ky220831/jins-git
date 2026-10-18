@@ -33,6 +33,8 @@ export interface ApiFailure {
   ok: false;
   code: string;
   message: string;
+  /** 云函数侧生成的请求追踪 ID（排障用） */
+  requestId?: string;
 }
 
 export type ApiResponse<T> = ApiResult<T> | ApiFailure;
@@ -159,6 +161,8 @@ export interface CreateTodoInput {
 
 export interface UpdateTodoInput {
   todoId: string;
+  /** 乐观锁：编辑时传入列表里的版本号，服务端校验 */
+  version: number;
   title?: string;
   date?: string;
   time?: string | null;
@@ -265,6 +269,7 @@ export interface CreateMealTemplateInput {
 
 export interface UpdateMealTemplateInput {
   templateId: string;
+  version: number;
   name?: string;
   category?: string | null;
   image?: string | null;
@@ -301,6 +306,7 @@ export interface CreateMealPlanInput {
 
 export interface UpdateMealPlanInput {
   planId: string;
+  version: number;
   date?: string;
   time?: string | null;
   name?: string;
@@ -311,6 +317,7 @@ export interface UpdateMealPlanInput {
 
 export interface OfflineMealPlanInput {
   planId: string;
+  version: number;
 }
 
 export interface DeleteMealPlanInput {
@@ -419,6 +426,7 @@ export interface CreateRestaurantInput {
 
 export interface UpdateRestaurantInput {
   restaurantId: string;
+  version: number;
   name?: string;
   address?: string | null;
   city?: string | null;
@@ -467,6 +475,7 @@ export interface CreateRestaurantVisitInput {
 
 export interface UpdateRestaurantVisitInput {
   visitId: string;
+  version: number;
   date?: string;
   time?: string | null;
   note?: string | null;
@@ -475,6 +484,7 @@ export interface UpdateRestaurantVisitInput {
 
 export interface OfflineRestaurantVisitInput {
   visitId: string;
+  version: number;
 }
 
 export interface DeleteRestaurantVisitInput {
@@ -578,6 +588,7 @@ export interface CreateAnniversaryInput {
 
 export interface UpdateAnniversaryInput {
   anniversaryId: string;
+  version: number;
   name?: string;
   date?: string;
   time?: string | null;
@@ -637,6 +648,7 @@ export interface CreateTripInput {
 
 export interface UpdateTripInput {
   tripId: string;
+  version: number;
   name?: string;
   country?: string | null;
   city?: string | null;
@@ -685,6 +697,7 @@ export interface CreateTripPlanInput {
 
 export interface UpdateTripPlanInput {
   planId: string;
+  version: number;
   tripId?: string;
   name?: string;
   startDate?: string;
@@ -700,6 +713,7 @@ export interface DeleteTripPlanInput {
 
 export interface OfflineTripPlanInput {
   planId: string;
+  version: number;
 }
 
 // ---- 管理（第七阶段：主管理 / 副管理）----
@@ -716,6 +730,21 @@ export interface ManageOverview {
     todos: number;
     trash: number;
   };
+}
+
+export interface AuditLogView {
+  id: string;
+  actorUserId: string;
+  action: string;
+  targetType?: string;
+  targetId?: string;
+  result: string;
+  detail?: string;
+  createdAt: string;
+}
+
+export interface ManageAuditResult {
+  logs: AuditLogView[];
 }
 
 export interface ExportDataResult {

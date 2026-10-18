@@ -42,6 +42,7 @@ test('素材库：新增/列表/编辑，副账号可编辑', async () => {
 
   const updated = await mealService.updateTemplate('openid-B', {
     templateId: created.id,
+    version: 1,
     category: '快手菜',
   });
   assert.equal(updated.category, '快手菜');
@@ -79,7 +80,7 @@ test('今日菜单：带时间上架自动生成 🍴 日历事件，下架移�
   assert.equal(event.title, '🍴 晚餐');
   assert.equal(event.startTime.toISOString(), new Date('2026-08-10T18:30:00+08:00').toISOString());
 
-  await mealService.offlinePlan('openid-B', { planId: plan.id });
+  await mealService.offlinePlan('openid-B', { planId: plan.id, version: 1 });
   assert.equal(repo.calendarEvents.size, 0);
   const month = await mealService.listPlansByMonth('openid-A', { year: 2026, month: 8 });
   assert.equal(month.length, 0);
@@ -92,7 +93,7 @@ test('今日菜单：修改时间同步日历事件', async () => {
     time: '12:00',
     name: '午餐',
   });
-  await mealService.updatePlan('openid-A', { planId: plan.id, time: '13:00' });
+  await mealService.updatePlan('openid-A', { planId: plan.id, version: 1, time: '13:00' });
   const event = [...repo.calendarEvents.values()].find((e) => e.sourceId === plan.id);
   assert.ok(event);
   assert.equal(event.startTime.toISOString(), new Date('2026-08-10T13:00:00+08:00').toISOString());
@@ -119,7 +120,7 @@ test('随机选择：只从启用素材中挑选并生成当天菜单', async ()
   const { mealService } = await fresh(() => new Date('2026-08-13T10:00:00+08:00'));
   const t1 = await mealService.createTemplate('openid-A', { name: '番茄炒蛋' });
   await mealService.createTemplate('openid-A', { name: '红烧排骨' });
-  await mealService.updateTemplate('openid-A', { templateId: t1.id, enabled: false });
+  await mealService.updateTemplate('openid-A', { templateId: t1.id, version: 1, enabled: false });
   const plan = await mealService.randomPick('openid-A', {});
   assert.equal(plan.name, '红烧排骨');
   assert.equal(plan.date, '2026-08-13');
@@ -198,11 +199,11 @@ test('跨空间：C 看不到 A 的素材、菜单与回收站', async () => {
   assert.equal((await mealService.listTemplates('openid-C')).length, 0);
   assert.equal((await mealService.listPlansByMonth('openid-C', { year: 2026, month: 8 })).length, 0);
   await expectError(
-    mealService.updateTemplate('openid-C', { templateId: t.id, name: '篡改' }),
+    mealService.updateTemplate('openid-C', { templateId: t.id, version: 1, name: '篡改' }),
     ErrorCodes.NOT_FOUND,
   );
   await expectError(
-    mealService.updatePlan('openid-C', { planId: plan.id, name: '篡改' }),
+    mealService.updatePlan('openid-C', { planId: plan.id, version: 1, name: '篡改' }),
     ErrorCodes.NOT_FOUND,
   );
   assert.equal((await trashService.list('openid-C')).length, 0);

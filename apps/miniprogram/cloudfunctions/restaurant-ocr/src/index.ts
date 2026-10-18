@@ -5,6 +5,7 @@ import { CloudRepo } from '../../_shared/cloudRepo';
 import { AppError, ErrorCodes } from '../../_shared/errors';
 import { createHandler } from '../../_shared/handler';
 import { WechatOcrProvider } from '../../_shared/ocrProvider';
+import { enforceRateLimit } from '../../_shared/rateLimit';
 
 const repo = new CloudRepo();
 
@@ -17,7 +18,8 @@ function contentTypeOf(fileID: string): string {
 
 export const main = createHandler<RestaurantOcrInput, RestaurantOcrDraft>(async (event) => {
   const { OPENID } = cloud.getWXContext();
-  await requireSpaceMember(repo, OPENID);
+  const { userId } = await requireSpaceMember(repo, OPENID);
+  await enforceRateLimit(repo, userId, 'restaurantOcr');
   const fileID = (event?.fileID ?? '').trim();
   if (!fileID) {
     throw new AppError(ErrorCodes.VALIDATION, '缺少图片 fileID');

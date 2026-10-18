@@ -104,33 +104,33 @@ test('安全矩阵：跨 Space 修改全部被拒绝（伪造 recordId 与伪造
   const w = await world();
   // 直接传 A 的 recordId，C 查不到 → NOT_FOUND
   await expectError(
-    w.todoService.update('openid-C', { todoId: w.ids.todo, title: '篡改' }),
+    w.todoService.update('openid-C', { todoId: w.ids.todo, version: 1, title: '篡改' }),
     ErrorCodes.NOT_FOUND,
   );
   await expectError(
-    w.mealService.updatePlan('openid-C', { planId: w.ids.plan, name: '篡改' }),
+    w.mealService.updatePlan('openid-C', { planId: w.ids.plan, version: 1, name: '篡改' }),
     ErrorCodes.NOT_FOUND,
   );
   await expectError(
-    w.restaurantService.updateRestaurant('openid-C', { restaurantId: w.ids.restaurant, name: '篡改' }),
+    w.restaurantService.updateRestaurant('openid-C', { restaurantId: w.ids.restaurant, version: 1, name: '篡改' }),
     ErrorCodes.NOT_FOUND,
   );
   await expectError(
-    w.anniversaryService.update('openid-C', { anniversaryId: w.ids.anniversary, name: '篡改' }),
+    w.anniversaryService.update('openid-C', { anniversaryId: w.ids.anniversary, version: 1, name: '篡改' }),
     ErrorCodes.NOT_FOUND,
   );
   await expectError(
-    w.travelService.updateTrip('openid-C', { tripId: w.ids.trip, name: '篡改' }),
+    w.travelService.updateTrip('openid-C', { tripId: w.ids.trip, version: 1, name: '篡改' }),
     ErrorCodes.NOT_FOUND,
   );
   // 伪造 spaceId 一并传入：仍以身份解析出的空间为准，A 的记录不可被 C 修改
   await expectError(
-    w.todoService.update('openid-C', { todoId: w.ids.todo, title: '篡改', spaceId: w.ids.plan } as never),
+    w.todoService.update('openid-C', { todoId: w.ids.todo, version: 1, title: '篡改', spaceId: w.ids.plan } as never),
     ErrorCodes.NOT_FOUND,
   );
   // 伪造随机 recordId：同样 NOT_FOUND
   await expectError(
-    w.todoService.update('openid-C', { todoId: 'fake_record_123', title: '篡改' }),
+    w.todoService.update('openid-C', { todoId: 'fake_record_123', version: 1, title: '篡改' }),
     ErrorCodes.NOT_FOUND,
   );
 });
@@ -161,6 +161,7 @@ test('安全矩阵：跨 Space 删除与伪造 role/userId 被拒绝', async () 
   // 伪造 userId 入参：记录创建者不会被篡改
   await w.restaurantService.updateRestaurant('openid-B', {
     restaurantId: w.ids.restaurant,
+    version: 1,
     note: 'B 编辑',
     userId: w.ids.trip,
   } as never);

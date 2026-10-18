@@ -1,21 +1,30 @@
 import cloud from 'wx-server-sdk';
-import type { ExportDataResult, ManageOverview } from '../../../../../packages/types/src';
+import type {
+  ExportDataResult,
+  ManageAuditResult,
+  ManageOverview,
+} from '../../../../../packages/types/src';
+import { requireSpaceMember } from '../../_shared/access';
 import { CloudRepo } from '../../_shared/cloudRepo';
 import { createHandler } from '../../_shared/handler';
 import { AppError, ErrorCodes } from '../../_shared/errors';
 import { ManageService } from '../../_shared/manageService';
+import { enforceRateLimit } from '../../_shared/rateLimit';
 
-const service = new ManageService(new CloudRepo());
+const repo = new CloudRepo();
+const service = new ManageService(repo);
 
 export const main = createHandler<
-  { action: 'overview' } | { action: 'export' },
-  ManageOverview | ExportDataResult
+  { action: 'overview' } | { action: 'export' } | { action: 'audit-logs' },
+  ManageOverview | ExportDataResult | ManageAuditResult
 >(async (event) => {
   const { OPENID } = cloud.getWXContext();
   if (event?.action === 'export') {
+    const { userId } = await requireSpaceMember(repo, OPENID);
+    await enforceRateLimit(repo, userId, 'exportData');
     const { payload, fileName } = await service.buildExport(OPENID);
     const json = JSON.stringify(payload, null, 2);
-    const cloudPath = `exports/${payload.space && (payload.space as { id?: string }).id ? (payload.space as { id: string }).id : 'space'}/${fileName}`;
+    const cloudPath = `exports/${(payload.space as { id?: string } | null)?.id ?? 'space'}/${fileName}`;
     const upload = await cloud.uploadFile({
       cloudPath,
       fileContent: Buffer.from(json, 'utf8'),
@@ -26,6 +35,9 @@ export const main = createHandler<
       throw new AppError(ErrorCodes.INTERNAL, '导出文件生成失败，请重试');
     }
     return { fileName, tempFileURL, sizeBytes: Buffer.byteLength(json, 'utf8') };
+  }
+  if (event?.action === 'audit-logs') {
+    return service.listAuditLogs(OPENID);
   }
   return service.overview(OPENID);
 });

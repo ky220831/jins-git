@@ -53,6 +53,7 @@ test('纪念日：新增/编辑双人平等，正倒计时与每年重复', asyn
 
   const updated = await anniversaryService.update('openid-B', {
     anniversaryId: created.id,
+    version: 1,
     name: '在一起纪念日',
     note: '每年都过',
   });
@@ -106,7 +107,7 @@ test('纪念日：跨空间隔离，C 无法读取/修改 A 的纪念日', async
   const created = await anniversaryService.create('openid-A', { name: '私密纪念日', date: '2026-08-20' });
   assert.equal((await anniversaryService.list('openid-C')).length, 0);
   await expectError(
-    anniversaryService.update('openid-C', { anniversaryId: created.id, name: '篡改' }),
+    anniversaryService.update('openid-C', { anniversaryId: created.id, version: 1, name: '篡改' }),
     ErrorCodes.NOT_FOUND,
   );
   await expectError(
@@ -134,6 +135,7 @@ test('旅游：新增/编辑资料双人平等，行程清单解析', async () =
 
   const updated = await travelService.updateTrip('openid-B', {
     tripId: created.id,
+    version: 1,
     note: '提前买 JR 周游券',
   });
   assert.equal(updated.note, '提前买 JR 周游券');
@@ -168,14 +170,14 @@ test('行程：创建生成 ✈️ 日历事件（无时间也全天显示），
   assert.equal(event.sourceType, 'trip');
   assert.equal(event.title, '✈️ 北海道之旅');
 
-  await travelService.updatePlan('openid-B', { planId: plan.id, time: '09:30' });
+  await travelService.updatePlan('openid-B', { planId: plan.id, version: 1, time: '09:30' });
   const updatedEvent = [...repo.calendarEvents.values()].find((e) => e.sourceId === plan.id);
   assert.equal(
     updatedEvent?.startTime.toISOString(),
     new Date('2026-08-20T09:30:00+08:00').toISOString(),
   );
 
-  await travelService.offlinePlan('openid-B', { planId: plan.id });
+  await travelService.offlinePlan('openid-B', { planId: plan.id, version: 2 });
   assert.equal(repo.calendarEvents.size, 0);
 
   const noTime = await travelService.createPlan('openid-B', { startDate: '2026-08-21', name: '全天行程' });
@@ -227,11 +229,11 @@ test('旅游：跨空间隔离，C 无法读取/修改 A 的资料与行程', as
   assert.equal((await travelService.listTrips('openid-C')).length, 0);
   assert.equal((await travelService.listPlansByMonth('openid-C', { year: 2026, month: 8 })).length, 0);
   await expectError(
-    travelService.updateTrip('openid-C', { tripId: trip.id, name: '篡改' }),
+    travelService.updateTrip('openid-C', { tripId: trip.id, version: 1, name: '篡改' }),
     ErrorCodes.NOT_FOUND,
   );
   await expectError(
-    travelService.updatePlan('openid-C', { planId: plan.id, note: '篡改' }),
+    travelService.updatePlan('openid-C', { planId: plan.id, version: 1, note: '篡改' }),
     ErrorCodes.NOT_FOUND,
   );
   await expectError(

@@ -170,40 +170,42 @@ export class TrashService {
     if (calendarConfig) {
       snapshot.expireAt = new Date(now.getTime() + calendarConfig.ttlDays * 24 * 3600000);
     }
-    await this.repo.restoreRecord(item.collection, snapshot);
-    await this.repo.updateTrash(spaceId, item.id, {
-      status: 'restored',
-      restoredAt: now,
-      restoredBy: userId,
-      updatedAt: now,
-    });
-    if (calendarConfig) {
-      const record = snapshot as unknown as MealPlanRecord;
-      const rawStatus = (record as { status?: string }).status;
-      const tripWholeDay = calendarConfig.sourceType === 'trip';
-      if (
-        (record.time || tripWholeDay) &&
-        (rawStatus === 'published' || rawStatus === 'planned')
-      ) {
-        await this.repo.createCalendarEvent({
-          id: newId('ce'),
-          spaceId,
-          sourceType: calendarConfig.sourceType,
-          sourceId: record.id,
-          title:
-            calendarConfig.sourceType === 'trip'
-              ? `✈️ ${record.name}`
-              : `🍴 ${record.name}`,
-          startTime: toShanghaiDate(record.date, record.time || '00:00'),
-          endTime: null,
-          colorToken: 'accent',
-          createdBy: record.createdBy,
-          createdAt: now,
-          updatedAt: now,
-          version: 1,
-        });
+    await this.repo.inTransaction(async (tx) => {
+      await tx.restoreRecord(item.collection, snapshot);
+      await tx.updateTrash(spaceId, item.id, {
+        status: 'restored',
+        restoredAt: now,
+        restoredBy: userId,
+        updatedAt: now,
+      });
+      if (calendarConfig) {
+        const record = snapshot as unknown as MealPlanRecord;
+        const rawStatus = (record as { status?: string }).status;
+        const tripWholeDay = calendarConfig.sourceType === 'trip';
+        if (
+          (record.time || tripWholeDay) &&
+          (rawStatus === 'published' || rawStatus === 'planned')
+        ) {
+          await tx.createCalendarEvent({
+            id: newId('ce'),
+            spaceId,
+            sourceType: calendarConfig.sourceType,
+            sourceId: record.id,
+            title:
+              calendarConfig.sourceType === 'trip'
+                ? `✈️ ${record.name}`
+                : `🍴 ${record.name}`,
+            startTime: toShanghaiDate(record.date, record.time || '00:00'),
+            endTime: null,
+            colorToken: 'accent',
+            createdBy: record.createdBy,
+            createdAt: now,
+            updatedAt: now,
+            version: 1,
+          });
+        }
       }
-    }
+    });
     await this.audit(userId, spaceId, 'trash.restore', 'trash_record', item.id, now);
   }
 

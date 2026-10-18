@@ -36,6 +36,15 @@
     </view>
 
     <view class="card">
+      <view class="card-title">操作记录（最近 50 条）</view>
+      <view class="empty" wx:if="{{!auditLogs.length}}">暂无操作记录</view>
+      <view class="audit-row" wx:for="{{auditLogs}}" wx:key="id">
+        <view class="audit-title">{{item.actionLabel}}</view>
+        <view class="audit-meta">{{item.timeLabel}} · {{item.actorUserId}}</view>
+      </view>
+    </view>
+
+    <view class="card">
       <view class="card-title">回收站（72 小时内可恢复）</view>
       <picker range="{{collectionOptions}}" range-key="label" value="{{trashFilterIndex}}" bindchange="onTrashFilterChange">
         <view class="picker-value">筛选：{{trashFilterLabel}}</view>

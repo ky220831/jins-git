@@ -200,7 +200,12 @@ Page({
         images: this.data.tImages,
       };
       if (this.data.editingTripId) {
-        await TravelService.updateTrip({ tripId: this.data.editingTripId, ...common });
+        const editing = this.data.trips.find((t) => t.id === this.data.editingTripId);
+        if (!editing) {
+          wx.showToast({ title: '旅行资料不存在，请刷新后重试', icon: 'none' });
+          return;
+        }
+        await TravelService.updateTrip({ tripId: this.data.editingTripId, version: editing.version, ...common });
       } else {
         await TravelService.createTrip(common);
       }
@@ -308,7 +313,12 @@ Page({
         note: this.data.pNote.trim() || null,
       };
       if (this.data.editingPlanId) {
-        await TravelService.updatePlan({ planId: this.data.editingPlanId, ...common });
+        const editing = this.data.plans.find((p) => p.id === this.data.editingPlanId);
+        if (!editing) {
+          wx.showToast({ title: '行程记录不存在，请刷新后重试', icon: 'none' });
+          return;
+        }
+        await TravelService.updatePlan({ planId: this.data.editingPlanId, version: editing.version, ...common });
       } else {
         await TravelService.createPlan(common);
       }
@@ -324,8 +334,10 @@ Page({
   async onOfflinePlan(e: WechatMiniprogram.TouchEvent) {
     const id = e.currentTarget.dataset.id as string;
     if (!id) return;
+    const plan = this.data.plans.find((p) => p.id === id);
+    if (!plan) return;
     try {
-      await TravelService.offlinePlan({ planId: id });
+      await TravelService.offlinePlan({ planId: id, version: plan.version });
       this.refresh();
     } catch (err) {
       wx.showToast({ title: err instanceof ApiError ? err.message : '操作失败', icon: 'none' });

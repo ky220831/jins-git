@@ -1,6 +1,7 @@
 import { ApiError } from '../../api/cloud';
 import {
   ROLE_OWNER,
+  type AuditLogView,
   type MealPlanView,
   type RestaurantView,
   type SpaceMemberView,
@@ -24,6 +25,52 @@ interface TrashRow extends TrashItemView {
 interface MemberRow extends SpaceMemberView {
   roleLabel: string;
 }
+
+interface AuditRow extends AuditLogView {
+  timeLabel: string;
+  actionLabel: string;
+}
+
+const ACTION_LABELS: Record<string, string> = {
+  'space.create': '创建空间',
+  'space.join': '成员加入',
+  'member.nickname.update': '修改昵称',
+  'meal.template.create': '新增菜单素材',
+  'meal.template.update': '编辑菜单素材',
+  'meal.template.delete': '删除菜单素材',
+  'meal.plan.create': '上架今日菜单',
+  'meal.plan.update': '编辑今日菜单',
+  'meal.plan.offline': '下架今日菜单',
+  'meal.plan.delete': '删除今日菜单',
+  'meal.plan.random': '随机选择菜单',
+  'meal.plan.auto_expire': '菜单自动清理',
+  'restaurant.create': '新增餐厅',
+  'restaurant.update': '编辑餐厅',
+  'restaurant.delete': '删除餐厅',
+  'restaurant.visit.create': '新增餐厅行程',
+  'restaurant.visit.update': '编辑餐厅行程',
+  'restaurant.visit.offline': '下架餐厅行程',
+  'restaurant.visit.delete': '删除餐厅行程',
+  'restaurant.visit.auto_expire': '行程自动清理',
+  'anniversary.create': '新增纪念日',
+  'anniversary.update': '编辑纪念日',
+  'anniversary.delete': '删除纪念日',
+  'trip.create': '新增旅行资料',
+  'trip.update': '编辑旅行资料',
+  'trip.delete': '删除旅行资料',
+  'trip.plan.create': '新增旅游行程',
+  'trip.plan.update': '编辑旅游行程',
+  'trip.plan.offline': '下架旅游行程',
+  'trip.plan.delete': '删除旅游行程',
+  'trip.plan.auto_expire': '行程自动清理',
+  'trash.restore': '恢复数据',
+  'trash.purge': '永久删除',
+  'trash.purge_all': '清空回收站',
+  'trash.auto_purge': '回收站自动清除',
+  'period.record.create': '记录生理期',
+  'period.record.delete': '删除生理期记录',
+  'period.visibility.update': '生理期显示开关',
+};
 
 const COLLECTION_LABELS: Record<string, string> = {
   meal_templates: '今日菜单素材',
@@ -74,6 +121,7 @@ Page({
     inviteExpiresAt: '',
     mealPlans: [] as MealPlanView[],
     restaurants: [] as RestaurantView[],
+    auditLogs: [] as AuditRow[],
   },
 
   onShow() {
@@ -86,10 +134,11 @@ Page({
       const spaceRes = await SpaceService.mySpace();
       const isOwner = spaceRes.space.myRole === ROLE_OWNER;
       if (isOwner) {
-        const [overview, trash, space] = await Promise.all([
+        const [overview, trash, space, auditLogs] = await Promise.all([
           ManageService.overview(),
           TrashService.list(),
           Promise.resolve(spaceRes),
+          ManageService.auditLogs(),
         ]);
         this.setData({
           isOwner: true,
@@ -104,6 +153,11 @@ Page({
           inviteExpiresAt: space.space.inviteCodeExpiresAt
             ? formatDateTime(space.space.inviteCodeExpiresAt)
             : '',
+          auditLogs: auditLogs.logs.map((log) => ({
+            ...log,
+            timeLabel: formatDateTime(log.createdAt),
+            actionLabel: ACTION_LABELS[log.action] || log.action,
+          })),
           error: '',
         });
       } else {
@@ -320,8 +374,10 @@ Page({
 
   async onOfflineMeal(e: WechatMiniprogram.TouchEvent) {
     const id = e.currentTarget.dataset.id as string;
+    const plan = this.data.mealPlans.find((p) => p.id === id);
+    if (!plan) return;
     try {
-      await MealService.offlinePlan({ planId: id });
+      await MealService.offlinePlan({ planId: id, version: plan.version });
       wx.showToast({ title: '已下架', icon: 'success' });
       this.refresh();
     } catch (err) {
@@ -331,8 +387,10 @@ Page({
 
   async onOfflineRestaurant(e: WechatMiniprogram.TouchEvent) {
     const id = e.currentTarget.dataset.id as string;
+    const restaurant = this.data.restaurants.find((r) => r.id === id);
+    if (!restaurant) return;
     try {
-      await RestaurantService.update({ restaurantId: id, enabled: false });
+      await RestaurantService.update({ restaurantId: id, version: restaurant.version, enabled: false });
       wx.showToast({ title: '已下架', icon: 'success' });
       this.refresh();
     } catch (err) {

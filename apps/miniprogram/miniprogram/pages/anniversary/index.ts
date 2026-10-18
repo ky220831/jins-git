@@ -121,7 +121,12 @@ Page({
         yearly: this.data.fYearly,
       };
       if (this.data.editingId) {
-        await AnniversaryService.update({ anniversaryId: this.data.editingId, ...common });
+        const editing = this.data.items.find((a) => a.id === this.data.editingId);
+        if (!editing) {
+          wx.showToast({ title: '纪念日不存在，请刷新后重试', icon: 'none' });
+          return;
+        }
+        await AnniversaryService.update({ anniversaryId: this.data.editingId, version: editing.version, ...common });
       } else {
         await AnniversaryService.create(common);
       }

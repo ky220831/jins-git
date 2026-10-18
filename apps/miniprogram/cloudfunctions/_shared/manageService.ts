@@ -1,4 +1,9 @@
-import { ROLE_OWNER, type ManageOverview } from '../../../../packages/types/src';
+import {
+  ROLE_OWNER,
+  type AuditLogView,
+  type ManageAuditResult,
+  type ManageOverview,
+} from '../../../../packages/types/src';
 import { requireSpaceMember } from './access';
 import { AppError, ErrorCodes } from './errors';
 import type { Repo } from './repo';
@@ -104,5 +109,28 @@ export class ManageService {
     };
     const fileName = `our-life-${spaceId}-${now.toISOString().slice(0, 19).replace(/[:T]/g, '-')}.json`;
     return { payload, fileName };
+  }
+
+  /** 审计日志（仅主账号，只读，PRD §59） */
+  async listAuditLogs(
+    providerUserId: string,
+    limit = 50,
+  ): Promise<ManageAuditResult> {
+    const { spaceId, role } = await requireSpaceMember(this.repo, providerUserId);
+    if (role !== ROLE_OWNER) {
+      throw new AppError(ErrorCodes.FORBIDDEN, '只有主账号可以查看操作记录');
+    }
+    const logs = await this.repo.listAuditLogs(spaceId, limit);
+    const views: AuditLogView[] = logs.map((log) => ({
+      id: log.id,
+      actorUserId: log.actorUserId,
+      action: log.action,
+      ...(log.targetType ? { targetType: log.targetType } : {}),
+      ...(log.targetId ? { targetId: log.targetId } : {}),
+      result: log.result,
+      ...(log.detail ? { detail: log.detail } : {}),
+      createdAt: log.createdAt.toISOString(),
+    }));
+    return { logs: views };
   }
 }

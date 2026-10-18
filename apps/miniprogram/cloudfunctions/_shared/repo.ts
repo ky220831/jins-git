@@ -379,4 +379,12 @@ export interface Repo {
   createTripPlan(plan: TripPlanRecord): Promise<void>;
   updateTripPlan(spaceId: string, planId: string, patch: Partial<TripPlanRecord>): Promise<void>;
   deleteTripPlan(spaceId: string, planId: string): Promise<void>;
+
+  // ---- 架构加固（V1.0 优化）：事务 / 审计日志 / 频控 ----
+  /** 在单数据库事务内执行业务（云上为真实事务，内存实现为透传） */
+  inTransaction<T>(fn: (tx: Repo) => Promise<T>): Promise<T>;
+  /** 查询空间审计日志（仅主账号经 ManageService 调用） */
+  listAuditLogs(spaceId: string, limit: number): Promise<AuditLogRecord[]>;
+  /** 频控计数：对 (user+action+分钟桶) 递增并返回当前次数 */
+  incRateHit(key: string): Promise<number>;
 }

@@ -19,6 +19,7 @@ import { COLLECTIONS, MEAL_NAME_MAX_LENGTH, MEAL_NOTE_MAX_LENGTH, MEAL_PLAN_TTL_
 import { isDateString, monthRange, normalizeTime, toShanghaiDate, todayShanghaiString, validateYearMonth } from './dateTime';
 import { AppError, ErrorCodes } from './errors';
 import { newId } from './ids';
+import { assertVersion } from './version';
 import type {
   CalendarEventRecord,
   MealPlanRecord,
@@ -111,6 +112,7 @@ export class MealService {
     if (!existing) {
       throw new AppError(ErrorCodes.NOT_FOUND, '素材不存在或已删除');
     }
+    assertVersion(existing.version, input?.version);
     const now = this.clock();
     const patch: Partial<MealTemplateRecord> = {};
     if (input?.name !== undefined) {
@@ -147,7 +149,7 @@ export class MealService {
       throw new AppError(ErrorCodes.NOT_FOUND, '素材不存在或已删除');
     }
     const now = this.clock();
-    await this.trashIt(spaceId, userId, COLLECTIONS.mealTemplates, existing, 'manual_delete', 'permanent', now);
+    await this.trashIt(this.repo, spaceId, userId, COLLECTIONS.mealTemplates, existing, 'manual_delete', 'permanent', now);
     await this.repo.deleteMealTemplate(spaceId, templateId);
     await this.audit(userId, spaceId, 'meal.template.delete', 'meal_template', templateId, now);
   }
@@ -221,8 +223,10 @@ export class MealService {
       version: 1,
       expireAt: new Date(now.getTime() + MEAL_PLAN_TTL_DAYS * 24 * 3600000),
     };
-    await this.repo.createMealPlan(plan);
-    await this.syncCalendarEvent(spaceId, plan, now);
+    await this.repo.inTransaction(async (tx) => {
+      await tx.createMealPlan(plan);
+      await this.syncCalendarEvent(tx, spaceId, plan, now);
+    });
     await this.audit(userId, spaceId, 'meal.plan.create', 'meal_plan', plan.id, now);
     return toMealPlanView(plan);
   }
@@ -237,6 +241,7 @@ export class MealService {
     if (!existing) {
       throw new AppError(ErrorCodes.NOT_FOUND, '菜单记录不存在或已删除');
     }
+    assertVersion(existing.version, input?.version);
     const now = this.clock();
     const patch: Partial<MealPlanRecord> = {};
     if (input?.date !== undefined) {
@@ -269,9 +274,11 @@ export class MealService {
     }
     patch.version = existing.version + 1;
     patch.updatedAt = now;
-    await this.repo.updateMealPlan(spaceId, planId, patch);
     const updated: MealPlanRecord = { ...existing, ...patch };
-    await this.syncCalendarEvent(spaceId, updated, now);
+    await this.repo.inTransaction(async (tx) => {
+      await tx.updateMealPlan(spaceId, planId, patch);
+      await this.syncCalendarEvent(tx, spaceId, updated, now);
+    });
     await this.audit(userId, spaceId, 'meal.plan.update', 'meal_plan', planId, now);
     return toMealPlanView(updated);
   }
@@ -286,6 +293,7 @@ export class MealService {
     if (!existing) {
       throw new AppError(ErrorCodes.NOT_FOUND, '菜单记录不存在或已删除');
     }
+    assertVersion(existing.version, input?.version);
     const now = this.clock();
     const updated: MealPlanRecord = {
       ...existing,
@@ -293,12 +301,14 @@ export class MealService {
       updatedAt: now,
       version: existing.version + 1,
     };
-    await this.repo.updateMealPlan(spaceId, planId, {
-      status: updated.status,
-      updatedAt: now,
-      version: updated.version,
+    await this.repo.inTransaction(async (tx) => {
+      await tx.updateMealPlan(spaceId, planId, {
+        status: updated.status,
+        updatedAt: now,
+        version: updated.version,
+      });
+      await this.syncCalendarEvent(tx, spaceId, updated, now);
     });
-    await this.syncCalendarEvent(spaceId, updated, now);
     await this.audit(userId, spaceId, 'meal.plan.offline', 'meal_plan', planId, now);
     return toMealPlanView(updated);
   }
@@ -317,9 +327,11 @@ export class MealService {
       throw new AppError(ErrorCodes.NOT_FOUND, '菜单记录不存在或已删除');
     }
     const now = this.clock();
-    await this.trashIt(spaceId, userId, COLLECTIONS.mealPlans, existing, 'manual_delete', 'temporary', now);
-    await this.repo.deleteMealPlan(spaceId, planId);
-    await this.removeCalendarEvent(spaceId, planId);
+    await this.repo.inTransaction(async (tx) => {
+      await this.trashIt(tx, spaceId, userId, COLLECTIONS.mealPlans, existing, 'manual_delete', 'temporary', now);
+      await tx.deleteMealPlan(spaceId, planId);
+      await this.removeCalendarEvent(tx, spaceId, planId);
+    });
     await this.audit(userId, spaceId, 'meal.plan.delete', 'meal_plan', planId, now);
   }
 
@@ -361,9 +373,11 @@ export class MealService {
     const expired = await this.repo.listExpiredMealPlans(now);
     let moved = 0;
     for (const plan of expired) {
-      await this.trashIt(plan.spaceId, SYSTEM_ACTOR, COLLECTIONS.mealPlans, plan, 'auto_expire', 'temporary', now);
-      await this.repo.deleteMealPlan(plan.spaceId, plan.id);
-      await this.removeCalendarEvent(plan.spaceId, plan.id);
+      await this.repo.inTransaction(async (tx) => {
+        await this.trashIt(tx, plan.spaceId, SYSTEM_ACTOR, COLLECTIONS.mealPlans, plan, 'auto_expire', 'temporary', now);
+        await tx.deleteMealPlan(plan.spaceId, plan.id);
+        await this.removeCalendarEvent(tx, plan.spaceId, plan.id);
+      });
       await this.audit(SYSTEM_ACTOR, plan.spaceId, 'meal.plan.auto_expire', 'meal_plan', plan.id, now);
       moved += 1;
     }
@@ -371,14 +385,19 @@ export class MealService {
   }
 
   // ---- 内部：日历联动（业务数据 = 唯一真实来源，PRD §21）----
-  private async syncCalendarEvent(spaceId: string, plan: MealPlanRecord, now: Date): Promise<void> {
-    const existing = await this.repo.findCalendarEventBySource(spaceId, 'meal', plan.id);
+  private async syncCalendarEvent(
+    repo: Repo,
+    spaceId: string,
+    plan: MealPlanRecord,
+    now: Date,
+  ): Promise<void> {
+    const existing = await repo.findCalendarEventBySource(spaceId, 'meal', plan.id);
     const shouldShow =
       plan.status === MEAL_PLAN_STATUS_PUBLISHED && plan.time !== null && isDateString(plan.date);
     if (shouldShow && plan.time) {
       const startTime = toShanghaiDate(plan.date, plan.time);
       if (existing) {
-        await this.repo.updateCalendarEvent(spaceId, existing.id, {
+        await repo.updateCalendarEvent(spaceId, existing.id, {
           title: `🍴 ${plan.name}`,
           startTime,
           endTime: null,
@@ -400,21 +419,22 @@ export class MealService {
           updatedAt: now,
           version: 1,
         };
-        await this.repo.createCalendarEvent(event);
+        await repo.createCalendarEvent(event);
       }
     } else if (existing) {
-      await this.repo.deleteCalendarEvent(spaceId, existing.id);
+      await repo.deleteCalendarEvent(spaceId, existing.id);
     }
   }
 
-  private async removeCalendarEvent(spaceId: string, planId: string): Promise<void> {
-    const existing = await this.repo.findCalendarEventBySource(spaceId, 'meal', planId);
+  private async removeCalendarEvent(repo: Repo, spaceId: string, planId: string): Promise<void> {
+    const existing = await repo.findCalendarEventBySource(spaceId, 'meal', planId);
     if (existing) {
-      await this.repo.deleteCalendarEvent(spaceId, existing.id);
+      await repo.deleteCalendarEvent(spaceId, existing.id);
     }
   }
 
   private async trashIt(
+    repo: Repo,
     spaceId: string,
     deletedBy: string,
     collection: string,
@@ -441,7 +461,7 @@ export class MealService {
       createdAt: now,
       updatedAt: now,
     };
-    await this.repo.createTrash(item);
+    await repo.createTrash(item);
   }
 
   private async audit(

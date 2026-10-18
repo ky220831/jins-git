@@ -16,6 +16,7 @@ import {
 import { isDateString, normalizeTime, todayShanghaiString } from './dateTime';
 import { AppError, ErrorCodes } from './errors';
 import { newId } from './ids';
+import { assertVersion } from './version';
 import type { AnniversaryRecord, Repo, TrashRecord } from './repo';
 
 const DAY_MS = 24 * 3600000;
@@ -144,6 +145,7 @@ export class AnniversaryService {
     if (!existing) {
       throw new AppError(ErrorCodes.NOT_FOUND, '纪念日不存在或已删除');
     }
+    assertVersion(existing.version, input?.version);
     const now = this.clock();
     const patch: Partial<AnniversaryRecord> = {};
     if (input?.name !== undefined) {

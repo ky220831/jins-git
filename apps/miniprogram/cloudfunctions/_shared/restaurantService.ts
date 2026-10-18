@@ -32,6 +32,7 @@ import {
 } from './dateTime';
 import { AppError, ErrorCodes } from './errors';
 import { newId } from './ids';
+import { assertVersion } from './version';
 import type {
   CalendarEventRecord,
   Repo,
@@ -203,6 +204,7 @@ export class RestaurantService {
     if (!existing) {
       throw new AppError(ErrorCodes.NOT_FOUND, '餐厅不存在或已删除');
     }
+    assertVersion(existing.version, input?.version);
     const now = this.clock();
     const patch: Partial<RestaurantRecord> = {};
     if (input?.name !== undefined) {
@@ -262,7 +264,7 @@ export class RestaurantService {
       throw new AppError(ErrorCodes.NOT_FOUND, '餐厅不存在或已删除');
     }
     const now = this.clock();
-    await this.trashIt(spaceId, userId, COLLECTIONS.restaurants, existing, 'manual_delete', 'permanent', now);
+    await this.trashIt(this.repo, spaceId, userId, COLLECTIONS.restaurants, existing, 'manual_delete', 'permanent', now);
     await this.repo.deleteRestaurant(spaceId, restaurantId);
     await this.audit(userId, spaceId, 'restaurant.delete', 'restaurant', restaurantId, now);
   }
@@ -316,8 +318,10 @@ export class RestaurantService {
       version: 1,
       expireAt: new Date(now.getTime() + RESTAURANT_VISIT_TTL_DAYS * 24 * 3600000),
     };
-    await this.repo.createRestaurantVisit(visit);
-    await this.syncVisitCalendarEvent(spaceId, visit, now);
+    await this.repo.inTransaction(async (tx) => {
+      await tx.createRestaurantVisit(visit);
+      await this.syncVisitCalendarEvent(tx, spaceId, visit, now);
+    });
     await this.audit(userId, spaceId, 'restaurant.visit.create', 'restaurant_visit', visit.id, now);
     return toVisitView(visit);
   }
@@ -335,6 +339,7 @@ export class RestaurantService {
     if (!existing) {
       throw new AppError(ErrorCodes.NOT_FOUND, '行程不存在或已删除');
     }
+    assertVersion(existing.version, input?.version);
     const now = this.clock();
     const patch: Partial<RestaurantVisitRecord> = {};
     if (input?.date !== undefined) {
@@ -359,9 +364,11 @@ export class RestaurantService {
     }
     patch.version = existing.version + 1;
     patch.updatedAt = now;
-    await this.repo.updateRestaurantVisit(spaceId, visitId, patch);
     const updated: RestaurantVisitRecord = { ...existing, ...patch };
-    await this.syncVisitCalendarEvent(spaceId, updated, now);
+    await this.repo.inTransaction(async (tx) => {
+      await tx.updateRestaurantVisit(spaceId, visitId, patch);
+      await this.syncVisitCalendarEvent(tx, spaceId, updated, now);
+    });
     await this.audit(userId, spaceId, 'restaurant.visit.update', 'restaurant_visit', visitId, now);
     return toVisitView(updated);
   }
@@ -390,9 +397,11 @@ export class RestaurantService {
       throw new AppError(ErrorCodes.NOT_FOUND, '行程不存在或已删除');
     }
     const now = this.clock();
-    await this.trashIt(spaceId, userId, COLLECTIONS.restaurantVisits, existing, 'manual_delete', 'temporary', now);
-    await this.repo.deleteRestaurantVisit(spaceId, visitId);
-    await this.removeVisitCalendarEvent(spaceId, visitId);
+    await this.repo.inTransaction(async (tx) => {
+      await this.trashIt(tx, spaceId, userId, COLLECTIONS.restaurantVisits, existing, 'manual_delete', 'temporary', now);
+      await tx.deleteRestaurantVisit(spaceId, visitId);
+      await this.removeVisitCalendarEvent(tx, spaceId, visitId);
+    });
     await this.audit(userId, spaceId, 'restaurant.visit.delete', 'restaurant_visit', visitId, now);
   }
 
@@ -401,9 +410,11 @@ export class RestaurantService {
     const expired = await this.repo.listExpiredRestaurantVisits(now);
     let moved = 0;
     for (const visit of expired) {
-      await this.trashIt(visit.spaceId, SYSTEM_ACTOR, COLLECTIONS.restaurantVisits, visit, 'auto_expire', 'temporary', now);
-      await this.repo.deleteRestaurantVisit(visit.spaceId, visit.id);
-      await this.removeVisitCalendarEvent(visit.spaceId, visit.id);
+      await this.repo.inTransaction(async (tx) => {
+        await this.trashIt(tx, visit.spaceId, SYSTEM_ACTOR, COLLECTIONS.restaurantVisits, visit, 'auto_expire', 'temporary', now);
+        await tx.deleteRestaurantVisit(visit.spaceId, visit.id);
+        await this.removeVisitCalendarEvent(tx, visit.spaceId, visit.id);
+      });
       await this.audit(SYSTEM_ACTOR, visit.spaceId, 'restaurant.visit.auto_expire', 'restaurant_visit', visit.id, now);
       moved += 1;
     }
@@ -412,16 +423,17 @@ export class RestaurantService {
 
   // ---- 内部：日历联动（业务数据 = 唯一真实来源，PRD §21）----
   private async syncVisitCalendarEvent(
+    repo: Repo,
     spaceId: string,
     visit: RestaurantVisitRecord,
     now: Date,
   ): Promise<void> {
-    const existing = await this.repo.findCalendarEventBySource(spaceId, 'restaurant', visit.id);
+    const existing = await repo.findCalendarEventBySource(spaceId, 'restaurant', visit.id);
     const shouldShow = visit.status === 'planned' && visit.time !== null && isDateString(visit.date);
     if (shouldShow && visit.time) {
       const startTime = toShanghaiDate(visit.date, visit.time);
       if (existing) {
-        await this.repo.updateCalendarEvent(spaceId, existing.id, {
+        await repo.updateCalendarEvent(spaceId, existing.id, {
           title: `🍴 ${visit.name}`,
           startTime,
           endTime: null,
@@ -443,21 +455,22 @@ export class RestaurantService {
           updatedAt: now,
           version: 1,
         };
-        await this.repo.createCalendarEvent(event);
+        await repo.createCalendarEvent(event);
       }
     } else if (existing) {
-      await this.repo.deleteCalendarEvent(spaceId, existing.id);
+      await repo.deleteCalendarEvent(spaceId, existing.id);
     }
   }
 
-  private async removeVisitCalendarEvent(spaceId: string, visitId: string): Promise<void> {
-    const existing = await this.repo.findCalendarEventBySource(spaceId, 'restaurant', visitId);
+  private async removeVisitCalendarEvent(repo: Repo, spaceId: string, visitId: string): Promise<void> {
+    const existing = await repo.findCalendarEventBySource(spaceId, 'restaurant', visitId);
     if (existing) {
-      await this.repo.deleteCalendarEvent(spaceId, existing.id);
+      await repo.deleteCalendarEvent(spaceId, existing.id);
     }
   }
 
   private async trashIt(
+    repo: Repo,
     spaceId: string,
     deletedBy: string,
     collection: string,
@@ -484,7 +497,7 @@ export class RestaurantService {
       createdAt: now,
       updatedAt: now,
     };
-    await this.repo.createTrash(item);
+    await repo.createTrash(item);
   }
 
   private async audit(

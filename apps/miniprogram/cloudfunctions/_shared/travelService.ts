@@ -33,6 +33,7 @@ import {
 } from './dateTime';
 import { AppError, ErrorCodes } from './errors';
 import { newId } from './ids';
+import { assertVersion } from './version';
 import type {
   CalendarEventRecord,
   Repo,
@@ -187,6 +188,7 @@ export class TravelService {
     if (!existing) {
       throw new AppError(ErrorCodes.NOT_FOUND, '旅行计划不存在或已删除');
     }
+    assertVersion(existing.version, input?.version);
     const now = this.clock();
     const patch: Partial<TripRecord> = {};
     if (input?.name !== undefined) {
@@ -232,7 +234,7 @@ export class TravelService {
       throw new AppError(ErrorCodes.NOT_FOUND, '旅行计划不存在或已删除');
     }
     const now = this.clock();
-    await this.trashIt(spaceId, userId, COLLECTIONS.trips, existing, 'manual_delete', 'permanent', now);
+    await this.trashIt(this.repo, spaceId, userId, COLLECTIONS.trips, existing, 'manual_delete', 'permanent', now);
     await this.repo.deleteTrip(spaceId, tripId);
     await this.audit(userId, spaceId, 'trip.delete', 'trip', tripId, now);
   }
@@ -294,8 +296,10 @@ export class TravelService {
       version: 1,
       expireAt: new Date(now.getTime() + TRIP_PLAN_TTL_DAYS * 24 * 3600000),
     };
-    await this.repo.createTripPlan(plan);
-    await this.syncPlanCalendarEvent(spaceId, plan, now);
+    await this.repo.inTransaction(async (tx) => {
+      await tx.createTripPlan(plan);
+      await this.syncPlanCalendarEvent(tx, spaceId, plan, now);
+    });
     await this.audit(userId, spaceId, 'trip.plan.create', 'trip_plan', plan.id, now);
     return toTripPlanView(plan);
   }
@@ -310,6 +314,7 @@ export class TravelService {
     if (!existing) {
       throw new AppError(ErrorCodes.NOT_FOUND, '行程记录不存在或已删除');
     }
+    assertVersion(existing.version, input?.version);
     const now = this.clock();
     const patch: Partial<TripPlanRecord> = {};
     if (input?.tripId !== undefined) {
@@ -357,9 +362,11 @@ export class TravelService {
     }
     patch.version = existing.version + 1;
     patch.updatedAt = now;
-    await this.repo.updateTripPlan(spaceId, planId, patch);
     const updated: TripPlanRecord = { ...existing, ...patch };
-    await this.syncPlanCalendarEvent(spaceId, updated, now);
+    await this.repo.inTransaction(async (tx) => {
+      await tx.updateTripPlan(spaceId, planId, patch);
+      await this.syncPlanCalendarEvent(tx, spaceId, updated, now);
+    });
     await this.audit(userId, spaceId, 'trip.plan.update', 'trip_plan', planId, now);
     return toTripPlanView(updated);
   }
@@ -385,9 +392,11 @@ export class TravelService {
       throw new AppError(ErrorCodes.NOT_FOUND, '行程记录不存在或已删除');
     }
     const now = this.clock();
-    await this.trashIt(spaceId, userId, COLLECTIONS.tripPlans, existing, 'manual_delete', 'temporary', now);
-    await this.repo.deleteTripPlan(spaceId, planId);
-    await this.removePlanCalendarEvent(spaceId, planId);
+    await this.repo.inTransaction(async (tx) => {
+      await this.trashIt(tx, spaceId, userId, COLLECTIONS.tripPlans, existing, 'manual_delete', 'temporary', now);
+      await tx.deleteTripPlan(spaceId, planId);
+      await this.removePlanCalendarEvent(tx, spaceId, planId);
+    });
     await this.audit(userId, spaceId, 'trip.plan.delete', 'trip_plan', planId, now);
   }
 
@@ -396,17 +405,20 @@ export class TravelService {
     const expired = await this.repo.listExpiredTripPlans(now);
     let moved = 0;
     for (const plan of expired) {
-      await this.trashIt(
-        plan.spaceId,
-        SYSTEM_ACTOR,
-        COLLECTIONS.tripPlans,
-        plan,
-        'auto_expire',
-        'temporary',
-        now,
-      );
-      await this.repo.deleteTripPlan(plan.spaceId, plan.id);
-      await this.removePlanCalendarEvent(plan.spaceId, plan.id);
+      await this.repo.inTransaction(async (tx) => {
+        await this.trashIt(
+          tx,
+          plan.spaceId,
+          SYSTEM_ACTOR,
+          COLLECTIONS.tripPlans,
+          plan,
+          'auto_expire',
+          'temporary',
+          now,
+        );
+        await tx.deleteTripPlan(plan.spaceId, plan.id);
+        await this.removePlanCalendarEvent(tx, plan.spaceId, plan.id);
+      });
       await this.audit(SYSTEM_ACTOR, plan.spaceId, 'trip.plan.auto_expire', 'trip_plan', plan.id, now);
       moved += 1;
     }
@@ -415,16 +427,17 @@ export class TravelService {
 
   // ---- 日历联动：业务数据 = 唯一真实来源（PRD §21）----
   private async syncPlanCalendarEvent(
+    repo: Repo,
     spaceId: string,
     plan: TripPlanRecord,
     now: Date,
   ): Promise<void> {
-    const existing = await this.repo.findCalendarEventBySource(spaceId, 'trip', plan.id);
+    const existing = await repo.findCalendarEventBySource(spaceId, 'trip', plan.id);
     const shouldShow = plan.status === 'planned' && isDateString(plan.startDate);
     if (shouldShow) {
       const startTime = toShanghaiDate(plan.startDate, plan.time || '00:00');
       if (existing) {
-        await this.repo.updateCalendarEvent(spaceId, existing.id, {
+        await repo.updateCalendarEvent(spaceId, existing.id, {
           title: `✈️ ${plan.name}`,
           startTime,
           endTime: null,
@@ -446,21 +459,22 @@ export class TravelService {
           updatedAt: now,
           version: 1,
         };
-        await this.repo.createCalendarEvent(event);
+        await repo.createCalendarEvent(event);
       }
     } else if (existing) {
-      await this.repo.deleteCalendarEvent(spaceId, existing.id);
+      await repo.deleteCalendarEvent(spaceId, existing.id);
     }
   }
 
-  private async removePlanCalendarEvent(spaceId: string, planId: string): Promise<void> {
-    const existing = await this.repo.findCalendarEventBySource(spaceId, 'trip', planId);
+  private async removePlanCalendarEvent(repo: Repo, spaceId: string, planId: string): Promise<void> {
+    const existing = await repo.findCalendarEventBySource(spaceId, 'trip', planId);
     if (existing) {
-      await this.repo.deleteCalendarEvent(spaceId, existing.id);
+      await repo.deleteCalendarEvent(spaceId, existing.id);
     }
   }
 
   private async trashIt(
+    repo: Repo,
     spaceId: string,
     deletedBy: string,
     collection: string,
@@ -487,7 +501,7 @@ export class TravelService {
       createdAt: now,
       updatedAt: now,
     };
-    await this.repo.createTrash(item);
+    await repo.createTrash(item);
   }
 
   private async audit(

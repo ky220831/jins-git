@@ -11,6 +11,9 @@ project.private.config.json
 work/
 outputs/
 
+# 云开发环境配置（含第三方密钥，如 LBS_KEY），禁止提交
+cloudbaserc.json
+
 # 系统文件
 .DS_Store
 Thumbs.db

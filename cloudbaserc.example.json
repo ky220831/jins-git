@@ -1,0 +1,18 @@
+{
+  "$schema": "https://static.cloudbase.net/cli/cloudbaserc.schema.json",
+  "version": "2.0",
+  "envId": "cloud1-xxxx替换为你的环境ID",
+  "functions": [
+    {
+      "name": "restaurant-search",
+      "runtime": "Nodejs16.13",
+      "handler": "index.main",
+      "installDependency": true,
+      "timeout": 15,
+      "memorySize": 256,
+      "envVariables": {
+        "LBS_KEY": "请填入腾讯位置服务Key（不要提交真实值到Git）"
+      }
+    }
+  ]
+}

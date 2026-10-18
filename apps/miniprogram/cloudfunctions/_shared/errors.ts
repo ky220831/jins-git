@@ -22,5 +22,9 @@ export const ErrorCodes = {
   INVITE_USED: 'INVITE_USED',
   THIRD_PARTY_ERROR: 'THIRD_PARTY_ERROR',
   LBS_NOT_CONFIGURED: 'LBS_NOT_CONFIGURED',
+  /** 乐观锁冲突：记录刚被另一人修改 */
+  CONFLICT: 'CONFLICT',
+  /** 触发频控限制 */
+  RATE_LIMITED: 'RATE_LIMITED',
   INTERNAL: 'INTERNAL',
 } as const;

@@ -15,8 +15,8 @@
 | --- | --- | --- |
 | 官方显示名 | 中文名，简洁有识别度 | 我们的生活 |
 | 代码标识 | 小写英文连字符（slug） | our-life |
-| 版本号 | 语义化版本 v主.次.修订 | v1.0.1 |
-| 产物 / 备份文件 | 中文名-代码名-版本-日期.zip | 我们的生活-our-life-v1.0.1-2026-08-14.zip |
+| 版本号 | 语义化版本 v主.次.修订 | v1.0.2 |
+| 产物 / 备份文件 | 中文名-代码名-版本-日期.zip | 我们的生活-our-life-v1.0.2-2026-08-14.zip |
 | 云函数 | 小写英文连字符 | auth-login / restaurant-search / daily-maintenance 等 |
 | Git 提交 | conventional commits | feat: / fix: / style: / chore: |
 | 文档 | 两位数字编号 + 中文标题 | docs/00-… ~ docs/11-… |
@@ -64,5 +64,6 @@
 
 - 已发布正式版 v1.0.0（云上 + Git tag v1.0.0 + 桌面备份 zip）。
 - 2026-08-14：重新上传开发版 1.0.1（包含首页日历优先、功能一列、邀请码右上角、昵称爱心连接）；云函数 space-info 已用 CloudBase CLI 重新部署。
+- 2026-08-14：开发版 1.0.2 架构加固：乐观锁冲突检测（CONFLICT）、业务写+日历联动事务化（CloudRepo.inTransaction）、主管理操作记录页、首页/日历 30 秒静默刷新、搜索/OCR/导出频控（rate_limits 集合，云函数自建）、结构化日志 requestId、cloudbaserc.json 移出 Git（新增 cloudbaserc.example.json）。83/83 测试通过，全部云函数已重新部署。
 - 阶段 1~9 全部完成：登录 / 绑定、日历 + To Do、生理期、节假日、今日菜单、漂亮饭（搜索 / OCR / 图片 / 导航）、纪念日、旅游、主副管理、安全测试 79/79 通过、韩风 UI。
 - 最新提交 ecc3367。

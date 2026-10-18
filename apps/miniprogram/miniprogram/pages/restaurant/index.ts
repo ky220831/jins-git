@@ -210,7 +210,12 @@ Page({
         lng: this.data.fLng.trim() ? Number(this.data.fLng) : null,
       };
       if (this.data.editingId) {
-        await RestaurantService.update({ restaurantId: this.data.editingId, ...common });
+        const editing = this.data.restaurants.find((x) => x.id === this.data.editingId);
+        if (!editing) {
+          wx.showToast({ title: '餐厅不存在，请刷新后重试', icon: 'none' });
+          return;
+        }
+        await RestaurantService.update({ restaurantId: this.data.editingId, version: editing.version, ...common });
       } else {
         await RestaurantService.create(common);
       }
@@ -228,7 +233,7 @@ Page({
     const r = this.data.restaurants.find((x) => x.id === id);
     if (!r) return;
     try {
-      await RestaurantService.update({ restaurantId: id, [field]: !r[field] } as never);
+      await RestaurantService.update({ restaurantId: id, version: r.version, [field]: !r[field] } as never);
       this.refresh();
     } catch (err) {
       wx.showToast({ title: err instanceof ApiError ? err.message : '操作失败', icon: 'none' });
@@ -364,7 +369,7 @@ Page({
       if (field === 'cover') patch.coverImage = upload.fileID;
       if (field === 'images') patch.images = [...r.images, upload.fileID];
       if (field === 'menuImages') patch.menuImages = [...r.menuImages, upload.fileID];
-      await RestaurantService.update(patch as never);
+      await RestaurantService.update({ ...patch, version: r.version } as never);
       this.refresh();
     } catch (err) {
       wx.hideLoading();
@@ -413,8 +418,10 @@ Page({
 
   async onOfflineVisit(e: WechatMiniprogram.TouchEvent) {
     const id = e.currentTarget.dataset.id as string;
+    const visit = this.data.visits.find((v) => v.id === id);
+    if (!visit) return;
     try {
-      await RestaurantService.offlineVisit({ visitId: id });
+      await RestaurantService.offlineVisit({ visitId: id, version: visit.version });
       this.refresh();
     } catch (err) {
       wx.showToast({ title: err instanceof ApiError ? err.message : '下架失败', icon: 'none' });

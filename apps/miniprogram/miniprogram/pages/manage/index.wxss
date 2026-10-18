@@ -250,3 +250,29 @@
   background: #F0F8F2;
   border-radius: 20rpx;
 }
+
+/* ---- 操作记录 ---- */
+.audit-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 20rpx;
+  padding: 16rpx 0;
+  border-bottom: 2rpx dashed var(--color-border);
+}
+
+.audit-row:last-child {
+  border-bottom: none;
+}
+
+.audit-title {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.audit-meta {
+  flex-shrink: 0;
+  font-size: 20rpx;
+  color: var(--color-text-secondary);
+}

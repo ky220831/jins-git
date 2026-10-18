@@ -147,9 +147,9 @@ test('副管理：副账号可以下架今日菜单与餐厅（管理视角）',
   const r = await restaurant.createRestaurant('openid-A', { name: '餐厅' });
 
   const plan = (await meal.todayPlans('openid-A'))[0];
-  const offlinePlan = await meal.offlinePlan('openid-B', { planId: plan.id });
+  const offlinePlan = await meal.offlinePlan('openid-B', { planId: plan.id, version: plan.version });
   assert.equal(offlinePlan.status, 'offline');
 
-  const updated = await restaurant.updateRestaurant('openid-B', { restaurantId: r.id, enabled: false });
+  const updated = await restaurant.updateRestaurant('openid-B', { restaurantId: r.id, version: r.version, enabled: false });
   assert.equal(updated.enabled, false);
 });

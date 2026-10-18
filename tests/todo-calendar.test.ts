@@ -64,7 +64,7 @@ test('完成 To Do：对应日历事件被移除', async () => {
     time: '14:30',
   });
   assert.equal(repo.calendarEvents.size, 1);
-  await todoService.update('openid-A', { todoId: todo.id, status: 'completed' });
+  await todoService.update('openid-A', { todoId: todo.id, version: 1, status: 'completed' });
   assert.equal(repo.calendarEvents.size, 0);
 });
 
@@ -75,7 +75,7 @@ test('修改 To Do 时间：日历事件时间同步更新', async () => {
     date: '2026-08-20',
     time: '18:00',
   });
-  await todoService.update('openid-A', { todoId: todo.id, time: '20:30' });
+  await todoService.update('openid-A', { todoId: todo.id, version: 1, time: '20:30' });
   const event = [...repo.calendarEvents.values()][0];
   assert.equal(event.startTime.toISOString(), new Date('2026-08-20T20:30:00+08:00').toISOString());
 });
@@ -85,8 +85,8 @@ test('月视图：只返回 pending/completed，归档事项不显示', async ()
   await todoService.create('openid-A', { title: '事项1', date: '2026-08-10' });
   const todo2 = await todoService.create('openid-A', { title: '事项2', date: '2026-08-11' });
   const todo3 = await todoService.create('openid-A', { title: '事项3', date: '2026-08-12' });
-  await todoService.update('openid-A', { todoId: todo2.id, status: 'completed' });
-  await todoService.update('openid-A', { todoId: todo3.id, status: 'archived' });
+  await todoService.update('openid-A', { todoId: todo2.id, version: 1, status: 'completed' });
+  await todoService.update('openid-A', { todoId: todo3.id, version: 1, status: 'archived' });
 
   const list = await todoService.listByMonth('openid-A', { year: 2026, month: 8 });
   assert.equal(list.length, 2);
@@ -101,14 +101,14 @@ test('跨空间：其他空间成员无法更新/查看 A 的 To Do（同空间�
   const todo = await todoService.create('openid-A', { title: 'A 的事项', date: '2026-08-10' });
 
   // 同空间成员 B 可以完成 A 的事项（双人共享）
-  const done = await todoService.update('openid-B', { todoId: todo.id, status: 'completed' });
+  const done = await todoService.update('openid-B', { todoId: todo.id, version: 1, status: 'completed' });
   assert.equal(done.status, 'completed');
-  await todoService.update('openid-B', { todoId: todo.id, status: 'pending' });
+  await todoService.update('openid-B', { todoId: todo.id, version: 2, status: 'pending' });
 
   // 另一空间的 C 无法操作
   await spaceService.createSpace('openid-C', { name: 'C 的空间' });
   await expectError(
-    todoService.update('openid-C', { todoId: todo.id, title: '篡改' }),
+    todoService.update('openid-C', { todoId: todo.id, version: 1, title: '篡改' }),
     ErrorCodes.NOT_FOUND,
   );
 

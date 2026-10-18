@@ -44,6 +44,8 @@ export class MemoryRepo implements Repo {
   anniversaries = new Map<string, AnniversaryRecord>();
   trips = new Map<string, TripRecord>();
   tripPlans = new Map<string, TripPlanRecord>();
+  /** 频控计数（key = user+action+分钟桶） */
+  rateHits = new Map<string, number>();
 
   async findUserIdentity(provider: string, providerUserId: string): Promise<UserIdentityRecord | null> {
     for (const item of this.userIdentities.values()) {
@@ -543,5 +545,26 @@ export class MemoryRepo implements Repo {
     if (current && current.spaceId === spaceId) {
       this.tripPlans.delete(planId);
     }
+  }
+
+  // ---- 架构加固（V1.0 优化）：事务 / 审计日志 / 频控 ----
+
+  /** 内存实现无需事务：直接透传（服务层事务语义由 CloudRepo 提供） */
+  async inTransaction<T>(fn: (tx: Repo) => Promise<T>): Promise<T> {
+    return fn(this);
+  }
+
+  async listAuditLogs(spaceId: string, limit: number): Promise<AuditLogRecord[]> {
+    return [...this.audits]
+      .filter((a) => a.spaceId === spaceId)
+      .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))
+      .slice(0, limit)
+      .map((a) => ({ ...a }));
+  }
+
+  async incRateHit(key: string): Promise<number> {
+    const next = (this.rateHits.get(key) ?? 0) + 1;
+    this.rateHits.set(key, next);
+    return next;
   }
 }

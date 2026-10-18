@@ -1,5 +1,9 @@
 import { callFunction } from '../api/cloud';
-import type { ExportDataResult, ManageOverview } from '../lib/shared/types/index';
+import type {
+  ExportDataResult,
+  ManageAuditResult,
+  ManageOverview,
+} from '../lib/shared/types/index';
 
 export const ManageService = {
   overview(): Promise<ManageOverview> {
@@ -7,5 +11,8 @@ export const ManageService = {
   },
   exportJson(): Promise<ExportDataResult> {
     return callFunction<ExportDataResult>('manage', { action: 'export' });
+  },
+  auditLogs(): Promise<ManageAuditResult> {
+    return callFunction<ManageAuditResult>('manage', { action: 'audit-logs' });
   },
 };

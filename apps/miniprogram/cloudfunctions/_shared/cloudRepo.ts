@@ -1,5 +1,6 @@
 import cloud from 'wx-server-sdk';
 import { COLLECTIONS } from './constants';
+import { AppError, ErrorCodes } from './errors';
 import type {
   AuditLogRecord,
   AnniversaryRecord,
@@ -27,6 +28,9 @@ cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV || process.env.CLOUDBASE_ENV_ID });
 
 const db = cloud.database();
 const _ = db.command;
+
+/** 频控集合只需在进程内创建一次（云函数实例级缓存） */
+let rateCollectionEnsured = false;
 
 function mapDoc<T>(doc: Record<string, unknown>): T {
   const { _id, ...rest } = doc;
@@ -553,5 +557,163 @@ export class CloudRepo implements Repo {
     await this.col(COLLECTIONS.tripPlans)
       .where({ _id: planId, spaceId })
       .remove();
+  }
+
+  // ---- 架构加固（V1.0 优化）：事务 / 审计日志 / 频控 ----
+
+  /** 真实云数据库事务：事务内仅支持单文档操作（doc.get/set/update/remove） */
+  async inTransaction<T>(fn: (tx: Repo) => Promise<T>): Promise<T> {
+    return db.runTransaction(async (transaction) => fn(new TxCloudRepo(transaction)));
+  }
+
+  async listAuditLogs(spaceId: string, limit: number): Promise<AuditLogRecord[]> {
+    const res = await this.col(COLLECTIONS.auditLogs)
+      .where({ spaceId })
+      .orderBy('createdAt', 'desc')
+      .limit(Math.min(Math.max(limit, 1), 100))
+      .get();
+    return res.data.map((d) => mapDoc<AuditLogRecord>(d));
+  }
+
+  async incRateHit(key: string): Promise<number> {
+    if (!rateCollectionEnsured) {
+      try {
+        await db.createCollection(COLLECTIONS.rateLimits);
+      } catch {
+        // 集合已存在时忽略
+      }
+      rateCollectionEnsured = true;
+    }
+    const id = `rl_${key.replace(/[^a-zA-Z0-9]/g, '_')}`;
+    try {
+      const res = await this.col(COLLECTIONS.rateLimits).doc(id).get();
+      const cur = (res.data as { count?: number })?.count ?? 0;
+      const next = cur + 1;
+      await this.col(COLLECTIONS.rateLimits).doc(id).update({
+        data: { count: next, updatedAt: new Date() },
+      });
+      return next;
+    } catch {
+      await this.col(COLLECTIONS.rateLimits).doc(id).set({
+        data: { key, count: 1, createdAt: new Date(), updatedAt: new Date() },
+      });
+      return 1;
+    }
+  }
+}
+
+/**
+ * 事务版数据访问层：只覆盖日历联动相关的单文档写操作。
+ * 事务内不支持 where 批量写，因此这里全部改为 doc(id) 操作，
+ * 并在写入前校验文档属于当前 spaceId（防止伪造 id 越权）。
+ */
+class TxCloudRepo extends CloudRepo {
+  // 事务对象：wx-server-sdk 类型较复杂，这里按结构使用（runTransaction 回调传入）
+  constructor(private readonly tx: any) {
+    super();
+  }
+
+  private async getDoc(
+    collection: string,
+    id: string,
+  ): Promise<Record<string, unknown> | null> {
+    try {
+      const res = await this.tx.collection(collection).doc(id).get();
+      return (res?.data as Record<string, unknown>) ?? null;
+    } catch {
+      return null;
+    }
+  }
+
+  private async assertOwned(collection: string, id: string, spaceId: string): Promise<void> {
+    const doc = await this.getDoc(collection, id);
+    if (!doc) {
+      throw new AppError(ErrorCodes.NOT_FOUND, '记录不存在或已删除');
+    }
+    const docSpaceId = (doc as { spaceId?: string }).spaceId;
+    if (docSpaceId && docSpaceId !== spaceId) {
+      throw new AppError(ErrorCodes.FORBIDDEN, '无权操作该记录');
+    }
+  }
+
+  // ---- To Do ----
+  override async createTodo(todo: TodoRecord): Promise<void> {
+    await this.tx.collection(COLLECTIONS.todos).doc(todo.id).set({ data: todo });
+  }
+  override async updateTodo(spaceId: string, todoId: string, patch: Partial<TodoRecord>): Promise<void> {
+    await this.assertOwned(COLLECTIONS.todos, todoId, spaceId);
+    await this.tx.collection(COLLECTIONS.todos).doc(todoId).update({ data: patch });
+  }
+  override async deleteTodo(spaceId: string, todoId: string): Promise<void> {
+    await this.assertOwned(COLLECTIONS.todos, todoId, spaceId);
+    await this.tx.collection(COLLECTIONS.todos).doc(todoId).remove();
+  }
+
+  // ---- 今日菜单临时记录 ----
+  override async createMealPlan(plan: MealPlanRecord): Promise<void> {
+    await this.tx.collection(COLLECTIONS.mealPlans).doc(plan.id).set({ data: plan });
+  }
+  override async updateMealPlan(spaceId: string, planId: string, patch: Partial<MealPlanRecord>): Promise<void> {
+    await this.assertOwned(COLLECTIONS.mealPlans, planId, spaceId);
+    await this.tx.collection(COLLECTIONS.mealPlans).doc(planId).update({ data: patch });
+  }
+  override async deleteMealPlan(spaceId: string, planId: string): Promise<void> {
+    await this.assertOwned(COLLECTIONS.mealPlans, planId, spaceId);
+    await this.tx.collection(COLLECTIONS.mealPlans).doc(planId).remove();
+  }
+
+  // ---- 漂亮饭临时行程 ----
+  override async createRestaurantVisit(visit: RestaurantVisitRecord): Promise<void> {
+    await this.tx.collection(COLLECTIONS.restaurantVisits).doc(visit.id).set({ data: visit });
+  }
+  override async updateRestaurantVisit(spaceId: string, visitId: string, patch: Partial<RestaurantVisitRecord>): Promise<void> {
+    await this.assertOwned(COLLECTIONS.restaurantVisits, visitId, spaceId);
+    await this.tx.collection(COLLECTIONS.restaurantVisits).doc(visitId).update({ data: patch });
+  }
+  override async deleteRestaurantVisit(spaceId: string, visitId: string): Promise<void> {
+    await this.assertOwned(COLLECTIONS.restaurantVisits, visitId, spaceId);
+    await this.tx.collection(COLLECTIONS.restaurantVisits).doc(visitId).remove();
+  }
+
+  // ---- 旅游临时行程 ----
+  override async createTripPlan(plan: TripPlanRecord): Promise<void> {
+    await this.tx.collection(COLLECTIONS.tripPlans).doc(plan.id).set({ data: plan });
+  }
+  override async updateTripPlan(spaceId: string, planId: string, patch: Partial<TripPlanRecord>): Promise<void> {
+    await this.assertOwned(COLLECTIONS.tripPlans, planId, spaceId);
+    await this.tx.collection(COLLECTIONS.tripPlans).doc(planId).update({ data: patch });
+  }
+  override async deleteTripPlan(spaceId: string, planId: string): Promise<void> {
+    await this.assertOwned(COLLECTIONS.tripPlans, planId, spaceId);
+    await this.tx.collection(COLLECTIONS.tripPlans).doc(planId).remove();
+  }
+
+  // ---- 日历事件 ----
+  override async createCalendarEvent(event: CalendarEventRecord): Promise<void> {
+    await this.tx.collection(COLLECTIONS.calendarEvents).doc(event.id).set({ data: event });
+  }
+  override async updateCalendarEvent(spaceId: string, eventId: string, patch: Partial<CalendarEventRecord>): Promise<void> {
+    await this.assertOwned(COLLECTIONS.calendarEvents, eventId, spaceId);
+    await this.tx.collection(COLLECTIONS.calendarEvents).doc(eventId).update({ data: patch });
+  }
+  override async deleteCalendarEvent(spaceId: string, eventId: string): Promise<void> {
+    await this.assertOwned(COLLECTIONS.calendarEvents, eventId, spaceId);
+    await this.tx.collection(COLLECTIONS.calendarEvents).doc(eventId).remove();
+  }
+
+  // ---- 回收站 ----
+  override async createTrash(item: TrashRecord): Promise<void> {
+    await this.tx.collection(COLLECTIONS.trashRecords).doc(item.id).set({ data: item });
+  }
+  override async updateTrash(spaceId: string, trashId: string, patch: Partial<TrashRecord>): Promise<void> {
+    await this.assertOwned(COLLECTIONS.trashRecords, trashId, spaceId);
+    await this.tx.collection(COLLECTIONS.trashRecords).doc(trashId).update({ data: patch });
+  }
+  override async deleteTrash(spaceId: string, trashId: string): Promise<void> {
+    await this.assertOwned(COLLECTIONS.trashRecords, trashId, spaceId);
+    await this.tx.collection(COLLECTIONS.trashRecords).doc(trashId).remove();
+  }
+  override async restoreRecord(collection: string, record: Record<string, unknown>): Promise<void> {
+    await this.tx.collection(collection).doc(record.id as string).set({ data: record });
   }
 }

@@ -11,6 +11,7 @@ import { CalendarService } from '../../services/calendar';
 import { PeriodService } from '../../services/period';
 import { SpaceService } from '../../services/space';
 import { TodoService } from '../../services/todo';
+import { startSilentRefresh } from '../../utils/realtime';
 
 interface DayCell {
   uid: number;
@@ -104,6 +105,30 @@ Page({
     if (this.data.year) {
       this.refresh();
     }
+    this.startSilent();
+  },
+
+  onHide() {
+    this.stopSilent();
+  },
+
+  onUnload() {
+    this.stopSilent();
+  },
+
+  startSilent() {
+    this.stopSilent();
+    (this as unknown as { _stopSilent?: () => void })._stopSilent = startSilentRefresh(() =>
+      this.refresh(true),
+    );
+  },
+
+  stopSilent() {
+    const stop = (this as unknown as { _stopSilent?: () => void })._stopSilent;
+    if (stop) {
+      stop();
+      (this as unknown as { _stopSilent?: () => void })._stopSilent = undefined;
+    }
   },
 
   async loadRole() {
@@ -115,9 +140,11 @@ Page({
     }
   },
 
-  async refresh() {
+  async refresh(silent = false) {
     const { year, month } = this.data;
-    this.setData({ loading: true, error: '' });
+    if (!silent) {
+      this.setData({ loading: true, error: '' });
+    }
     try {
       const [monthRes, periodInfo] = await Promise.all([
         CalendarService.month({ year, month }),
@@ -141,9 +168,13 @@ Page({
       });
     } catch (err) {
       const message = err instanceof ApiError ? err.message : '日历加载失败，请重试';
-      this.setData({ error: message });
+      if (!silent) {
+        this.setData({ error: message });
+      }
     } finally {
-      this.setData({ loading: false });
+      if (!silent) {
+        this.setData({ loading: false });
+      }
     }
   },
 
@@ -349,9 +380,12 @@ Page({
     const id = e.currentTarget.dataset.id as string;
     const status = e.currentTarget.dataset.status as string;
     if (!id) return;
+    const todo = this.data.dayTodos.find((t) => t.id === id);
+    if (!todo) return;
     try {
       await TodoService.update({
         todoId: id,
+        version: todo.version,
         status: status === 'completed' ? 'pending' : 'completed',
       });
       this.refresh();

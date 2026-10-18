@@ -4,6 +4,7 @@ export class ApiError extends Error {
   constructor(
     readonly code: string,
     message: string,
+    readonly requestId?: string,
   ) {
     super(message);
     this.name = 'ApiError';
@@ -29,7 +30,7 @@ export async function callFunction<T>(name: string, data: Record<string, unknown
   }
   if (!payload.ok) {
     console.error(`[callFunction] ${name} 返回错误:`, payload);
-    throw new ApiError(payload.code, payload.message);
+    throw new ApiError(payload.code, payload.message, payload.requestId);
   }
   return payload.data;
 }

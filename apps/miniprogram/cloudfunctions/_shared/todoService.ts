@@ -16,6 +16,7 @@ import { requireSpaceMember } from './access';
 import { isDateString, monthRange, normalizeTime, toShanghaiDate, validateYearMonth } from './dateTime';
 import { AppError, ErrorCodes } from './errors';
 import { newId } from './ids';
+import { assertVersion } from './version';
 import type { CalendarEventRecord, Repo, TodoRecord } from './repo';
 
 const PRIORITIES: TodoPriority[] = ['low', 'normal', 'high'];
@@ -72,8 +73,10 @@ export class TodoService {
       updatedAt: now,
       version: 1,
     };
-    await this.repo.createTodo(todo);
-    await this.syncCalendarEvent(spaceId, todo, userId, now);
+    await this.repo.inTransaction(async (tx) => {
+      await tx.createTodo(todo);
+      await this.syncCalendarEvent(tx, spaceId, todo, userId, now);
+    });
     return toTodoView(todo);
   }
 
@@ -87,6 +90,7 @@ export class TodoService {
     if (!existing) {
       throw new AppError(ErrorCodes.NOT_FOUND, '事项不存在或已删除');
     }
+    assertVersion(existing.version, input?.version);
 
     const patch: Partial<TodoRecord> = {};
     if (input.title !== undefined) {
@@ -121,12 +125,14 @@ export class TodoService {
       patch.status = input.status;
     }
 
+    const updatedAt = new Date();
     patch.version = existing.version + 1;
-    patch.updatedAt = new Date();
-    await this.repo.updateTodo(spaceId, todoId, patch);
-
+    patch.updatedAt = updatedAt;
     const updated: TodoRecord = { ...existing, ...patch };
-    await this.syncCalendarEvent(spaceId, updated, userId, patch.updatedAt);
+    await this.repo.inTransaction(async (tx) => {
+      await tx.updateTodo(spaceId, todoId, patch);
+      await this.syncCalendarEvent(tx, spaceId, updated, userId, updatedAt);
+    });
     return toTodoView(updated);
   }
 
@@ -140,18 +146,19 @@ export class TodoService {
 
   /** To Do 是唯一真实来源：有时段且未完成时同步 CalendarEvent，否则删除 */
   private async syncCalendarEvent(
+    repo: Repo,
     spaceId: string,
     todo: TodoRecord,
     userId: string,
     now: Date,
   ): Promise<void> {
-    const existing = await this.repo.findCalendarEventBySource(spaceId, CALENDAR_SOURCE_TODO, todo.id);
+    const existing = await repo.findCalendarEventBySource(spaceId, CALENDAR_SOURCE_TODO, todo.id);
     const shouldShow = todo.status === TODO_STATUS_PENDING && todo.time !== null && isDateString(todo.date);
 
     if (shouldShow && todo.time) {
       const startTime = toShanghaiDate(todo.date, todo.time);
       if (existing) {
-        await this.repo.updateCalendarEvent(spaceId, existing.id, {
+        await repo.updateCalendarEvent(spaceId, existing.id, {
           title: todo.title,
           startTime,
           endTime: null,
@@ -173,10 +180,10 @@ export class TodoService {
           updatedAt: now,
           version: 1,
         };
-        await this.repo.createCalendarEvent(event);
+        await repo.createCalendarEvent(event);
       }
     } else if (existing) {
-      await this.repo.deleteCalendarEvent(spaceId, existing.id);
+      await repo.deleteCalendarEvent(spaceId, existing.id);
     }
   }
 }

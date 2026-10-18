@@ -1,6 +1,7 @@
 import { ApiError } from '../../api/cloud';
 import { ROLE_OWNER, type SpaceMemberView, type SpaceView } from '../../lib/shared/types/index';
 import { SpaceService } from '../../services/space';
+import { startSilentRefresh } from '../../utils/realtime';
 import { formatDateTime } from '../../utils/time';
 
 interface MemberRow extends SpaceMemberView {
@@ -26,10 +27,36 @@ Page({
 
   onShow() {
     this.refresh();
+    this.startSilent();
   },
 
-  async refresh() {
-    this.setData({ loading: true, error: '' });
+  onHide() {
+    this.stopSilent();
+  },
+
+  onUnload() {
+    this.stopSilent();
+  },
+
+  startSilent() {
+    this.stopSilent();
+    (this as unknown as { _stopSilent?: () => void })._stopSilent = startSilentRefresh(() =>
+      this.refresh(true),
+    );
+  },
+
+  stopSilent() {
+    const stop = (this as unknown as { _stopSilent?: () => void })._stopSilent;
+    if (stop) {
+      stop();
+      (this as unknown as { _stopSilent?: () => void })._stopSilent = undefined;
+    }
+  },
+
+  async refresh(silent = false) {
+    if (!silent) {
+      this.setData({ loading: true, error: '' });
+    }
     try {
       const spaceRes = await SpaceService.mySpace();
       const space = spaceRes.space;
@@ -63,9 +90,13 @@ Page({
         return;
       }
       const message = err instanceof ApiError ? err.message : '加载失败，请重试';
-      this.setData({ error: message });
+      if (!silent) {
+        this.setData({ error: message });
+      }
     } finally {
-      this.setData({ loading: false });
+      if (!silent) {
+        this.setData({ loading: false });
+      }
     }
   },
 

@@ -72,6 +72,10 @@
     "trip_plans": {
       "read": false,
       "write": false
+    },
+    "rate_limits": {
+      "read": false,
+      "write": false
     }
   },
   "indexes": {

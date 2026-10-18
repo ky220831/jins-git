@@ -17,6 +17,14 @@ export const COLLECTIONS = {
   anniversaries: 'anniversaries',
   trips: 'trips',
   tripPlans: 'trip_plans',
+  rateLimits: 'rate_limits',
+} as const;
+
+/** 频控：每用户每分钟最大调用次数（仅对“烧钱”的外部资源接口启用） */
+export const RATE_LIMIT_PER_MINUTE = {
+  restaurantSearch: 20,
+  restaurantOcr: 10,
+  exportData: 5,
 } as const;
 
 /** 邀请码有效期：7 天（可调整） */

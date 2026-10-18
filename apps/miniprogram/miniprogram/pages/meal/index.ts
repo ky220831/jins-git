@@ -154,7 +154,9 @@ Page({
     const id = e.currentTarget.dataset.id as string;
     if (!id) return;
     try {
-      await MealService.offlinePlan({ planId: id });
+      const plan = this.data.todayPlans.find((p) => p.id === id);
+      if (!plan) return;
+      await MealService.offlinePlan({ planId: id, version: plan.version });
       this.refresh();
     } catch (err) {
       wx.showToast({ title: err instanceof ApiError ? err.message : '下架失败', icon: 'none' });
@@ -218,8 +220,14 @@ Page({
     this.setData({ saving: true });
     try {
       if (editingTemplateId) {
+        const template = this.data.templates.find((t) => t.id === editingTemplateId);
+        if (!template) {
+          wx.showToast({ title: '素材不存在，请刷新后重试', icon: 'none' });
+          return;
+        }
         await MealService.updateTemplate({
           templateId: editingTemplateId,
+          version: template.version,
           name: templateName.trim(),
           category: templateCategory.trim() || null,
         });
@@ -241,8 +249,10 @@ Page({
   async onToggleTemplate(e: WechatMiniprogram.SwitchChange) {
     const id = e.currentTarget.dataset.id as string;
     if (!id) return;
+    const template = this.data.templates.find((t) => t.id === id);
+    if (!template) return;
     try {
-      await MealService.updateTemplate({ templateId: id, enabled: !!e.detail.value });
+      await MealService.updateTemplate({ templateId: id, version: template.version, enabled: !!e.detail.value });
       this.refresh();
     } catch (err) {
       wx.showToast({ title: err instanceof ApiError ? err.message : '操作失败', icon: 'none' });

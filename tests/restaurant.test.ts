@@ -50,6 +50,7 @@ test('餐厅：新增/列表/编辑，副账号可编辑并收藏', async () => 
 
   const updated = await restaurantService.updateRestaurant('openid-B', {
     restaurantId: created.id,
+    version: 1,
     favorite: true,
     visited: true,
     note: '提前订座',
@@ -90,14 +91,14 @@ test('行程：带时间创建生成 🍴 日历事件，下架移除，修改�
   assert.equal(event.sourceType, 'restaurant');
   assert.equal(event.title, '🍴 XX日料');
 
-  await restaurantService.updateVisit('openid-B', { visitId: visit.id, time: '19:00' });
+  await restaurantService.updateVisit('openid-B', { visitId: visit.id, version: 1, time: '19:00' });
   const updatedEvent = [...repo.calendarEvents.values()].find((e) => e.sourceId === visit.id);
   assert.equal(
     updatedEvent?.startTime.toISOString(),
     new Date('2026-08-20T19:00:00+08:00').toISOString(),
   );
 
-  await restaurantService.offlineVisit('openid-B', { visitId: visit.id });
+  await restaurantService.offlineVisit('openid-B', { visitId: visit.id, version: 2 });
   assert.equal(repo.calendarEvents.size, 0);
   const month = await restaurantService.listVisitsByMonth('openid-A', { year: 2026, month: 8 });
   assert.equal(month.length, 0);
@@ -156,11 +157,11 @@ test('跨空间：C 看不到/改不了 A 的餐厅与行程', async () => {
   assert.equal((await restaurantService.listRestaurants('openid-C')).length, 0);
   assert.equal((await restaurantService.listVisitsByMonth('openid-C', { year: 2026, month: 8 })).length, 0);
   await expectError(
-    restaurantService.updateRestaurant('openid-C', { restaurantId: restaurant.id, name: '篡改' }),
+    restaurantService.updateRestaurant('openid-C', { restaurantId: restaurant.id, version: 1, name: '篡改' }),
     ErrorCodes.NOT_FOUND,
   );
   await expectError(
-    restaurantService.updateVisit('openid-C', { visitId: visit.id, note: '篡改' }),
+    restaurantService.updateVisit('openid-C', { visitId: visit.id, version: 1, note: '篡改' }),
     ErrorCodes.NOT_FOUND,
   );
 });
