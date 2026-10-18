@@ -15,8 +15,8 @@
 | --- | --- | --- |
 | 官方显示名 | 中文名，简洁有识别度 | 我们的生活 |
 | 代码标识 | 小写英文连字符（slug） | our-life |
-| 版本号 | 语义化版本 v主.次.修订 | v1.1.3 |
-| 产物 / 备份文件 | 中文名-代码名-版本-日期.zip | 我们的生活-our-life-v1.1.3-2026-08-15.zip |
+| 版本号 | 语义化版本 v主.次.修订 | v1.1.4 |
+| 产物 / 备份文件 | 中文名-代码名-版本-日期.zip | 我们的生活-our-life-v1.1.4-2026-08-15.zip |
 | 云函数 | 小写英文连字符 | auth-login / restaurant-search / daily-maintenance 等 |
 | Git 提交 | conventional commits | feat: / fix: / style: / chore: |
 | 文档 | 两位数字编号 + 中文标题 | docs/00-… ~ docs/11-… |
@@ -85,5 +85,6 @@
 - 2026-08-15：开发版 1.1.0：①微信订阅消息提醒——纪念日/今日菜单/餐厅行程到期提醒（不含生理期，reminder 云函数 + subscribe_grants 集合，daily-maintenance 每日发送；REMINDER_TEMPLATES.templateId 需在后台选用模板后填入，否则按钮自动隐藏）；②年度节假日更新工具化（npm run holidays:import -- holidays-2027.json，2027 官方发布后导入）；③数据备份脚本（npm run backup，导出全部集合到 outputs/backup/日期/，已实测 19 集合 159 条）。
 - 2026-08-15：开发版 1.1.2：订阅消息模板已选用并填入（纪念日提醒 + 日程提醒共用），发送字段按模板适配（纪念日 thing1/date2/date3，菜单行程 thing1/date2/time3），miniprogramState=trial 便于体验版测试。
 - 2026-08-15：开发版 1.1.3：修复“开启提醒失败”——改为点击瞬间同步弹 wx.requestSubscribeMessage（模板 ID 前端常量 CLIENT_REMINDER_TEMPLATES），收到 accept 后再异步写 subscribe_grants，避免先 await 云函数导致手势中断。
+- 2026-08-15：开发版 1.1.4：修正 1.1.3 遗留的调用错误——enableReminder 改为返回 Promise（授权仍在点击调用栈内同步发起），三个提醒按钮页面的错误提示改为展示具体原因（未授权/开启失败/模板未配置）。
 - 阶段 1~9 全部完成：登录 / 绑定、日历 + To Do、生理期、节假日、今日菜单、漂亮饭（搜索 / OCR / 图片 / 导航）、纪念日、旅游、主副管理、安全测试 79/79 通过、韩风 UI。
 - 最新提交 ecc3367。

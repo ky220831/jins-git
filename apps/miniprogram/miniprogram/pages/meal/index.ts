@@ -327,9 +327,9 @@ Page({
     });
   },
 
-  onRemind() {
-    enableReminder('meal').catch((err) => {
-      wx.showToast({ title: err instanceof ApiError ? err.message : '开启失败', icon: 'none' });
-    });
-  },
+    onRemind() {
+      enableReminder('meal').catch((err) => {
+        wx.showToast({ title: err instanceof Error ? err.message : '开启失败', icon: 'none' });
+      });
+    },
 });

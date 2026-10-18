@@ -13,29 +13,32 @@ const CLIENT_REMINDER_TEMPLATES: Partial<Record<ReminderTopic, string>> = {
 };
 
 /** 点击“开启提醒”：同步请求授权（保留用户点击手势），同意后再异步记录一次性授权 */
-export function enableReminder(topic: ReminderTopic): void {
+export function enableReminder(topic: ReminderTopic): Promise<void> {
   const templateId = CLIENT_REMINDER_TEMPLATES[topic];
   if (!templateId) {
-    wx.showToast({ title: '提醒模板尚未配置', icon: 'none' });
-    return;
+    return Promise.reject(new Error('提醒模板尚未配置'));
   }
-  wx.requestSubscribeMessage({
-    tmplIds: [templateId],
-    success: (res) => {
-      if (res && res[templateId] === 'accept') {
-        ReminderService.grant(topic)
-          .then(() => {
-            wx.showToast({ title: '已开启提醒', icon: 'success' });
-          })
-          .catch(() => {
-            wx.showToast({ title: '开启失败，请重试', icon: 'none' });
-          });
-      } else {
-        wx.showToast({ title: '未授权，不会收到提醒', icon: 'none' });
-      }
-    },
-    fail: () => {
-      wx.showToast({ title: '开启失败，请重试', icon: 'none' });
-    },
+  // wx.requestSubscribeMessage 必须在本函数调用栈内同步发起，结果用 Promise 通知页面
+  return new Promise<void>((resolve, reject) => {
+    wx.requestSubscribeMessage({
+      tmplIds: [templateId],
+      success: (res) => {
+        if (res && res[templateId] === 'accept') {
+          ReminderService.grant(topic)
+            .then(() => {
+              wx.showToast({ title: '已开启提醒', icon: 'success' });
+              resolve();
+            })
+            .catch(() => {
+              reject(new Error('开启失败，请重试'));
+            });
+        } else {
+          reject(new Error('未授权，不会收到提醒'));
+        }
+      },
+      fail: () => {
+        reject(new Error('开启失败，请重试'));
+      },
+    });
   });
 }
