@@ -75,6 +75,7 @@ Page({
   },
 
   onShow() {
+    this.setData({ themeClass: currentThemeClass() });
     this.refresh();
   },
 
@@ -349,7 +350,8 @@ Page({
         fCategory: draft.category || '',
         fPrice: typeof draft.pricePerPerson === 'number' ? String(draft.pricePerPerson) : '',
         fHours: draft.businessHours || '',
-        ocrHint: 'OCR 识别结果仅供参考，请核对后保存',
+        fDishes: (draft.dishes || []).join(', '),
+        ocrHint: 'OCR 识别结果仅供参考（支持菜单照片和团购截图），请核对后保存',
       });
     } catch (err) {
       wx.hideLoading();

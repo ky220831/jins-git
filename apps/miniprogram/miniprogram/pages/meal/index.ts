@@ -30,10 +30,13 @@ Page({
     loading: false,
     error: '',
     showPlanForm: false,
+    editingPlanId: '',
     planName: '',
     planDate: '',
     planTime: '',
     planNote: '',
+    planImage: '',
+    planSaveAsTemplate: false,
     templatePickerIndex: -1,
     showTemplateForm: false,
     editingTemplateId: '',
@@ -56,6 +59,7 @@ Page({
   },
 
   onShow() {
+    this.setData({ themeClass: currentThemeClass() });
     this.refresh();
   },
 
@@ -90,10 +94,13 @@ Page({
   onShowPlanForm() {
     this.setData({
       showPlanForm: true,
+      editingPlanId: '',
       planName: '',
       planDate: this.data.todayDate,
       planTime: '',
       planNote: '',
+      planImage: '',
+      planSaveAsTemplate: false,
       templatePickerIndex: -1,
     });
   },
@@ -128,8 +135,73 @@ Page({
     this.setData({ planNote: e.detail.value });
   },
 
-  async onAddPlan() {
-    const { templatePickerIndex, enabledTemplates, planName, planDate, planTime, planNote } = this.data;
+  /** 编辑今日已有菜单（1.1.7） */
+  onEditPlan(e: WechatMiniprogram.TouchEvent) {
+    const id = e.currentTarget.dataset.id as string;
+    const plan = this.data.todayPlans.find((p) => p.id === id);
+    if (!plan) return;
+    this.setData({
+      showPlanForm: true,
+      editingPlanId: id,
+      planName: plan.name,
+      planDate: plan.date,
+      planTime: plan.time || '',
+      planNote: plan.note || '',
+      planImage: plan.image || '',
+      planSaveAsTemplate: false,
+      templatePickerIndex: -1,
+    });
+  },
+
+  /** 菜单图片：选择 → 压缩 → 上传云存储，上传成功才保留 fileID（PRD §78） */
+  async onPickPlanImage() {
+    try {
+      const res = await wx.chooseMedia({
+        count: 1,
+        mediaType: ['image'],
+        sourceType: ['camera', 'album'],
+        sizeType: ['compressed'],
+      });
+      const temp = res.tempFiles[0];
+      if (!temp) return;
+      const compressed = await this.compressImage(temp.tempFilePath);
+      wx.showLoading({ title: '上传中' });
+      const cloudPath = `meals/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`;
+      const upload = await wx.cloud.uploadFile({ cloudPath, filePath: compressed });
+      this.setData({ planImage: upload.fileID });
+    } catch {
+      wx.showToast({ title: '图片上传失败，请重试', icon: 'none' });
+    } finally {
+      wx.hideLoading();
+    }
+  },
+
+  onClearPlanImage() {
+    this.setData({ planImage: '' });
+  },
+
+  onToggleSaveTemplate(e: WechatMiniprogram.SwitchChange) {
+    this.setData({ planSaveAsTemplate: !!e.detail.value });
+  },
+
+  compressImage(src: string): Promise<string> {
+    return new Promise((resolve) => {
+      wx.compressImage({ src, quality: 80, success: (r) => resolve(r.tempFilePath), fail: () => resolve(src) });
+    });
+  },
+
+  async onSavePlan() {
+    const {
+      editingPlanId,
+      templatePickerIndex,
+      enabledTemplates,
+      planName,
+      planDate,
+      planTime,
+      planNote,
+      planImage,
+      planSaveAsTemplate,
+    } = this.data;
     const template = templatePickerIndex >= 0 ? enabledTemplates[templatePickerIndex] : undefined;
     if (!template && !planName.trim()) {
       wx.showToast({ title: '请选择素材或填写名称', icon: 'none' });
@@ -138,12 +210,39 @@ Page({
     if (this.data.saving) return;
     this.setData({ saving: true });
     try {
-      await MealService.createPlan({
-        date: planDate.trim(),
-        ...(template ? { templateId: template.id } : { name: planName.trim() }),
-        ...(planTime.trim() ? { time: planTime.trim() } : {}),
-        ...(planNote.trim() ? { note: planNote.trim() } : {}),
-      });
+      if (editingPlanId) {
+        const plan = this.data.todayPlans.find((p) => p.id === editingPlanId);
+        if (!plan) {
+          wx.showToast({ title: '菜单记录不存在，请刷新后重试', icon: 'none' });
+          return;
+        }
+        await MealService.updatePlan({
+          planId: editingPlanId,
+          version: plan.version,
+          name: planName.trim(),
+          time: planTime.trim() || null,
+          note: planNote.trim() || null,
+          image: planImage || null,
+        });
+      } else {
+        await MealService.createPlan({
+          date: planDate.trim(),
+          ...(template ? { templateId: template.id } : { name: planName.trim() }),
+          ...(planTime.trim() ? { time: planTime.trim() } : {}),
+          ...(planNote.trim() ? { note: planNote.trim() } : {}),
+          ...(planImage ? { image: planImage } : {}),
+        });
+      }
+      if (planSaveAsTemplate && !template) {
+        try {
+          await MealService.createTemplate({
+            name: planName.trim(),
+            ...(planImage ? { image: planImage } : {}),
+          });
+        } catch {
+          wx.showToast({ title: '菜单已保存，但素材添加失败，可手动添加', icon: 'none' });
+        }
+      }
       this.setData({ showPlanForm: false });
       this.refresh();
     } catch (err) {

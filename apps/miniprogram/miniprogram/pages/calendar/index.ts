@@ -174,6 +174,7 @@ Page({
   },
 
   onShow() {
+    this.setData({ themeClass: currentThemeClass() });
     if (this.data.year && !this.data.guestMode) {
       this.refresh();
     } else if (this.data.guestMode) {

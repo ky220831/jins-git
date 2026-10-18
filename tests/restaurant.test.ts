@@ -3,7 +3,7 @@ import { test } from 'node:test';
 
 import { CalendarService } from '../apps/miniprogram/cloudfunctions/_shared/calendarService';
 import { ErrorCodes } from '../apps/miniprogram/cloudfunctions/_shared/errors';
-import { parseOcrText } from '../apps/miniprogram/cloudfunctions/_shared/ocrProvider';
+import { parseOcrText, parseVisionJson } from '../apps/miniprogram/cloudfunctions/_shared/ocrProvider';
 import { RestaurantService } from '../apps/miniprogram/cloudfunctions/_shared/restaurantService';
 import { LbsRestaurantSearchProvider } from '../apps/miniprogram/cloudfunctions/_shared/restaurantSearchProvider';
 import { SpaceService } from '../apps/miniprogram/cloudfunctions/_shared/spaceService';
@@ -196,6 +196,23 @@ test('OCR 解析：从菜单文字提取草稿（名称/地址/人均/营业时�
   assert.equal(draft.pricePerPerson, 120);
   assert.equal(draft.businessHours, '11:00-23:00');
   assert.equal(draft.category, '日料 刺身');
+});
+
+test('智能 OCR 解析：接受 JSON（含 markdown 代码块），提取截图/团购页信息与推荐菜', () => {
+  const text = '```json\n{"name":"火上云小南·傣味烧烤","address":"护国街道威远街168号","city":"昆明","category":"烧烤","pricePerPerson":63,"businessHours":"17:30-24:00","dishes":["鲜切五花肉","泡鲁达"]}\n```';
+  const draft = parseVisionJson(text);
+  assert.ok(draft);
+  assert.equal(draft.name, '火上云小南·傣味烧烤');
+  assert.equal(draft.address, '护国街道威远街168号');
+  assert.equal(draft.category, '烧烤');
+  assert.equal(draft.pricePerPerson, 63);
+  assert.equal(draft.businessHours, '17:30-24:00');
+  assert.deepEqual(draft.dishes, ['鲜切五花肉', '泡鲁达']);
+});
+
+test('智能 OCR 解析：非 JSON 或损坏 JSON 返回 null（走手动录入兜底）', () => {
+  assert.equal(parseVisionJson('抱歉，我无法识别'), null);
+  assert.equal(parseVisionJson('{"name":'), null);
 });
 
 test('POI 搜索 Provider：解析腾讯位置服务返回；未配置 Key / 接口报错给出明确错误', async () => {

@@ -95,3 +95,55 @@ test('提醒发送：模板未配置时跳过（不报错不发送）', async ()
   const count = await service.sendDue();
   assert.equal(count, 0);
 });
+
+test('变更通知：A 编辑菜单后，只通知已授权的 B，不通知本人', async () => {
+  const { repo, space, mealService } = await fresh();
+  const plan = await mealService.createPlan('openid-A', {
+    date: '2026-08-15',
+    time: '18:30',
+    name: '晚餐',
+    image: 'cloud://env/meals/dinner.jpg',
+  });
+  assert.equal(plan.image, 'cloud://env/meals/dinner.jpg');
+
+  const sent: string[] = [];
+  const service = new ReminderService(
+    repo,
+    async ({ openid }) => {
+      sent.push(openid);
+    },
+    () => BASE,
+    FAKE_TEMPLATES,
+  );
+  await service.grant('openid-B', space.spaceId, 'meal');
+  await service.grant('openid-A', space.spaceId, 'meal');
+
+  const count = await service.notifyChange(
+    space.spaceId,
+    'meal',
+    '菜单已更新：晚餐',
+    '2026-08-15',
+    '18:30',
+    'openid-A',
+  );
+  assert.equal(count, 1);
+  assert.deepEqual(sent, ['openid-B']);
+  // 一次性授权发送后删除（A 的授权保留，B 的已用掉）
+  assert.equal(repo.grants.size, 1);
+});
+
+test('变更通知：另一方未授权时不发送', async () => {
+  const { repo, space } = await fresh();
+  const sent: string[] = [];
+  const service = new ReminderService(
+    repo,
+    async ({ openid }) => {
+      sent.push(openid);
+    },
+    () => BASE,
+    FAKE_TEMPLATES,
+  );
+  const count = await service.notifyChange(space.spaceId, 'meal', '菜单已更新', '2026-08-15');
+  assert.equal(count, 0);
+  assert.deepEqual(sent, []);
+});

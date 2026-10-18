@@ -300,6 +300,7 @@ export interface MealPlanView {
   date: string;
   time?: string;
   category?: string;
+  image?: string;
   note?: string;
   status: MealPlanStatus;
   createdBy: string;
@@ -314,6 +315,7 @@ export interface CreateMealPlanInput {
   name?: string;
   time?: string;
   category?: string;
+  image?: string;
   note?: string;
 }
 
@@ -324,6 +326,7 @@ export interface UpdateMealPlanInput {
   time?: string | null;
   name?: string;
   category?: string | null;
+  image?: string | null;
   note?: string | null;
   status?: MealPlanStatus;
 }
@@ -538,6 +541,8 @@ export interface RestaurantOcrDraft {
   category?: string;
   pricePerPerson?: number;
   businessHours?: string;
+  /** 推荐菜/招牌菜（智能识别通道返回） */
+  dishes?: string[];
   rawText: string;
 }
 

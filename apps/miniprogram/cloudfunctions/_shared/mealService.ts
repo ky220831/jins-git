@@ -50,6 +50,7 @@ function toMealPlanView(p: MealPlanRecord): MealPlanView {
     date: p.date,
     ...(p.time ? { time: p.time } : {}),
     ...(p.category ? { category: p.category } : {}),
+    ...(p.image ? { image: p.image } : {}),
     ...(p.note ? { note: p.note } : {}),
     status: p.status,
     createdBy: p.createdBy,
@@ -215,6 +216,7 @@ export class MealService {
       date,
       time,
       category: input?.category?.trim() || category,
+      image: input?.image?.trim() || null,
       note: input?.note?.trim() || null,
       status: MEAL_PLAN_STATUS_PUBLISHED,
       createdBy: userId,
@@ -259,6 +261,7 @@ export class MealService {
       patch.name = name;
     }
     if (input?.category !== undefined) patch.category = input.category?.trim() || null;
+    if (input?.image !== undefined) patch.image = input.image?.trim() || null;
     if (input?.note !== undefined) {
       const note = input.note?.trim() || null;
       if (note && note.length > MEAL_NOTE_MAX_LENGTH) {
@@ -355,6 +358,7 @@ export class MealService {
       date,
       time: null,
       category: pick.category,
+      image: null,
       note: null,
       status: MEAL_PLAN_STATUS_PUBLISHED,
       createdBy: userId,

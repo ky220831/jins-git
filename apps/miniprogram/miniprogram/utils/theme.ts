@@ -39,6 +39,7 @@ export function currentThemeClass(): string {
   return parts.join(' ');
 }
 
+
 /** 供功能页展示当前主题信息（节气/节日/昼夜） */
 export function currentThemeInfo(): { term: string; festival: string; period: DayPeriod } {
   const ctx = themeDayContext();

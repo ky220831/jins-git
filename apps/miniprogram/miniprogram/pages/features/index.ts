@@ -13,6 +13,7 @@ Page({
   },
 
   onShow() {
+    this.setData({ themeClass: currentThemeClass() });
     SpaceService.mySpace()
       .then((res) => {
         this.setData({

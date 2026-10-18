@@ -8,11 +8,31 @@ import type {
   OfflineMealPlanInput,
   UpdateMealPlanInput,
 } from '../../../../../packages/types/src';
+import { requireSpaceMember } from '../../_shared/access';
 import { CloudRepo } from '../../_shared/cloudRepo';
 import { createHandler } from '../../_shared/handler';
 import { MealService } from '../../_shared/mealService';
+import { ReminderService } from '../../_shared/reminderService';
 
 const service = new MealService(new CloudRepo());
+const repo = new CloudRepo();
+
+/** 菜单新增/编辑后，给已授权的另一方发一次性订阅消息（失败不影响主流程） */
+async function notifyMealChange(openid: string, plan: MealPlanView): Promise<void> {
+  try {
+    const { spaceId } = await requireSpaceMember(repo, openid);
+    await new ReminderService(repo).notifyChange(
+      spaceId,
+      'meal',
+      `菜单已更新：${plan.name}`,
+      plan.date,
+      plan.time || undefined,
+      openid,
+    );
+  } catch {
+    // 通知失败不阻塞保存
+  }
+}
 
 type MealPlanEvent =
   | ({ action: 'month' } & CalendarMonthInput)
@@ -27,10 +47,14 @@ export const main = createHandler<MealPlanEvent, MealPlanView[] | MealPlanView |
   async (event) => {
     const { OPENID } = cloud.getWXContext();
     if (event?.action === 'create') {
-      return service.createPlan(OPENID, event);
+      const plan = await service.createPlan(OPENID, event);
+      await notifyMealChange(OPENID, plan);
+      return plan;
     }
     if (event?.action === 'update') {
-      return service.updatePlan(OPENID, event);
+      const plan = await service.updatePlan(OPENID, event);
+      await notifyMealChange(OPENID, plan);
+      return plan;
     }
     if (event?.action === 'offline') {
       return service.offlinePlan(OPENID, event);

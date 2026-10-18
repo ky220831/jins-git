@@ -101,6 +101,54 @@ export class ReminderService {
     });
   }
 
+  /**
+   * 业务变更即时通知（v1.1.7）：编辑/新增菜单或餐厅行程后，
+   * 向已授权的“另一方”发送一次性订阅消息（内容说明变化）。
+   * excludeOpenid = 操作者本人，不给自己发。
+   */
+  async notifyChange(
+    spaceId: string,
+    topic: ReminderTopic,
+    changeText: string,
+    date: string,
+    time?: string,
+    excludeOpenid?: string,
+  ): Promise<number> {
+    const cfg = this.templates[topic];
+    if (!cfg || !cfg.templateId) return 0;
+    const grants = await this.repo.listGrantsBySpaceTopic(spaceId, topic);
+    let sent = 0;
+    for (const grant of grants) {
+      if (grant.openid === excludeOpenid) continue;
+      try {
+        const data: Record<string, { value: string }> =
+          topic === 'anniversary'
+            ? {
+                thing1: { value: changeText.slice(0, 20) },
+                date2: { value: date },
+                date3: { value: date },
+              }
+            : {
+                thing1: { value: changeText.slice(0, 20) },
+                date2: { value: date },
+                time3: { value: time || '全天' },
+              };
+        await this.send({
+          openid: grant.openid,
+          templateId: grant.templateId || cfg.templateId,
+          page: cfg.page,
+          data,
+        });
+        sent += 1;
+      } catch {
+        // 发送失败保留授权，下次可重试
+        continue;
+      }
+      await this.repo.deleteGrant(spaceId, grant.id);
+    }
+    return sent;
+  }
+
   /** 发送今日到期提醒（每条一次性授权发一次后删除） */
   async sendDue(now: Date = this.clock()): Promise<number> {
     const items = await this.collectDue(now);

@@ -63,6 +63,37 @@
   color: var(--color-text-secondary);
 }
 
+.plan-image {
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+  margin-right: 4rpx;
+}
+
+.image-picker {
+  width: 200rpx;
+  height: 200rpx;
+  border-radius: var(--radius-md);
+  border: 2rpx dashed var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12rpx;
+  overflow: hidden;
+  background: rgba(240, 138, 155, 0.04);
+}
+
+.image-placeholder {
+  font-size: 24rpx;
+  color: var(--color-text-secondary);
+}
+
+.plan-preview {
+  width: 100%;
+  height: 100%;
+}
+
 .plan-actions,
 .template-actions,
 .trash-actions {

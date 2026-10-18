@@ -21,6 +21,18 @@
       "installDependency": true,
       "timeout": 10,
       "memorySize": 256
+    },
+    {
+      "name": "restaurant-ocr",
+      "runtime": "Nodejs16.13",
+      "handler": "index.main",
+      "installDependency": true,
+      "timeout": 30,
+      "memorySize": 256,
+      "envVariables": {
+        "OCR_DASHSCOPE_API_KEY": "请填入百炼API Key（不要提交真实值到Git）",
+        "OCR_DASHSCOPE_BASE_URL": "https://dashscope.aliyuncs.com/compatible-mode/v1"
+      }
     }
   ]
 }

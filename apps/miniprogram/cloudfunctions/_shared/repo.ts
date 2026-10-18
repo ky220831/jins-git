@@ -165,6 +165,7 @@ export interface MealPlanRecord {
   date: string;
   time: string | null;
   category: string | null;
+  image: string | null;
   note: string | null;
   status: MealPlanStatus;
   createdBy: string;

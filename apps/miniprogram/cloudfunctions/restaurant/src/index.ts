@@ -11,11 +11,34 @@ import type {
   UpdateRestaurantInput,
   UpdateRestaurantVisitInput,
 } from '../../../../../packages/types/src';
+import { requireSpaceMember } from '../../_shared/access';
 import { CloudRepo } from '../../_shared/cloudRepo';
 import { createHandler } from '../../_shared/handler';
+import { ReminderService } from '../../_shared/reminderService';
 import { RestaurantService } from '../../_shared/restaurantService';
 
 const service = new RestaurantService(new CloudRepo());
+const repo = new CloudRepo();
+
+/** 餐厅行程新增/编辑后，给已授权的另一方发一次性订阅消息（失败不影响主流程） */
+async function notifyVisitChange(
+  openid: string,
+  visit: RestaurantVisitView,
+): Promise<void> {
+  try {
+    const { spaceId } = await requireSpaceMember(repo, openid);
+    await new ReminderService(repo).notifyChange(
+      spaceId,
+      'visit',
+      `餐厅行程已更新：${visit.name}`,
+      visit.date,
+      visit.time || undefined,
+      openid,
+    );
+  } catch {
+    // 通知失败不阻塞保存
+  }
+}
 
 type RestaurantEvent =
   | { action: 'list' }
@@ -39,8 +62,16 @@ export const main = createHandler<
     await service.deleteRestaurant(OPENID, event);
     return { ok: true };
   }
-  if (event?.action === 'create-visit') return service.createVisit(OPENID, event);
-  if (event?.action === 'update-visit') return service.updateVisit(OPENID, event);
+  if (event?.action === 'create-visit') {
+    const visit = await service.createVisit(OPENID, event);
+    await notifyVisitChange(OPENID, visit);
+    return visit;
+  }
+  if (event?.action === 'update-visit') {
+    const visit = await service.updateVisit(OPENID, event);
+    await notifyVisitChange(OPENID, visit);
+    return visit;
+  }
   if (event?.action === 'offline-visit') return service.offlineVisit(OPENID, event);
   if (event?.action === 'delete-visit') {
     await service.deleteVisit(OPENID, event);

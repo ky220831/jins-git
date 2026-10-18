@@ -127,6 +127,7 @@ Page({
   },
 
   onShow() {
+    this.setData({ themeClass: currentThemeClass() });
     this.refresh();
   },
 
