@@ -11,25 +11,32 @@ interface FeatureItem {
   sub: string;
 }
 
+/** 默认功能列表：进入页面立即渲染，避免空白闪现；onShow 后仅更新主/副文案 */
+const DEFAULT_FEATURE_LIST: FeatureItem[] = [
+  { key: 'meal', icon: moduleLabels.meal.icon, label: moduleLabels.meal.label, sub: '今天想吃什么 · 随机选 · 素材库' },
+  { key: 'restaurant', icon: moduleLabels.restaurant.icon, label: moduleLabels.restaurant.label, sub: '收藏想去的餐厅 · 行程 · 搜索' },
+  { key: 'anniversary', icon: moduleLabels.anniversary.icon, label: moduleLabels.anniversary.label, sub: '属于我们的日子 · 每年重复' },
+  { key: 'trip', icon: moduleLabels.trip.icon, label: moduleLabels.trip.label, sub: '去过的国家和城市' },
+  { key: 'period', icon: moduleLabels.period.icon, label: moduleLabels.period.label, sub: '记录与预测 · 日历显示开关' },
+  { key: 'manage', icon: moduleLabels.manage.icon, label: moduleLabels.manage.label, sub: '回收站 · 数据 · 家庭' },
+];
+
 Page({
   data: {
     themeClass: currentThemeClass(),
     themeAuto: themeAutoEnabled(),
     isOwner: false,
-    featureList: [] as FeatureItem[],
+    featureList: DEFAULT_FEATURE_LIST,
     loading: true,
     error: '',
   },
 
   buildFeatureList(isOwner: boolean) {
-    const list: FeatureItem[] = [
-      { key: 'meal', icon: moduleLabels.meal.icon, label: moduleLabels.meal.label, sub: '今天想吃什么 · 随机选 · 素材库' },
-      { key: 'restaurant', icon: moduleLabels.restaurant.icon, label: moduleLabels.restaurant.label, sub: '收藏想去的餐厅 · 行程 · 搜索' },
-      { key: 'anniversary', icon: moduleLabels.anniversary.icon, label: moduleLabels.anniversary.label, sub: '属于我们的日子 · 每年重复' },
-      { key: 'trip', icon: moduleLabels.trip.icon, label: moduleLabels.trip.label, sub: '去过的国家和城市' },
-      { key: 'period', icon: moduleLabels.period.icon, label: moduleLabels.period.label, sub: '记录与预测 · 日历显示开关' },
-      { key: 'manage', icon: moduleLabels.manage.icon, label: moduleLabels.manage.label, sub: isOwner ? '回收站 · 数据 · 家庭' : '副管理' },
-    ];
+    const list = DEFAULT_FEATURE_LIST.map((item) =>
+      item.key === 'manage'
+        ? { ...item, sub: isOwner ? '回收站 · 数据 · 家庭' : '副管理' }
+        : item,
+    );
     this.setData({ featureList: list });
   },
 

@@ -159,7 +159,10 @@ Page({
 
   onLoad() {
     const now = new Date();
-    this.setData({ year: now.getFullYear(), month: now.getMonth() + 1 });
+    this.setData({ year: now.getFullYear(), month: now.getMonth() + 1, loading: true });
+    // 立即渲染本地公共日历（日期/周末/农历/节气），避免进入时空白闪现；
+    // bootstrap 完成后再覆盖为完整业务数据或游客模式节假日版本。
+    this.buildMonth([], [], [], [], false);
     this.bootstrap();
   },
 
@@ -204,6 +207,7 @@ Page({
    * 微信云函数身份由微信静默下发，全程无按钮、无授权弹窗（目标 1）。
    */
   async bootstrap() {
+    this.setData({ loading: true });
     try {
       const res = await SpaceService.mySpace();
       this.setData({
@@ -214,7 +218,7 @@ Page({
       this.refresh();
     } catch (err) {
       const notInSpace = err instanceof ApiError && err.code === 'NOT_IN_SPACE';
-      this.setData({ guestMode: true, guestError: !notInSpace });
+      this.setData({ guestMode: true, guestError: !notInSpace, loading: false });
       await this.buildGuestMonth();
     }
   },
@@ -229,13 +233,19 @@ Page({
     const cacheKey = `${year}-${month}`;
     let holidays = this.data.guestHolidays;
     if (guestHolidayKey !== cacheKey) {
+      this.setData({ loading: true });
       try {
         const res = await CalendarService.publicMonth({ year, month });
         holidays = res.days;
-        this.setData({ guestHolidayKey: cacheKey, guestHolidays: holidays, guestError: false });
+        this.setData({
+          guestHolidayKey: cacheKey,
+          guestHolidays: holidays,
+          guestError: false,
+          loading: false,
+        });
       } catch {
         // 节假日拉取失败不阻塞：本地周末/农历/节气仍可显示
-        this.setData({ guestError: true });
+        this.setData({ guestError: true, loading: false });
       }
     }
     this.buildMonth([], [], [], holidays, false);

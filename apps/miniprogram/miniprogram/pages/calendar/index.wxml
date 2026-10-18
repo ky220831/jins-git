@@ -96,6 +96,7 @@
     <view class="status-line period-past" wx:if="{{dayPeriodState === 'past'}}">🩷 生理期（已过去）</view>
     <view class="status-line rest" wx:if="{{dayPeriodState === 'rest'}}">🔵 休息日</view>
     <view class="day-empty" wx:if="{{guestMode}}">创建空间后，这里会记录你们的一天</view>
+    <view class="day-empty" wx:elif="{{loading}}">正在加载这一天…</view>
     <view class="day-empty" wx:elif="{{!dayTodos.length && !dayEvents.length && !dayPeriodState && !dayMarks.length}}">🌷 这一天还没有安排</view>
 
     <!-- 快速入口：日历 → 核心功能新增/编辑（自动带入当天日期） -->
