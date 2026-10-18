@@ -3,6 +3,7 @@ import { ROLE_OWNER, type MealPlanView, type MealTemplateView, type TrashItemVie
 import { MealService } from '../../services/meal';
 import { SpaceService } from '../../services/space';
 import { TrashService } from '../../services/trash';
+import { currentThemeClass } from '../../utils/theme';
 
 interface PlanRow extends MealPlanView {
   timeLabel: string;
@@ -18,6 +19,7 @@ function dateKey(year: number, month: number, day: number): string {
 
 Page({
   data: {
+    themeClass: currentThemeClass(),
     todayDate: '',
     todayPlans: [] as PlanRow[],
     templates: [] as MealTemplateView[],

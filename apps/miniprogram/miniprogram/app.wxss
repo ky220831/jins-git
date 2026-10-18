@@ -3,6 +3,7 @@
 page {
   background: var(--color-bg);
   color: var(--color-text);
+  transition: background 0.6s ease;
   font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
   letter-spacing: 0.5rpx;
 }
@@ -13,6 +14,8 @@ page {
   min-height: 100vh;
   padding: 48rpx 40rpx 64rpx;
   box-sizing: border-box;
+  background: linear-gradient(165deg, var(--grad-a), var(--grad-b));
+  transition: background 0.6s ease;
 }
 
 /* ---- 胶囊按钮 ---- */
@@ -274,7 +277,7 @@ button::after {
 
 .sheet {
   position: relative;
-  background: #FFFDF9;
+  background: var(--color-surface);
   border-radius: 32rpx 32rpx 0 0;
   padding: 16rpx 32rpx calc(40rpx + env(safe-area-inset-bottom));
   max-height: 86vh;

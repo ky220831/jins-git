@@ -1,9 +1,12 @@
 import { ApiError } from '../../api/cloud';
 import { ROLE_OWNER } from '../../lib/shared/types/index';
 import { SpaceService } from '../../services/space';
+import { currentThemeClass, setThemeAuto, themeAutoEnabled } from '../../utils/theme';
 
 Page({
   data: {
+    themeClass: currentThemeClass(),
+    themeAuto: themeAutoEnabled(),
     isOwner: false,
     loading: true,
     error: '',
@@ -48,5 +51,11 @@ Page({
 
   onOpenManage() {
     wx.navigateTo({ url: '/pages/manage/index' });
+  },
+
+  onToggleTheme(e: WechatMiniprogram.SwitchChange) {
+    const enabled = !!e.detail.value;
+    setThemeAuto(enabled);
+    this.setData({ themeAuto: enabled, themeClass: currentThemeClass() });
   },
 });

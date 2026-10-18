@@ -2,6 +2,8 @@
 page {
   --color-bg: #FFF7F0;
   --color-surface: #FFFFFF;
+  --grad-a: #FFF7F0;
+  --grad-b: #F7F0E8;
   --color-text: #4E4547;
   --color-text-secondary: #B9A8A0;
   --color-border: #F6E8DC;
@@ -19,4 +21,92 @@ page {
   --radius-lg: 36rpx;
   --shadow-card: 0 8rpx 24rpx rgba(244, 177, 177, 0.16);
   --shadow-soft: 0 4rpx 16rpx rgba(244, 177, 177, 0.12);
+}
+
+/* ===== 月度季节渐变换肤（1.0.16）：只影响背景/卡片微弱底色，主色与文字固定 ===== */
+.theme-base {
+  --color-bg: #FFF7F0;
+  --color-surface: #FFFFFF;
+  --grad-a: #FFF7F0;
+  --grad-b: #F7F0E8;
+}
+
+/* 春季（3-5）嫩青奶油绿系 */
+.theme-m3 {
+  --color-bg: #FDF2F3;
+  --color-surface: #FEF9F8;
+  --grad-a: #FDF2F3;
+  --grad-b: #EAF2EC;
+}
+.theme-m4 {
+  --color-bg: #ECF7F3;
+  --color-surface: #F8FCFA;
+  --grad-a: #ECF7F3;
+  --grad-b: #DFF0E9;
+}
+.theme-m5 {
+  --color-bg: #F2F8EA;
+  --color-surface: #FAFCF6;
+  --grad-a: #F2F8EA;
+  --grad-b: #E3EFD8;
+}
+
+/* 夏季（6-8）冰蓝浅青冷调 */
+.theme-m6 {
+  --color-bg: #EDF4FB;
+  --color-surface: #F8FBFD;
+  --grad-a: #EDF4FB;
+  --grad-b: #DCECF6;
+}
+.theme-m7 {
+  --color-bg: #EAF6F5;
+  --color-surface: #F7FCFB;
+  --grad-a: #EAF6F5;
+  --grad-b: #D9EFED;
+}
+.theme-m8 {
+  --color-bg: #EAF5F2;
+  --color-surface: #F7FCFA;
+  --grad-a: #EAF5F2;
+  --grad-b: #D9EBE7;
+}
+
+/* 秋季（9-11）暖杏浅橘奶茶系 */
+.theme-m9 {
+  --color-bg: #F9F4E9;
+  --color-surface: #FDFBF5;
+  --grad-a: #F9F4E9;
+  --grad-b: #EFE6D3;
+}
+.theme-m10 {
+  --color-bg: #FBF2E5;
+  --color-surface: #FEFAF4;
+  --grad-a: #FBF2E5;
+  --grad-b: #F2E0CB;
+}
+.theme-m11 {
+  --color-bg: #F5F0EA;
+  --color-surface: #FCF9F5;
+  --grad-a: #F5F0EA;
+  --grad-b: #E9DFD4;
+}
+
+/* 冬季（12-2）低饱和冷调淡紫灰 */
+.theme-m12 {
+  --color-bg: #F4EFF3;
+  --color-surface: #FBF8FA;
+  --grad-a: #F4EFF3;
+  --grad-b: #E6DEE8;
+}
+.theme-m1 {
+  --color-bg: #F4F4F4;
+  --color-surface: #FBFBFB;
+  --grad-a: #F4F4F4;
+  --grad-b: #E8E8EC;
+}
+.theme-m2 {
+  --color-bg: #F3EFF8;
+  --color-surface: #FAF8FC;
+  --grad-a: #F3EFF8;
+  --grad-b: #E7E0F0;
 }

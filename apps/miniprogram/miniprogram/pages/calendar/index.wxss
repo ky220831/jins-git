@@ -68,12 +68,13 @@
 .grid {
   display: flex;
   flex-wrap: wrap;
+  gap: 8rpx;
   margin-top: 8rpx;
 }
 
 .day-cell {
-  width: 14.28%;
-  height: 82rpx;
+  width: calc((100% - 48rpx) / 7);
+  height: 78rpx;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -82,33 +83,25 @@
 }
 
 .day-cell.today {
-  background: #FFE9EC;
+  background: rgba(255, 180, 190, 0.14);
 }
 
 .day-cell.period {
-  background: rgba(245, 106, 106, 0.14);
+  background: rgba(245, 106, 106, 0.06);
 }
 
 .day-cell.rest {
-  background: rgba(155, 199, 222, 0.22);
+  background: rgba(155, 199, 222, 0.08);
 }
 
 .day-cell.selected {
-  background: linear-gradient(135deg, #FFB3BB, #FF96A1);
-  box-shadow: var(--shadow-soft);
+  background: rgba(255, 150, 161, 0.14);
+  box-shadow: inset 0 0 0 3rpx rgba(244, 119, 138, 0.45);
 }
 
 .day-cell.selected .day-num {
-  color: #ffffff;
+  color: var(--color-primary-deep);
   font-weight: 700;
-}
-
-.day-cell.selected .holiday-label {
-  color: #ffffff;
-}
-
-.day-cell.selected .dot {
-  background: rgba(255, 255, 255, 0.85);
 }
 
 .day-cell.dim .day-num {
@@ -159,15 +152,26 @@
   margin-top: 14rpx;
   background: var(--color-surface);
   border-radius: var(--radius-lg);
-  padding: 16rpx 24rpx;
+  padding: 12rpx 20rpx;
   box-shadow: var(--shadow-soft);
+}
+
+.legend-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .legend-title {
   font-size: 22rpx;
   font-weight: 600;
   color: var(--color-text-secondary);
-  margin-bottom: 12rpx;
+  margin-bottom: 0;
+}
+
+.legend-arrow {
+  font-size: 20rpx;
+  color: var(--color-text-secondary);
 }
 
 .legend-grid {
@@ -457,28 +461,28 @@
 
 /* ---- 格子：周末 / 生理期三态 ---- */
 .day-cell.weekend {
-  background: rgba(226, 221, 246, 0.35);
+  background: rgba(167, 159, 196, 0.05);
 }
 
 .day-cell.period-ongoing {
-  background: rgba(217, 83, 79, 0.18);
+  background: rgba(217, 83, 79, 0.06);
 }
 
 .day-cell.period-predicted {
-  background: rgba(249, 195, 205, 0.30);
+  background: rgba(249, 195, 205, 0.08);
 }
 
 .day-cell.period-past {
-  background: rgba(233, 214, 216, 0.40);
+  background: rgba(233, 214, 216, 0.08);
 }
 
 /* 选中/今天 优先级最高，避免被状态色覆盖 */
 .day-cell.selected {
-  background: linear-gradient(135deg, #FFB3BB, #FF96A1);
+  background: rgba(255, 150, 161, 0.14);
 }
 
 .day-cell.today:not(.selected) {
-  background: #FFE9EC;
+  background: rgba(255, 180, 190, 0.14);
 }
 
 /* ---- 标识徽章 ---- */
@@ -496,13 +500,9 @@
 }
 
 .holiday-label.weekend-badge {
-  background: rgba(150, 141, 170, 0.12);
-  color: #8A8198;
-}
-
-.day-cell.selected .holiday-label {
-  background: rgba(255, 255, 255, 0.25);
-  color: #ffffff;
+  background: transparent;
+  color: #B0A6BE;
+  padding: 0;
 }
 
 /* ---- 事件数量角标 ---- */
@@ -593,8 +593,10 @@
 }
 
 .quick-btn {
-  padding: 12rpx 20rpx;
+  flex: 0 0 calc((100% - 28rpx) / 3);
+  padding: 14rpx 8rpx;
   font-size: 24rpx;
+  text-align: center;
   color: var(--color-primary-deep);
   background: #FFF1EF;
   border-radius: 999rpx;

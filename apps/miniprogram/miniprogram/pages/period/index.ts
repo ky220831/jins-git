@@ -2,6 +2,7 @@ import { ApiError } from '../../api/cloud';
 import { ROLE_OWNER, type PeriodRecordView } from '../../lib/shared/types/index';
 import { PeriodService } from '../../services/period';
 import { SpaceService } from '../../services/space';
+import { currentThemeClass } from '../../utils/theme';
 
 interface PeriodRow extends PeriodRecordView {
   rangeLabel: string;
@@ -22,6 +23,7 @@ function addDays(date: string, n: number): string {
 
 Page({
   data: {
+    themeClass: currentThemeClass(),
     loading: true,
     error: '',
     periodRecords: [] as PeriodRow[],

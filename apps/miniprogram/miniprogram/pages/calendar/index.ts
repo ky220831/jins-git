@@ -12,6 +12,7 @@ import { SpaceService } from '../../services/space';
 import { TodoService } from '../../services/todo';
 import { startSilentRefresh } from '../../utils/realtime';
 import { formatDateTime } from '../../utils/time';
+import { currentThemeClass } from '../../utils/theme';
 
 interface DayCell {
   uid: number;
@@ -24,6 +25,7 @@ interface DayCell {
   hasTodo: boolean;
   hasEvent: boolean;
   eventCount: number;
+  eventDotList: number[];
   /** 生理期三态 + 休息：ongoing 进行中 / past 已过去 / predicted 预计 / rest 休息 */
   periodState: '' | 'ongoing' | 'past' | 'predicted' | 'rest';
   holidayLabel: string;
@@ -109,6 +111,7 @@ function periodStateOf(
 
 Page({
   data: {
+    themeClass: currentThemeClass(),
     year: 0,
     month: 0,
     weekdays: ['日', '一', '二', '三', '四', '五', '六'],
@@ -134,6 +137,7 @@ Page({
     dayMarks: [] as { label: string; kind: string }[],
     dayHoliday: null as HolidayDayView | null,
     periodVisible: true,
+    legendOpen: false,
     isOwner: false,
     loading: false,
     error: '',
@@ -266,6 +270,7 @@ Page({
       hasTodo: false,
       hasEvent: false,
       eventCount: 0,
+      eventDotList: [],
       periodState: '',
       holidayLabel: '',
       holidayKind: '',
@@ -291,6 +296,7 @@ Page({
         hasTodo: todoDates.has(key),
         hasEvent: eventCount > 0,
         eventCount,
+        eventDotList: Array.from({ length: Math.min(eventCount, 4) }, (_, i) => i),
         periodState:
           periodVisible && period ? periodStateOf(period, key, todayKeyLocal) : '',
         holidayLabel: holiday ? holidayLabel(holiday) : weekend ? '周末' : '',
@@ -392,6 +398,10 @@ Page({
     this.updateDayDetail(key);
   },
 
+  onToggleLegend() {
+    this.setData({ legendOpen: !this.data.legendOpen });
+  },
+
   /** 日程 → 业务模块（PRD §20/§21 双向联动） */
   onTapEvent(e: WechatMiniprogram.TouchEvent) {
     const { type, id } = e.currentTarget.dataset as { type: string; id: string };
@@ -466,7 +476,7 @@ Page({
   },
 
   onQuickTravel() {
-    wx.navigateTo({ url: `/pages/travel/index?date=${this.data.selectedDate}` });
+    wx.navigateTo({ url: `/pages/travel/index?date=${this.data.selectedDate}&add=1` });
   },
 
   onQuickAnniversary() {

@@ -1,4 +1,4 @@
-<view class="container features-page">
+<view class="container {{themeClass}} features-page">
   <view class="page-head">
     <view class="page-title">功能</view>
     <view class="page-sub">日历在左侧 Tab · 点这里进入各功能</view>
@@ -60,5 +60,15 @@
   <view class="tip-card">
     <view class="tip-title">💡 小贴士</view>
     <view class="tip-text">在“日历”里点某一天，可以直接为该天添加菜单、餐厅行程、旅游行程或纪念日。</view>
+  </view>
+
+  <view class="tip-card">
+    <view class="toggle-row">
+      <view>
+        <view class="tip-title">🎨 月度季节自动换肤</view>
+        <view class="tip-text">跟随月份微调背景氛围色；关闭后锁定基础风格</view>
+      </view>
+      <switch checked="{{themeAuto}}" bindchange="onToggleTheme" color="#FF96A1" />
+    </view>
   </view>
 </view>

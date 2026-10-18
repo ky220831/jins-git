@@ -1,4 +1,4 @@
-<view class="container meal-page">
+<view class="container {{themeClass}} meal-page">
   <view class="page-head">
     <view class="page-title">今日菜单</view>
     <view class="page-date">{{todayDate}}</view>

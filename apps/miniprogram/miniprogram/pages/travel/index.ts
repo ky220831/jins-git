@@ -8,6 +8,7 @@ import {
 import { SpaceService } from '../../services/space';
 import { TravelService } from '../../services/travel';
 import { RestaurantImagesService } from '../../services/restaurant';
+import { currentThemeClass } from '../../utils/theme';
 
 interface TripRow extends TripView {
   coverUrl: string;
@@ -119,6 +120,7 @@ function tripDisplayName(city: string, country: string): string {
 
 Page({
   data: {
+    themeClass: currentThemeClass(),
     trips: [] as TripRow[],
     plans: [] as PlanRow[],
     isOwner: false,
@@ -152,6 +154,7 @@ Page({
     pTime: '',
     pNote: '',
     pendingPlanDate: '',
+    pendingAddTrip: false,
     savingPlan: false,
   },
 
@@ -162,6 +165,9 @@ Page({
   onLoad(options?: Record<string, string>) {
     if (options?.date && /^\d{4}-\d{2}-\d{2}$/.test(options.date)) {
       this.setData({ pendingPlanDate: options.date });
+    }
+    if (options?.add === '1') {
+      this.setData({ pendingAddTrip: true });
     }
   },
 
@@ -197,6 +203,10 @@ Page({
         isOwner: space.space.myRole === ROLE_OWNER,
         error: '',
       });
+      if (this.data.pendingAddTrip) {
+        this.setData({ pendingAddTrip: false });
+        this.onShowTripForm();
+      }
     } catch (err) {
       const message = err instanceof ApiError ? err.message : '加载失败，请重试';
       this.setData({ error: message });

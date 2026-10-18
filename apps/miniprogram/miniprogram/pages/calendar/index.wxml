@@ -1,4 +1,4 @@
-<view class="container calendar-page">
+<view class="container {{themeClass}} calendar-page">
   <!-- 顶部：双人爱心连接 + 右上角小邀请码 -->
   <view class="top-bar">
     <view class="couple">
@@ -43,15 +43,18 @@
       <view class="dots">
         <view class="dot {{item.periodState === 'ongoing' ? 'dot-period-ongoing' : ''}} {{item.periodState === 'past' ? 'dot-period-past' : ''}} {{item.periodState === 'predicted' ? 'dot-period-predicted' : ''}} {{item.periodState === 'rest' ? 'dot-rest' : ''}}" wx:if="{{item.periodState}}"></view>
         <view class="dot dot-todo" wx:if="{{item.hasTodo}}"></view>
-        <view class="dot dot-event" wx:if="{{item.hasEvent}}"></view>
+        <view class="dot dot-event" wx:for="{{item.eventDotList}}" wx:for-item="d" wx:key="*this"></view>
       </view>
-      <view class="event-count" wx:if="{{item.eventCount > 1}}">{{item.eventCount}}</view>
+      <view class="event-count" wx:if="{{item.eventCount > 4}}">{{item.eventCount}}</view>
     </view>
   </view>
 
   <view class="legend-card">
-    <view class="legend-title">图例</view>
-    <view class="legend-grid">
+    <view class="legend-head" bindtap="onToggleLegend">
+      <text class="legend-title">图例</text>
+      <text class="legend-arrow">{{legendOpen ? '收起 ▴' : '展开 ▾'}}</text>
+    </view>
+    <view class="legend-grid" wx:if="{{legendOpen}}">
       <view class="legend-chip"><view class="legend-dot period-ongoing"></view><text>生理期进行中</text></view>
       <view class="legend-chip"><view class="legend-dot period-predicted"></view><text>生理期预计</text></view>
       <view class="legend-chip"><view class="legend-dot period-past"></view><text>生理期已过</text></view>

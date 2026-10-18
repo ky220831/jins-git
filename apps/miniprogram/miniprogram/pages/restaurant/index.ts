@@ -7,6 +7,7 @@ import {
   RestaurantService,
 } from '../../services/restaurant';
 import { SpaceService } from '../../services/space';
+import { currentThemeClass } from '../../utils/theme';
 
 interface RestaurantRow extends RestaurantView {
   coverUrl: string;
@@ -34,6 +35,7 @@ function todayKey(): string {
 
 Page({
   data: {
+    themeClass: currentThemeClass(),
     restaurants: [] as RestaurantRow[],
     visits: [] as VisitRow[],
     searchResults: [] as RestaurantSearchItem[],

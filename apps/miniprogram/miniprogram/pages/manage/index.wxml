@@ -1,4 +1,4 @@
-<view class="container manage-page">
+<view class="container {{themeClass}} manage-page">
   <view class="page-head">
     <view class="page-title">管理</view>
     <view class="page-sub">{{isOwner ? '主管理' : '副管理'}}</view>

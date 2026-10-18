@@ -14,6 +14,7 @@ import { RestaurantService } from '../../services/restaurant';
 import { SpaceService } from '../../services/space';
 import { TrashService } from '../../services/trash';
 import { formatDate, formatDateTime } from '../../utils/time';
+import { currentThemeClass } from '../../utils/theme';
 
 interface TrashRow extends TrashItemView {
   collectionLabel: string;
@@ -93,6 +94,7 @@ function collectionLabel(collection: string): string {
 
 Page({
   data: {
+    themeClass: currentThemeClass(),
     isOwner: false,
     loading: false,
     error: '',

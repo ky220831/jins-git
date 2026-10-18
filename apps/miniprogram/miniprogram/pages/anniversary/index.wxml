@@ -1,4 +1,4 @@
-<view class="container anniversary-page">
+<view class="container {{themeClass}} anniversary-page">
   <view class="page-head">
     <view class="page-title">纪念日</view>
     <view class="page-sub">两个人的重要日子</view>

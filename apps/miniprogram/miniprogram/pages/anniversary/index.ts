@@ -2,6 +2,7 @@ import { ApiError } from '../../api/cloud';
 import { ROLE_OWNER, type AnniversaryView } from '../../lib/shared/types/index';
 import { AnniversaryService } from '../../services/anniversary';
 import { SpaceService } from '../../services/space';
+import { currentThemeClass } from '../../utils/theme';
 
 interface AnniversaryRow extends AnniversaryView {
   countLabel: string;
@@ -11,6 +12,7 @@ interface AnniversaryRow extends AnniversaryView {
 
 Page({
   data: {
+    themeClass: currentThemeClass(),
     items: [] as AnniversaryRow[],
     isOwner: false,
     loading: false,
