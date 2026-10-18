@@ -67,9 +67,9 @@
       <view class="sheet-handle"></view>
       <view class="form-title">搜索餐厅（腾讯位置服务）</view>
       <view class="field-label">关键词</view>
-      <input class="input" placeholder="如：日料 / 店名" value="{{searchKeyword}}" bindinput="onSearchKeyword" maxlength="30" />
+      <textarea class="input textarea auto-grow" placeholder="如：日料 / 店名" value="{{searchKeyword}}" bindinput="onSearchKeyword" maxlength="30" auto-height />
       <view class="field-label">城市（可选）</view>
-      <input class="input" placeholder="默认全国" value="{{searchRegion}}" bindinput="onSearchRegion" maxlength="20" />
+      <textarea class="input textarea auto-grow" placeholder="默认全国" value="{{searchRegion}}" bindinput="onSearchRegion" maxlength="20" auto-height />
       <view class="form-actions">
         <button class="btn-secondary form-btn" bindtap="onHideSearch">取消</button>
         <button class="btn-primary form-btn" bindtap="onSearch" loading="{{searching}}" disabled="{{searching}}">搜索</button>
@@ -95,11 +95,11 @@
       <view class="form-row">
         <view class="form-col">
           <view class="field-label">城市</view>
-          <input class="input" placeholder="城市" value="{{fCity}}" data-field="fCity" bindinput="onFieldInput" maxlength="20" />
+          <textarea class="input textarea auto-grow" placeholder="城市" value="{{fCity}}" data-field="fCity" bindinput="onFieldInput" maxlength="20" auto-height />
         </view>
         <view class="form-col">
           <view class="field-label">分类</view>
-          <input class="input" placeholder="如：日料/火锅" value="{{fCategory}}" data-field="fCategory" bindinput="onFieldInput" maxlength="20" />
+          <textarea class="input textarea auto-grow" placeholder="如：日料/火锅" value="{{fCategory}}" data-field="fCategory" bindinput="onFieldInput" maxlength="20" auto-height />
         </view>
       </view>
       <!-- 高级信息：仅编辑已有餐厅时显示 -->

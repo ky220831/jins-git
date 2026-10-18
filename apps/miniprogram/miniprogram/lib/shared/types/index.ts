@@ -627,6 +627,8 @@ export interface TripView {
   name: string;
   country?: string;
   city?: string;
+  /** 去过的日期（精简版旅行记录，可选） */
+  visitedDate?: string;
   lat?: number | null;
   lng?: number | null;
   transport?: string;
@@ -650,6 +652,7 @@ export interface CreateTripInput {
   name: string;
   country?: string | null;
   city?: string | null;
+  visitedDate?: string | null;
   lat?: number | null;
   lng?: number | null;
   transport?: string | null;
@@ -665,6 +668,7 @@ export interface UpdateTripInput {
   name?: string;
   country?: string | null;
   city?: string | null;
+  visitedDate?: string | null;
   lat?: number | null;
   lng?: number | null;
   transport?: string | null;

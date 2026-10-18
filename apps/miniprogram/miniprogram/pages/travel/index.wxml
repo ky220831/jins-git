@@ -33,16 +33,11 @@
           <view class="chip danger" wx:if="{{isOwner}}" data-id="{{item.id}}" bindtap="onDeleteTrip">删除</view>
         </view>
       </view>
-      <view class="trip-meta" wx:if="{{item.country || item.city}}">
-        {{item.country}}{{item.city ? ' · ' + item.city : ''}}
-      </view>
-      <view class="trip-meta" wx:if="{{item.transport}}">交通：{{item.transport}}</view>
-      <view class="trip-meta" wx:if="{{item.hotel}}">酒店：{{item.hotel}}</view>
-      <view class="trip-meta" wx:if="{{item.itinLabel}}">行程：{{item.itinLabel}}</view>
-      <view class="trip-meta" wx:if="{{item.note}}">{{item.note}}</view>
+      <view class="trip-meta" wx:if="{{item.placeLabel}}">📍 {{item.placeLabel}}</view>
+      <view class="trip-meta" wx:if="{{item.visitedDate}}">🗓️ 去过：{{item.visitedDate}}</view>
       <view class="trip-actions-row">
         <view class="chip" data-trip-id="{{item.id}}" bindtap="onShowPlanForm">✈️ 安排行程</view>
-        <view class="chip" data-id="{{item.id}}" bindtap="onShowTripForm">🧳 完善资料</view>
+        <view class="chip" data-id="{{item.id}}" bindtap="onShowTripForm">✏️ 编辑</view>
       </view>
     </view>
   </view>
@@ -57,41 +52,21 @@
     <view class="mask" bindtap="onHideTripForm"></view>
     <view class="sheet">
       <view class="sheet-handle"></view>
-      <view class="form-title">{{editingTripId ? '编辑旅行资料' : '添加旅行资料'}}（永久保存）</view>
-      <view class="field-label">旅行名称 *</view>
-      <textarea class="input textarea auto-grow" placeholder="如：北海道之旅" value="{{tName}}" data-field="tName" bindinput="onFieldInput" maxlength="60" auto-height />
-      <view class="form-row">
-        <view class="form-col">
-          <view class="field-label">国家/地区</view>
-          <input class="input" placeholder="国家/地区" value="{{tCountry}}" data-field="tCountry" bindinput="onFieldInput" maxlength="30" />
-        </view>
-        <view class="form-col">
-          <view class="field-label">城市</view>
-          <input class="input" placeholder="城市" value="{{tCity}}" data-field="tCity" bindinput="onFieldInput" maxlength="30" />
-        </view>
+      <view class="form-title">{{editingTripId ? '编辑目的地' : '添加目的地'}}</view>
+      <view class="field-label">国家（可搜索）</view>
+      <textarea class="input textarea auto-grow" placeholder="如：日本 / 泰国 / 中国大陆" value="{{tCountry}}" bindinput="onCountryInput" bindblur="onCountryBlur" maxlength="30" auto-height />
+      <view class="suggest" wx:if="{{showCountryList && countryOptions.length}}">
+        <view class="suggest-item" wx:for="{{countryOptions}}" wx:key="*this" data-name="{{item}}" bindtap="onPickCountry">{{item}}</view>
       </view>
-      <view class="field-label">交通</view>
-      <textarea class="input textarea auto-grow" placeholder="如：飞机 + JR" value="{{tTransport}}" data-field="tTransport" bindinput="onFieldInput" maxlength="100" auto-height />
-      <view class="field-label">酒店（可选）</view>
-      <textarea class="input textarea auto-grow" placeholder="酒店（可选）" value="{{tHotel}}" data-field="tHotel" bindinput="onFieldInput" maxlength="100" auto-height />
-      <view class="form-row">
-        <view class="form-col">
-          <view class="field-label">纬度（可选）</view>
-          <input class="input" placeholder="纬度（可选）" type="digit" value="{{tLat}}" data-field="tLat" bindinput="onFieldInput" maxlength="12" />
-        </view>
-        <view class="form-col">
-          <view class="field-label">经度（可选）</view>
-          <input class="input" placeholder="经度（可选）" type="digit" value="{{tLng}}" data-field="tLng" bindinput="onFieldInput" maxlength="12" />
-        </view>
+      <view class="field-label">城市（可搜索）</view>
+      <textarea class="input textarea auto-grow" placeholder="如：东京 / 首尔 / 上海" value="{{tCity}}" bindinput="onCityInput" bindblur="onCityBlur" maxlength="30" auto-height />
+      <view class="suggest" wx:if="{{showCityList && cityOptions.length}}">
+        <view class="suggest-item" wx:for="{{cityOptions}}" wx:key="*this" data-name="{{item}}" bindtap="onPickCity">{{item}}</view>
       </view>
-      <view class="field-label">行程安排</view>
-      <textarea class="input textarea tall" placeholder="每行一个：日期 标题 | 备注&#10;如：2026-08-20 小樽运河 | 拍照" value="{{tItinerary}}" data-field="tItinerary" bindinput="onFieldInput" />
-      <view class="field-label">备注（可选）</view>
-      <textarea class="input textarea" placeholder="备注（可选）" value="{{tNote}}" data-field="tNote" bindinput="onFieldInput" maxlength="500" />
-      <view class="photo-strip" wx:if="{{tImageUrls.length}}">
-        <image class="thumb" wx:for="{{tImageUrls}}" wx:key="*this" src="{{item}}" mode="aspectFill" />
-      </view>
-      <button class="btn-secondary upload-btn" bindtap="onUploadTripImage">＋ 添加照片</button>
+      <view class="field-label">去过的日期（可选）</view>
+      <picker mode="date" value="{{tVisitedDate}}" bindchange="onFieldChange" data-field="tVisitedDate">
+        <view class="picker-value {{tVisitedDate ? '' : 'placeholder'}}">{{tVisitedDate || '选择日期'}}</view>
+      </picker>
       <view class="form-actions">
         <button class="btn-secondary form-btn" bindtap="onHideTripForm">取消</button>
         <button class="btn-primary form-btn" bindtap="onSaveTrip" loading="{{savingTrip}}" disabled="{{savingTrip}}">保存</button>

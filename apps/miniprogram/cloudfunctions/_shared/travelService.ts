@@ -99,6 +99,7 @@ function toTripView(t: TripRecord): TripView {
     name: t.name,
     ...(t.country ? { country: t.country } : {}),
     ...(t.city ? { city: t.city } : {}),
+    ...(t.visitedDate ? { visitedDate: t.visitedDate } : {}),
     ...(typeof t.lat === 'number' ? { lat: t.lat } : {}),
     ...(typeof t.lng === 'number' ? { lng: t.lng } : {}),
     ...(t.transport ? { transport: t.transport } : {}),
@@ -161,6 +162,7 @@ export class TravelService {
       name,
       country: input?.country?.trim() || null,
       city: input?.city?.trim() || null,
+      visitedDate: input?.visitedDate?.trim() || null,
       lat: validCoord(input?.lat, '纬度', -90, 90),
       lng: validCoord(input?.lng, '经度', -180, 180),
       transport: input?.transport?.trim() || null,
@@ -200,6 +202,7 @@ export class TravelService {
     }
     if (input?.country !== undefined) patch.country = input.country?.trim() || null;
     if (input?.city !== undefined) patch.city = input.city?.trim() || null;
+    if (input?.visitedDate !== undefined) patch.visitedDate = input.visitedDate?.trim() || null;
     if (input?.lat !== undefined) patch.lat = validCoord(input.lat, '纬度', -90, 90);
     if (input?.lng !== undefined) patch.lng = validCoord(input.lng, '经度', -180, 180);
     if (input?.transport !== undefined) patch.transport = input.transport?.trim() || null;

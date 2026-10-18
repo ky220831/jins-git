@@ -12,6 +12,7 @@ import { RestaurantImagesService } from '../../services/restaurant';
 interface TripRow extends TripView {
   coverUrl: string;
   itinLabel: string;
+  placeLabel: string;
 }
 
 interface PlanRow extends TripPlanView {
@@ -67,6 +68,55 @@ function joinItinerary(items: TripItemView[]): string {
     .join('\n');
 }
 
+/** 精简版：国家/城市搜索联想数据（可扩展） */
+const REGION_DATA: { name: string; cities: string[] }[] = [
+  { name: '日本', cities: ['东京', '大阪', '京都', '札幌', '冲绳', '福冈', '奈良'] },
+  { name: '韩国', cities: ['首尔', '釜山', '济州岛'] },
+  { name: '泰国', cities: ['曼谷', '清迈', '普吉岛', '苏梅岛'] },
+  { name: '新加坡', cities: ['新加坡'] },
+  { name: '马来西亚', cities: ['吉隆坡', '沙巴', '槟城'] },
+  { name: '印度尼西亚', cities: ['巴厘岛', '雅加达'] },
+  { name: '越南', cities: ['胡志明市', '河内', '岘港'] },
+  { name: '柬埔寨', cities: ['暹粒（吴哥窟）', '金边'] },
+  { name: '菲律宾', cities: ['马尼拉', '宿务', '长滩岛'] },
+  { name: '马尔代夫', cities: ['马累'] },
+  { name: '阿联酋', cities: ['迪拜', '阿布扎比'] },
+  { name: '土耳其', cities: ['伊斯坦布尔', '卡帕多奇亚'] },
+  { name: '法国', cities: ['巴黎', '尼斯'] },
+  { name: '意大利', cities: ['罗马', '米兰', '威尼斯', '佛罗伦萨'] },
+  { name: '西班牙', cities: ['巴塞罗那', '马德里'] },
+  { name: '英国', cities: ['伦敦', '爱丁堡'] },
+  { name: '德国', cities: ['柏林', '慕尼黑', '法兰克福'] },
+  { name: '瑞士', cities: ['苏黎世', '日内瓦', '因特拉肯'] },
+  { name: '荷兰', cities: ['阿姆斯特丹'] },
+  { name: '奥地利', cities: ['维也纳', '萨尔茨堡'] },
+  { name: '捷克', cities: ['布拉格'] },
+  { name: '希腊', cities: ['雅典', '圣托里尼'] },
+  { name: '葡萄牙', cities: ['里斯本', '波尔图'] },
+  { name: '美国', cities: ['纽约', '洛杉矶', '旧金山', '夏威夷'] },
+  { name: '加拿大', cities: ['温哥华', '多伦多'] },
+  { name: '墨西哥', cities: ['坎昆', '墨西哥城'] },
+  { name: '澳大利亚', cities: ['悉尼', '墨尔本', '黄金海岸'] },
+  { name: '新西兰', cities: ['奥克兰', '皇后镇'] },
+  { name: '俄罗斯', cities: ['莫斯科', '圣彼得堡'] },
+  { name: '埃及', cities: ['开罗'] },
+  { name: '南非', cities: ['开普敦'] },
+  { name: '中国大陆', cities: ['北京', '上海', '广州', '深圳', '成都', '重庆', '杭州', '西安', '厦门', '三亚', '丽江', '大理', '桂林', '青岛', '哈尔滨', '拉萨', '乌鲁木齐'] },
+  { name: '中国香港', cities: ['香港'] },
+  { name: '中国澳门', cities: ['澳门'] },
+  { name: '中国台湾', cities: ['台北', '台中', '高雄', '花莲'] },
+];
+
+/** 目的地自动命名：东京（日本） */
+function tripDisplayName(city: string, country: string): string {
+  const c = city.trim();
+  const n = country.trim();
+  if (c && n) return `${c}（${n}）`;
+  if (c) return c;
+  if (n) return n;
+  return '';
+}
+
 Page({
   data: {
     trips: [] as TripRow[],
@@ -79,6 +129,7 @@ Page({
     tName: '',
     tCountry: '',
     tCity: '',
+    tVisitedDate: '',
     tTransport: '',
     tHotel: '',
     tNote: '',
@@ -87,6 +138,10 @@ Page({
     tLng: '',
     tImages: [] as string[],
     tImageUrls: [] as string[],
+    countryOptions: [] as string[],
+    cityOptions: [] as string[],
+    showCountryList: false,
+    showCityList: false,
     savingTrip: false,
     showPlanForm: false,
     editingPlanId: '',
@@ -132,6 +187,7 @@ Page({
           itinLabel: t.itinerary
             .map((item) => (item.date ? `${item.date} ${item.title}` : item.title))
             .join('；'),
+          placeLabel: [t.country, t.city].filter(Boolean).join(' · '),
         })),
         plans: plans.map((p) => ({
           ...p,
@@ -159,6 +215,7 @@ Page({
       tName: item?.name || '',
       tCountry: item?.country || '',
       tCity: item?.city || '',
+      tVisitedDate: item?.visitedDate || '',
       tTransport: item?.transport || '',
       tHotel: item?.hotel || '',
       tNote: item?.note || '',
@@ -167,6 +224,10 @@ Page({
       tLng: typeof item?.lng === 'number' ? String(item.lng) : '',
       tImages: item?.images || [],
       tImageUrls: [],
+      countryOptions: [],
+      cityOptions: [],
+      showCountryList: false,
+      showCityList: false,
     });
     if (item && item.images.length > 0) {
       RestaurantImagesService.tempUrls(item.images).then((res) => {
@@ -190,8 +251,62 @@ Page({
     this.setData({ [field]: e.detail.value } as Record<string, string>);
   },
 
+  // ---- 精简版：国家/城市搜索联想 ----
+  onCountryInput(e: WechatMiniprogram.Input) {
+    const keyword = e.detail.value;
+    const options = REGION_DATA.filter((r) => r.name.includes(keyword))
+      .slice(0, 6)
+      .map((r) => r.name);
+    this.setData({
+      tCountry: keyword,
+      countryOptions: options,
+      showCountryList: options.length > 0,
+    });
+  },
+
+  onCountryBlur() {
+    setTimeout(() => this.setData({ showCountryList: false }), 200);
+  },
+
+  onPickCountry(e: WechatMiniprogram.TouchEvent) {
+    const name = e.currentTarget.dataset.name as string;
+    const region = REGION_DATA.find((r) => r.name === name);
+    this.setData({
+      tCountry: name,
+      countryOptions: [],
+      showCountryList: false,
+      cityOptions: region ? region.cities : [],
+      showCityList: region ? region.cities.length > 0 : false,
+      tCity: '',
+    });
+  },
+
+  onCityInput(e: WechatMiniprogram.Input) {
+    const keyword = e.detail.value;
+    const pool =
+      this.data.cityOptions.length > 0
+        ? this.data.cityOptions
+        : REGION_DATA.flatMap((r) => r.cities);
+    const options = pool.filter((c) => c.includes(keyword)).slice(0, 8);
+    this.setData({
+      tCity: keyword,
+      cityOptions: options,
+      showCityList: options.length > 0,
+    });
+  },
+
+  onCityBlur() {
+    setTimeout(() => this.setData({ showCityList: false }), 200);
+  },
+
+  onPickCity(e: WechatMiniprogram.TouchEvent) {
+    const name = e.currentTarget.dataset.name as string;
+    this.setData({ tCity: name, cityOptions: [], showCityList: false });
+  },
+
   async onSaveTrip() {
-    const name = this.data.tName.trim();
+    const name =
+      this.data.tName.trim() || tripDisplayName(this.data.tCity, this.data.tCountry) || '未命名目的地';
     if (!name) {
       wx.showToast({ title: '请填写旅行名称', icon: 'none' });
       return;
@@ -203,13 +318,7 @@ Page({
         name,
         country: this.data.tCountry.trim() || null,
         city: this.data.tCity.trim() || null,
-        transport: this.data.tTransport.trim() || null,
-        hotel: this.data.tHotel.trim() || null,
-        note: this.data.tNote.trim() || null,
-        itinerary: parseItinerary(this.data.tItinerary),
-        lat: this.data.tLat.trim() ? Number(this.data.tLat) : null,
-        lng: this.data.tLng.trim() ? Number(this.data.tLng) : null,
-        images: this.data.tImages,
+        visitedDate: this.data.tVisitedDate.trim() || null,
       };
       if (this.data.editingTripId) {
         const editing = this.data.trips.find((t) => t.id === this.data.editingTripId);

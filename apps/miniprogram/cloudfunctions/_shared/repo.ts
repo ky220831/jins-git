@@ -257,6 +257,7 @@ export interface TripRecord {
   name: string;
   country: string | null;
   city: string | null;
+  visitedDate: string | null;
   lat: number | null;
   lng: number | null;
   transport: string | null;

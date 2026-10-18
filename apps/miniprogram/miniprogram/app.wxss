@@ -225,6 +225,31 @@ button::after {
   line-height: 1.5;
 }
 
+/* 搜索联想下拉（旅行国家/城市等） */
+.suggest {
+  margin-top: -8rpx;
+  margin-bottom: 8rpx;
+  background: #FFFFFF;
+  border: 2rpx solid #FBE9DC;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.suggest-item {
+  padding: 18rpx 24rpx;
+  font-size: 26rpx;
+  color: var(--color-text);
+  border-bottom: 2rpx dashed var(--color-border);
+}
+
+.suggest-item:last-child {
+  border-bottom: none;
+}
+
+.suggest-item:active {
+  background: #FFF9F4;
+}
+
 /* ---- 交互规范：所有新增/编辑表单统一用底部弹窗 + 遮罩（1.0.9） ---- */
 .modal {
   position: fixed;

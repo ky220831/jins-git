@@ -99,7 +99,7 @@
       <view class="field-label">菜谱名称</view>
       <textarea class="input textarea auto-grow" placeholder="菜谱名称" value="{{templateName}}" bindinput="onTemplateNameInput" maxlength="50" auto-height />
       <view class="field-label">分类（可选）</view>
-      <input class="input" placeholder="如：家常菜/早餐" value="{{templateCategory}}" bindinput="onTemplateCategoryInput" maxlength="20" />
+      <textarea class="input textarea auto-grow" placeholder="如：家常菜/早餐" value="{{templateCategory}}" bindinput="onTemplateCategoryInput" maxlength="20" auto-height />
       <view class="form-actions">
         <button class="btn-secondary form-btn" bindtap="onHideTemplateForm">取消</button>
         <button class="btn-primary form-btn" bindtap="onSaveTemplate" loading="{{saving}}" disabled="{{saving}}">保存</button>
