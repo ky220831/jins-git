@@ -1,3 +1,7 @@
+.nav-holder {
+  background: linear-gradient(165deg, var(--grad-a), var(--grad-b));
+}
+
 .custom-nav {
   position: fixed;
   top: 0;
@@ -5,6 +9,8 @@
   right: 0;
   z-index: 1000;
   background: linear-gradient(165deg, var(--grad-a), var(--grad-b));
+  /* 防止机型渲染接缝白线 */
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.03);
 }
 
 .nav-inner {

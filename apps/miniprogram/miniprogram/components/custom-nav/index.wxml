@@ -1,4 +1,4 @@
-<view style="height:{{statusBarHeight + navHeight}}px;"></view>
+<view class="nav-holder" style="height:{{statusBarHeight + navHeight}}px;"></view>
 <view class="custom-nav">
   <view style="height:{{statusBarHeight}}px;"></view>
   <view class="nav-inner" style="height:{{navHeight}}px; padding-right:{{capsuleRight}}px;">

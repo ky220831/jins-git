@@ -7,7 +7,8 @@
   height: 100rpx;
   padding-bottom: env(safe-area-inset-bottom);
   background: var(--color-bg);
-  border-top: 2rpx solid var(--color-border);
+  border-top: none;
+  box-shadow: 0 -2rpx 12rpx rgba(80, 70, 90, 0.08);
   display: flex;
   box-sizing: content-box;
 }
