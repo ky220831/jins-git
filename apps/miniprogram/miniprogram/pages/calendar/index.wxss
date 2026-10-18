@@ -253,6 +253,9 @@
   background: #FFF9F4;
   border-radius: 20rpx;
   border: 2rpx solid #FBE9DC;
+  display: flex;
+  align-items: flex-start;
+  gap: 16rpx;
 }
 
 .todo-item.done .todo-title {
@@ -271,6 +274,17 @@
   margin-top: 6rpx;
   font-size: 22rpx;
   color: var(--color-text-secondary);
+}
+
+.item-icon {
+  font-size: 34rpx;
+  line-height: 1.2;
+  flex-shrink: 0;
+}
+
+.item-body {
+  flex: 1;
+  min-width: 0;
 }
 
 .add-btn {

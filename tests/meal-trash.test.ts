@@ -67,7 +67,7 @@ test('素材库：副账号不能删除，主账号删除后进入回收站（pe
   assert.equal(trash[0].retentionType, 'permanent');
 });
 
-test('今日菜单：带时间上架自动生成 🍴 日历事件，下架移除', async () => {
+test('今日菜单：带时间上架自动生成 🍚 日历事件，下架移除', async () => {
   const { repo, mealService } = await fresh();
   const plan = await mealService.createPlan('openid-A', {
     date: '2026-08-10',
@@ -77,7 +77,7 @@ test('今日菜单：带时间上架自动生成 🍴 日历事件，下架移�
   assert.equal(plan.status, 'published');
   const event = [...repo.calendarEvents.values()].find((e) => e.sourceId === plan.id);
   assert.ok(event);
-  assert.equal(event.title, '🍴 晚餐');
+  assert.equal(event.title, '🍚 晚餐');
   assert.equal(event.startTime.toISOString(), new Date('2026-08-10T18:30:00+08:00').toISOString());
 
   await mealService.offlinePlan('openid-B', { planId: plan.id, version: 1 });
@@ -160,7 +160,7 @@ test('恢复：主账号恢复菜单后回到原状态，带时间记录重建�
   assert.equal(restored[0].name, '晚餐');
   const event = [...repo.calendarEvents.values()].find((e) => e.sourceId === plan.id);
   assert.ok(event);
-  assert.equal(event.title, '🍴 晚餐');
+  assert.equal(event.title, '🍚 晚餐');
   const trashAfter = await trashService.list('openid-A');
   assert.equal(trashAfter.length, 0);
 });

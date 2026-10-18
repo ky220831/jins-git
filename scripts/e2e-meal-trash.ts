@@ -140,7 +140,7 @@ async function main(): Promise<void> {
   const mealEvent = oct.events.find((e) => e.sourceId === plan.id);
   check(
     '上架带时间菜单自动生成 🍴 日历事件',
-    !!mealEvent && mealEvent.title === '🍴 番茄炒蛋' && mealEvent.colorToken === 'accent',
+    !!mealEvent && mealEvent.title === '🍚 番茄炒蛋' && mealEvent.colorToken === 'accent',
     mealEvent ? mealEvent.title : '无事件',
   );
 

@@ -398,7 +398,7 @@ export class MealService {
       const startTime = toShanghaiDate(plan.date, plan.time);
       if (existing) {
         await repo.updateCalendarEvent(spaceId, existing.id, {
-          title: `🍴 ${plan.name}`,
+          title: `🍚 ${plan.name}`,
           startTime,
           endTime: null,
           updatedAt: now,
@@ -410,7 +410,7 @@ export class MealService {
           spaceId,
           sourceType: 'meal',
           sourceId: plan.id,
-          title: `🍴 ${plan.name}`,
+          title: `🍚 ${plan.name}`,
           startTime,
           endTime: null,
           colorToken: 'accent',

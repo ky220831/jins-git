@@ -104,7 +104,7 @@ async function main(): Promise<void> {
   const eventAfterCreate = await repo.findCalendarEventBySource(testSpaceId, 'meal', plan.id);
   check(
     '事务-上架：菜单与日历事件同事务写入',
-    !!eventAfterCreate && eventAfterCreate.title === '🍴 E2E晚餐',
+    !!eventAfterCreate && eventAfterCreate.title === '🍚 E2E晚餐',
     eventAfterCreate?.title ?? '无事件',
   );
   check('事务-上架：初始版本为 1', plan.version === 1, `version=${plan.version}`);
@@ -180,7 +180,7 @@ async function main(): Promise<void> {
     const eventB = await repo.findCalendarEventBySource(testSpaceId, 'meal', planB.id);
     check(
       '事务-恢复：上架快照恢复后重建日历事件',
-      !!eventB && eventB.title === '🍴 E2E午餐',
+      !!eventB && eventB.title === '🍚 E2E午餐',
       eventB?.title ?? '无事件',
     );
   }

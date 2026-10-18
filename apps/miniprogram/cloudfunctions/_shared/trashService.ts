@@ -194,7 +194,9 @@ export class TrashService {
             title:
               calendarConfig.sourceType === 'trip'
                 ? `✈️ ${record.name}`
-                : `🍴 ${record.name}`,
+                : calendarConfig.sourceType === 'restaurant'
+                  ? `🍴 ${record.name}`
+                  : `🍚 ${record.name}`,
             startTime: toShanghaiDate(record.date, record.time || '00:00'),
             endTime: null,
             colorToken: 'accent',

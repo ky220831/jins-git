@@ -34,10 +34,34 @@ interface DayCell {
 interface TodoRow extends TodoView {
   timeLabel: string;
   priorityLabel: string;
+  icon: string;
+  moduleLabel: string;
 }
 
 interface EventRow extends CalendarEventView {
   timeLabel: string;
+  icon: string;
+  moduleLabel: string;
+}
+
+/** 与功能页完全一致的模块图标与名称（1.0.14） */
+const MODULE_META: Record<string, { icon: string; label: string }> = {
+  meal: { icon: '🍚', label: '今日菜单' },
+  restaurant: { icon: '🍴', label: '漂亮饭' },
+  anniversary: { icon: '❤️', label: '纪念日' },
+  trip: { icon: '✈️', label: '旅游计划' },
+  period: { icon: '🌸', label: '生理期' },
+  todo: { icon: '📝', label: 'To Do' },
+  custom: { icon: '📌', label: '事项' },
+};
+
+/** 去掉标题前已有的模块 emoji，避免图标重复（如 🍴 晚餐 → 晚餐） */
+function stripModuleEmoji(title: string, icon: string): string {
+  if (icon && title.startsWith(icon)) {
+    return title.slice([...icon].length).replace(/^\s+/, '');
+  }
+  const m = title.match(/^[^\u4e00-\u9fa5a-zA-Z0-9]+/);
+  return m ? title.slice(m[0].length) : title;
 }
 
 function pad(n: number): string {
@@ -295,14 +319,22 @@ Page({
         ...todo,
         timeLabel: todo.time || '全天',
         priorityLabel: todo.priority === 'high' ? '高' : todo.priority === 'low' ? '低' : '普通',
+        icon: (todo.businessType && MODULE_META[todo.businessType]?.icon) || '📝',
+        moduleLabel: (todo.businessType && MODULE_META[todo.businessType]?.label) || 'To Do',
       }));
     const dayEvents: EventRow[] = eventList
       .map((event) => ({ event, parts: toShanghaiParts(event.startTime) }))
       .filter(({ parts }) => parts.date === date)
-      .map(({ event, parts }) => ({
-        ...event,
-        timeLabel: parts.time === '00:00' ? '全天' : parts.time,
-      }));
+      .map(({ event, parts }) => {
+        const meta = MODULE_META[event.sourceType] || MODULE_META.custom;
+        return {
+          ...event,
+          title: stripModuleEmoji(event.title, meta.icon),
+          timeLabel: parts.time === '00:00' ? '全天' : parts.time,
+          icon: meta.icon,
+          moduleLabel: meta.label,
+        };
+      });
     const period = this.data.periodVisible
       ? this.data.periodDays.find((p) => p.date === date)
       : undefined;

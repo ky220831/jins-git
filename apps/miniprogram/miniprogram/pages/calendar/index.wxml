@@ -94,13 +94,19 @@
       data-status="{{item.status}}"
       bindtap="onToggleTodo"
     >
-      <view class="todo-title">{{item.title}}</view>
-      <view class="todo-meta">{{item.timeLabel}} · {{item.priorityLabel}}</view>
+      <view class="item-icon">{{item.icon}}</view>
+      <view class="item-body">
+        <view class="todo-title">{{item.title}}</view>
+        <view class="todo-meta">{{item.moduleLabel}} · {{item.timeLabel}} · {{item.priorityLabel}}</view>
+      </view>
     </view>
 
     <view class="event-item" wx:for="{{dayEvents}}" wx:key="id" data-type="{{item.sourceType}}" data-id="{{item.sourceId}}" bindtap="onTapEvent">
-      <view class="event-title">{{item.title}}</view>
-      <view class="event-meta">{{item.timeLabel}}</view>
+      <view class="item-icon">{{item.icon}}</view>
+      <view class="item-body">
+        <view class="event-title">{{item.title}}</view>
+        <view class="event-meta">{{item.moduleLabel}} · {{item.timeLabel}}</view>
+      </view>
     </view>
 
   </view>
