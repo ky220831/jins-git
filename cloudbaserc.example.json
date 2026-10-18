@@ -13,6 +13,14 @@
       "envVariables": {
         "LBS_KEY": "请填入腾讯位置服务Key（不要提交真实值到Git）"
       }
+    },
+    {
+      "name": "holiday-public",
+      "runtime": "Nodejs16.13",
+      "handler": "index.main",
+      "installDependency": true,
+      "timeout": 10,
+      "memorySize": 256
     }
   ]
 }

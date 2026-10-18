@@ -353,6 +353,27 @@ test('节假日：国庆 10-01 放假、10-10 调休上班，以 HolidayCalendar
   assert.equal(byDate.has('2026-09-30'), false);
 });
 
+test('公共节假日（游客模式）：不依赖空间身份，且只返回公共字段（无任何私人数据）', async () => {
+  const { holidayService, repo } = await fresh();
+  seedHoliday(repo, '2026-08-01', '建军节', 'holiday');
+  seedHoliday(repo, '2026-08-15', '调休上班', 'makeup_workday', {
+    isHoliday: false,
+    isWorkday: true,
+    isMakeupWorkday: true,
+  });
+
+  // 没有任何空间成员身份也能查询（holiday-public 服务层不校验空间）
+  const month = await holidayService.month(2026, 8);
+  assert.equal(month.length, 2);
+
+  // 返回对象仅含公共字段，绝不含 spaceId / 私人业务字段（目标 2）
+  for (const day of month) {
+    const keys = Object.keys(day).sort();
+    assert.deepEqual(keys, ['date', 'isHoliday', 'isMakeupWorkday', 'isWorkday', 'name', 'type']);
+  }
+  assert.equal(month.find((d) => d.date === '2026-08-15')?.isMakeupWorkday, true);
+});
+
 test('calendar-month 聚合：同时返回 periodDays 与 holidays（首页/日历一次请求）', async () => {
   const { calendarService, repo, periodService } = await fresh();
   await periodService.recordActual('openid-A', {

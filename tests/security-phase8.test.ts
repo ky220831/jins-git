@@ -201,6 +201,11 @@ test('安全矩阵：绕过前端直接调用云函数（无微信身份）被�
   // 未绑定用户（有微信身份但无空间）访问业务 → NOT_IN_SPACE
   await w.spaceService.createSpace('openid-E', { name: 'E 独立空间' });
   await expectError(w.restaurantService.listRestaurants('openid-F'), ErrorCodes.NOT_IN_SPACE);
+  // 未绑定用户访问日历月视图（业务数据）同样被拒（目标 2）
+  await expectError(
+    w.calendarService.getMonth('openid-F', { year: 2026, month: 8 }),
+    ErrorCodes.NOT_IN_SPACE,
+  );
 });
 
 test('安全矩阵：图片临时链接越权被拦截（fileID 仅限本空间）', async () => {

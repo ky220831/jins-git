@@ -1,10 +1,9 @@
 {
   "pages": [
-    "pages/login/index",
+    "pages/calendar/index",
     "pages/space/index",
     "pages/space-create/index",
     "pages/space-join/index",
-    "pages/calendar/index",
     "pages/features/index",
     "pages/meal/index",
     "pages/restaurant/index",

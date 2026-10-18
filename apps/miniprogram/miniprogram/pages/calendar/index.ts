@@ -152,6 +152,12 @@ Page({
     periodVisible: true,
     legendOpen: false,
     isOwner: false,
+    /** 未绑定空间的游客模式：只显示本地公共日历，不请求任何业务数据 */
+    guestMode: false,
+    guestError: false,
+    /** 游客模式公共节假日缓存（按年月） */
+    guestHolidayKey: '',
+    guestHolidays: [] as HolidayDayView[],
     loading: false,
     error: '',
     showForm: false,
@@ -164,14 +170,19 @@ Page({
   onLoad() {
     const now = new Date();
     this.setData({ year: now.getFullYear(), month: now.getMonth() + 1 });
-    this.loadRole();
+    this.bootstrap();
   },
 
   onShow() {
-    if (this.data.year) {
+    if (this.data.year && !this.data.guestMode) {
       this.refresh();
+    } else if (this.data.guestMode) {
+      // 游客模式：只重建本地公共日历，不调云函数
+      this.buildGuestMonth();
     }
-    this.startSilent();
+    if (!this.data.guestMode) {
+      this.startSilent();
+    }
   },
 
   onHide() {
@@ -197,13 +208,46 @@ Page({
     }
   },
 
-  async loadRole() {
+  /**
+   * 启动身份探测（静默）：已绑定 → 完整日历；未绑定 → 游客模式公共日历。
+   * 微信云函数身份由微信静默下发，全程无按钮、无授权弹窗（目标 1）。
+   */
+  async bootstrap() {
     try {
       const res = await SpaceService.mySpace();
-      this.setData({ isOwner: res.space.myRole === ROLE_OWNER });
-    } catch {
-      // 角色仅影响删除按钮显示，失败不阻塞日历
+      this.setData({
+        isOwner: res.space.myRole === ROLE_OWNER,
+        guestMode: false,
+        guestError: false,
+      });
+      this.refresh();
+    } catch (err) {
+      const notInSpace = err instanceof ApiError && err.code === 'NOT_IN_SPACE';
+      this.setData({ guestMode: true, guestError: !notInSpace });
+      await this.buildGuestMonth();
     }
+  },
+
+  /**
+   * 游客模式（方案 B）：公共日历 = 本地算法（周末/农历/节气）
+   * + 官方节假日/调休（holiday-public 公共接口，只含公开字段）。
+   * 不请求任何业务云函数，不产生私人数据（目标 2）。
+   */
+  async buildGuestMonth() {
+    const { year, month, guestHolidayKey } = this.data;
+    const cacheKey = `${year}-${month}`;
+    let holidays = this.data.guestHolidays;
+    if (guestHolidayKey !== cacheKey) {
+      try {
+        const res = await CalendarService.publicMonth({ year, month });
+        holidays = res.days;
+        this.setData({ guestHolidayKey: cacheKey, guestHolidays: holidays, guestError: false });
+      } catch {
+        // 节假日拉取失败不阻塞：本地周末/农历/节气仍可显示
+        this.setData({ guestError: true });
+      }
+    }
+    this.buildMonth([], [], [], holidays, false);
   },
 
   async refresh(silent = false) {
@@ -404,14 +448,14 @@ Page({
     const { year, month } = this.data;
     const d = new Date(year, month - 2, 1);
     this.setData({ year: d.getFullYear(), month: d.getMonth() + 1 });
-    this.refresh();
+    this.data.guestMode ? this.buildGuestMonth() : this.refresh();
   },
 
   onNext() {
     const { year, month } = this.data;
     const d = new Date(year, month, 1);
     this.setData({ year: d.getFullYear(), month: d.getMonth() + 1 });
-    this.refresh();
+    this.data.guestMode ? this.buildGuestMonth() : this.refresh();
   },
 
   onToday() {
@@ -421,7 +465,7 @@ Page({
       month: now.getMonth() + 1,
       selectedDate: dateKey(now.getFullYear(), now.getMonth() + 1, now.getDate()),
     });
-    this.refresh();
+    this.data.guestMode ? this.buildGuestMonth() : this.refresh();
   },
 
   onTapDay(e: WechatMiniprogram.TouchEvent) {
@@ -433,6 +477,33 @@ Page({
 
   onToggleLegend() {
     this.setData({ legendOpen: !this.data.legendOpen });
+  },
+
+  // ---- 游客模式：引导创建/加入空间（目标 1/2） ----
+  onGuestAction() {
+    wx.showModal({
+      title: '体验模式',
+      content: '创建或加入空间后，才能记录和查看两个人的生活。所有私人数据仅对绑定双方可见。',
+      confirmText: '去创建/加入',
+      cancelText: '再看看',
+      success: (res) => {
+        if (res.confirm) {
+          wx.navigateTo({ url: '/pages/space/index' });
+        }
+      },
+    });
+  },
+
+  onGuestCreate() {
+    wx.navigateTo({ url: '/pages/space/index' });
+  },
+
+  onGuestJoin() {
+    wx.navigateTo({ url: '/pages/space/index' });
+  },
+
+  onRetry() {
+    this.bootstrap();
   },
 
   /** 日程 → 业务模块（PRD §20/§21 双向联动） */
@@ -497,26 +568,32 @@ Page({
 
   // ---- 日历 → 核心功能快速入口（PRD §19：自动带入日期）----
   onQuickMeal() {
+    if (this.data.guestMode) return this.onGuestAction();
     wx.navigateTo({ url: `/pages/meal/index?date=${this.data.selectedDate}` });
   },
 
   onQuickRestaurant() {
+    if (this.data.guestMode) return this.onGuestAction();
     wx.navigateTo({ url: `/pages/restaurant/index?date=${this.data.selectedDate}` });
   },
 
   onQuickPeriod() {
+    if (this.data.guestMode) return this.onGuestAction();
     wx.navigateTo({ url: '/pages/period/index' });
   },
 
   onQuickTravel() {
+    if (this.data.guestMode) return this.onGuestAction();
     wx.navigateTo({ url: `/pages/travel/index?date=${this.data.selectedDate}&add=1` });
   },
 
   onQuickAnniversary() {
+    if (this.data.guestMode) return this.onGuestAction();
     wx.navigateTo({ url: `/pages/anniversary/index?date=${this.data.selectedDate}` });
   },
 
   onShowForm() {
+    if (this.data.guestMode) return this.onGuestAction();
     this.setData({ showForm: true, formTitle: '', formTime: '', formNote: '' });
   },
 

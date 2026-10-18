@@ -1,0 +1,10 @@
+{
+  "name": "holiday-public",
+  "version": "1.0.0",
+  "private": true,
+  "description": "公共节假日查询（游客模式显示官方节假日/调休，不含私人数据）",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "^4.0.2"
+  }
+}

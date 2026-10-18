@@ -565,6 +565,61 @@
   font-size: 28rpx;
 }
 
+/* ---- 游客模式（v1.1.6） ---- */
+.guest-badge {
+  padding: 10rpx 20rpx;
+  background: var(--color-surface);
+  border-radius: var(--radius-pill);
+  font-size: 22rpx;
+  color: var(--color-text-secondary);
+  font-weight: 600;
+  box-shadow: var(--shadow-soft);
+}
+
+.guest-actions {
+  display: flex;
+  gap: 12rpx;
+}
+
+.guest-btn {
+  padding: 10rpx 22rpx;
+  font-size: 22rpx;
+  color: var(--color-primary-deep);
+  background: var(--color-surface);
+  border-radius: var(--radius-pill);
+  border: 2rpx solid var(--color-border);
+  box-shadow: var(--shadow-soft);
+  font-weight: 600;
+}
+
+.guest-btn.primary {
+  color: #ffffff;
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.guest-error {
+  margin: 0 0 16rpx;
+  padding: 14rpx 20rpx;
+  font-size: 24rpx;
+  color: #C97F3E;
+  background: rgba(224, 162, 107, 0.14);
+  border-radius: var(--radius-sm);
+  text-align: center;
+}
+
+.guest-tip .legend-title {
+  font-size: 24rpx;
+  color: var(--color-primary-deep);
+}
+
+.guest-tip-text {
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+}
+
 /* ---- 事件数量角标 ---- */
 .event-count {
   position: absolute;

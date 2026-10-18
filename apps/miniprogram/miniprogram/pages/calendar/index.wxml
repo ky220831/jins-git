@@ -1,6 +1,13 @@
 <view class="container {{themeClass}} calendar-page">
   <!-- 顶部：双人爱心连接 + 右上角小邀请码 -->
-  <view class="top-bar">
+  <view class="top-bar" wx:if="{{guestMode}}">
+    <view class="guest-badge">🌿 体验模式</view>
+    <view class="guest-actions">
+      <view class="guest-btn primary" bindtap="onGuestCreate">创建空间</view>
+      <view class="guest-btn" bindtap="onGuestJoin">加入空间</view>
+    </view>
+  </view>
+  <view class="top-bar" wx:else>
     <view class="couple">
         <view class="mini-avatar me" bindtap="onStartEditName">
           <text class="mini-emoji">{{isOwner ? '👑' : '💗'}}</text>
@@ -16,6 +23,8 @@
     <view class="invite-badge" wx:if="{{isOwner && inviteCode}}" bindtap="onCopyInvite">🔑 {{inviteCode}}</view>
     <view class="invite-badge bound" wx:if="{{!inviteCode}}">💗</view>
   </view>
+
+  <view class="guest-error" wx:if="{{guestMode && guestError}}" bindtap="onRetry">⚠️ 网络异常，节假日可能未加载 · 点此重试</view>
 
   <view class="cal-header">
     <view class="cal-pill">
@@ -49,7 +58,13 @@
     </view>
   </view>
 
-  <view class="legend-card">
+  <view class="legend-card guest-tip" wx:if="{{guestMode}}">
+    <view class="legend-head">
+      <text class="legend-title">🌿 体验模式</text>
+    </view>
+    <view class="guest-tip-text">这里展示公共日历（节假日 / 调休 / 周末 / 农历 / 节气）。创建或加入空间后，才能看到并记录你们两个人的日程、纪念日、生理期等；所有私人数据仅对绑定双方可见。</view>
+  </view>
+  <view class="legend-card" wx:else>
     <view class="legend-head" bindtap="onToggleLegend">
       <text class="legend-title">图例</text>
       <text class="legend-arrow">{{legendOpen ? '收起 ▴' : '展开 ▾'}}</text>
@@ -80,7 +95,8 @@
     <view class="status-line period-predicted" wx:if="{{dayPeriodState === 'predicted'}}">🌸 生理期（预计）</view>
     <view class="status-line period-past" wx:if="{{dayPeriodState === 'past'}}">🩷 生理期（已过去）</view>
     <view class="status-line rest" wx:if="{{dayPeriodState === 'rest'}}">🔵 休息日</view>
-    <view class="day-empty" wx:if="{{!dayTodos.length && !dayEvents.length && !dayPeriodState && !dayMarks.length}}">🌷 这一天还没有安排</view>
+    <view class="day-empty" wx:if="{{guestMode}}">创建空间后，这里会记录你们的一天</view>
+    <view class="day-empty" wx:elif="{{!dayTodos.length && !dayEvents.length && !dayPeriodState && !dayMarks.length}}">🌷 这一天还没有安排</view>
 
     <!-- 快速入口：日历 → 核心功能新增/编辑（自动带入当天日期） -->
     <view class="quick-row">
