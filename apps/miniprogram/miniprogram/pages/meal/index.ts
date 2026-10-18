@@ -101,7 +101,12 @@ Page({
 
   onTemplatePick(e: WechatMiniprogram.PickerChange) {
     const index = Number(e.detail.value);
-    this.setData({ templatePickerIndex: index });
+    const template = this.data.enabledTemplates[index];
+    this.setData({
+      templatePickerIndex: index,
+      // 选了素材后自动带出名称，用户可直接看到已选内容（可再手动改）
+      planName: template ? template.name : this.data.planName,
+    });
   },
 
   onPlanNameInput(e: WechatMiniprogram.Input) {

@@ -62,7 +62,7 @@
     <view class="mask" bindtap="onHidePlanForm"></view>
     <view class="sheet">
       <view class="sheet-handle"></view>
-      <view class="form-title">上架菜单（{{planDate}}）</view>
+      <view class="form-title">上架菜单</view>
       <picker class="picker" range="{{enabledTemplates}}" range-key="name" value="{{templatePickerIndex}}" bindchange="onTemplatePick">
         <view class="picker-value {{templatePickerIndex < 0 ? 'placeholder' : ''}}">{{templatePickerIndex >= 0 ? enabledTemplates[templatePickerIndex].name : '从素材库选择（可选）'}}</view>
       </picker>
