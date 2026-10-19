@@ -1,6 +1,13 @@
-# “我们的生活” V1.0
+# 我们的生活 · Our Life
 
-只属于两个人的私人生活管理微信小程序（当前阶段：微信小程序 + 微信云开发 CloudBase）。
+> 只属于两个人的私密生活管理系统 —— 微信小程序 + 云开发全栈项目
+
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue)](https://www.typescriptlang.org/)
+[![WeChat Mini Program](https://img.shields.io/badge/WeChat-Mini%20Program-green)](https://mp.weixin.qq.com/)
+[![CloudBase](https://img.shields.io/badge/Tencent-CloudBase-orange)](https://cloudbase.net/)
+[![Version](https://img.shields.io/badge/version-1.2.0-brightgreen)]()
+
+双人私密生活管理微信小程序，覆盖日历、生理期、节假日、每日菜单、餐厅收藏、纪念日、旅行计划等日常场景。采用前后端分离 + 云函数架构，内置跨空间权限隔离与自动化安全测试。
 
 ## 命名规范
 
